@@ -1,0 +1,31 @@
+//
+// YANG Parser
+//
+
+// PEST built-in
+WHITESPACE = _{ " " | "\t" | NEWLINE }
+
+single_line_comment = @{ "//" ~ (!NEWLINE ~ ANY)* ~ NEWLINE }
+block_comment = @{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
+
+single_quoted_string = @{ "\'" ~ (!"\'" ~ ANY)* ~ "\'" }
+double_quoted_string = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
+plus_sign = { "+" }
+
+identifier = @{ (!WHITESPACE ~ ANY)+ }
+stmtend = { ";" }
+
+// YANG input
+yang = {
+     SOI ~
+     ( single_line_comment
+     | block_comment
+     | single_quoted_string
+     | double_quoted_string
+     | plus_sign
+     | identifier
+     | stmtend
+     )* ~
+     EOI
+}
+
