@@ -7,8 +7,46 @@ use std::cell::Cell;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
+use std::io::Error;
+use std::io::ErrorKind;
+use std::path::Path;
 
 use super::error::*;
+use super::yang::*;
+use super::abnf::*;
+
+/// Open and parse a YANG file.
+pub fn parse_file(filename: &str) -> std::io::Result<()> {
+    let mut f = File::open(filename)?;
+    let mut s = String::new();
+    let p = Path::new(filename)
+        .file_stem()
+        .ok_or(Error::new(ErrorKind::Other, "Invalid filename"))?;
+    let n1 = p
+        .to_str()
+        .ok_or(Error::new(ErrorKind::Other, "Invalid filename"))?;
+    let n2 = str::replace(n1, ".", "_");
+
+    f.read_to_string(&mut s)?;
+    let mut parser = Parser::new(s);
+
+    match parser.parse_yang() {
+        Ok(yang) => {
+            // TBD
+        }
+        Err(err) => {
+            println!(
+                "Error: {:?} at line {}, pos {}",
+                err,
+                parser.line(),
+                parser.pos()
+            );
+        }
+    }
+
+    Ok(())
+}
+
 
 // YANG Token type.
 #[derive(PartialEq, Debug, Clone)]
@@ -27,19 +65,30 @@ pub enum Token {
 pub struct Parser {
     /// Input string.
     input: String,
-    /// Cursor positionin bytes from the beginning.
+
+    /// Cursor position in bytes from the beginning.
     pos: Cell<usize>,
+
     /// Line number at cursor.
     line: Cell<usize>,
+
+    /// YANG ABNF rulelist.
+    rulelist: Rulelist,
 }
 
 impl Parser {
     /// Constructor.
     pub fn new(s: String) -> Parser {
+        let mut rulelist = get_yang_abnf_rulelist();
+
+        // TBD
+        rulelist.insert("yang-file".to_string(), Repetition { repeat: None, element: Element::Sequence(vec![Repetition { repeat: None, element: Element::Rulename("optsep".to_string()) }, Repetition { repeat: None, element: Element::Selection(vec![Repetition { repeat: None, element: Element::Rulename("module-stmt".to_string()) }, Repetition { repeat: None, element: Element::Rulename("submodule-stmt".to_string()) }]) }, Repetition { repeat: None, element: Element::Rulename("optsep".to_string()) }]) });
+
         Parser {
             input: s,
             pos: Cell::new(0),
             line: Cell::new(0),
+            rulelist: rulelist,
         }
     }
 
@@ -95,6 +144,7 @@ impl Parser {
                 Some(pos) => pos,
                 None => input.len(),
             };
+            self.line_add(1);
             token = Token::Comment(String::from(&input[2..pos]));
         } else if input.starts_with("/*") {
             let l = &input[2..];
@@ -102,8 +152,13 @@ impl Parser {
                 Some(pos) => pos,
                 None => return Err(YangError::InvalidComment),
             };
+
             token = Token::Comment(String::from(&l[..pos]));
             pos += 4;
+
+            let l = &input[..pos];
+            let v: Vec<&str> = l.matches("\n").collect();
+            self.line_add(v.len());
         } else if input.starts_with('+') {
             pos = 1;
             token = Token::PlusSign;
@@ -183,8 +238,127 @@ impl Parser {
         Ok((token, pos))
     }
 
+    /// Entry point of YANG parser. It will return a module or submodule.
+    pub fn parse_yang(&mut self) -> Result<Yang, YangError> {
+        let mut keyword: Option<String> = None;
+
+        // Find a statement keyword.
+        while self.input_len() > 0 {
+            let (token, pos) = self.get_token()?;
+println!("*** {:?}", token);
+            match token {
+                // Ignore.
+                Token::Whitespace(_) |
+                Token::Comment(_) => {}
+                // Module or submodule.
+                Token::Identifier(k) => {
+                    keyword = Some(k.clone());
+                    break;
+                }
+                _ => return Err(YangError::UnexpectedToken(self.line())),
+            }
+        }
+
+println!("*** 10");
+
+        if keyword == None {
+            return Err(YangError::UnexpectedEof);
+        }
+
+        let mut arg: Option<String> = None;
+        
+println!("*** 20");
+        // Find an arg.
+        while self.input_len() > 0 {
+            let (token, pos) = self.get_token()?;
+            match token {
+                // Ignore.
+                Token::Whitespace(_) |
+                Token::Comment(_) => {}
+                // Module or submodule.
+                Token::Identifier(k) => {
+                    arg = Some(k.clone());
+                }
+                _ => return Err(YangError::UnexpectedToken(self.line())),
+            }
+        }
+
+println!("*** 30");
+        if arg == None {
+            return Err(YangError::UnexpectedEof);
+        }
+
+println!("*** 40");
+        if keyword == Some("module".to_string()) {
+            match self.parse_module(arg.unwrap()) {
+                Ok(module) => Ok(Yang::Module(module)),
+                Err(_) => Err(YangError::UnexpectedToken(self.line())),
+            }
+        } else if keyword == Some("submodule".to_string()) {
+//            let submodule = self.parse_module();
+            Err(YangError::UnexpectedToken(self.line()))
+        } else {
+            Err(YangError::UnexpectedToken(self.line()))
+        }
+    }
+
+    pub fn parse_module(&mut self, arg: String) -> Result<ModuleStmt, YangError> {
+        let module = ModuleStmt::new(arg);
+        let mut stack: usize = 0;
+
+        while self.input_len() > 0 {
+            let (token, pos) = self.get_token()?;
+            match token {
+                // Ignore.
+                Token::Whitespace(_) |
+                Token::Comment(_) => {}
+                // Module or submodule.
+                Token::BlockBegin => {
+                    stack += 1;
+                    break;
+                }
+                _ => return Err(YangError::UnexpectedToken(self.line())),
+            }
+        }
+
+        while self.input_len() > 0 {
+            let (token, pos) = self.get_token()?;
+            match token {
+                // Ignore.
+                Token::Whitespace(_) |
+                Token::Comment(_) => {}
+                // Module or submodule.
+                Token::BlockBegin => {
+                    stack += 1;
+                }
+                Token::BlockEnd => {
+                    stack -= 1;
+                    if stack == 0 {
+                        break;
+                    }
+                }
+                _ => return Err(YangError::UnexpectedToken(self.line())),
+            }
+        }
+
+        if stack > 0 {
+            return Err(YangError::UnexpectedEof);
+        }
+
+        println!("*** line {}", self.line());
+
+        Ok(module)
+    }
+
     /// Recursively parse input and build structs.
     pub fn parse(&mut self) -> Result<(), YangError> {
+        // start from yang-file rule.
+
+
+        // get list of tokens toward the end of statement (; or {} ).
+        // match any of statement per keyword to choose, statement parser.
+        // if the statement include sub statemnts, call sub statement parser.
+
         while self.input_len() > 0 {
             let (token, pos) = self.get_token()?;
             match token {

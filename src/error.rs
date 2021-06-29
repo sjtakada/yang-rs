@@ -18,6 +18,15 @@ quick_error! {
         InvalidString {
             display("Invalid string")
         }
+        NoSuchRulename(s: String) {
+            display("No such rulename {}", s)
+        }
+        UnexpectedEof {
+            display("Unexpected end of file")
+        }
+        UnexpectedToken(line: usize) {
+            display("Unexpected token at line {}", line)
+        }
         PlaceHolder {
             display("placeholder")
         }
