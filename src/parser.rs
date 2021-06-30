@@ -144,7 +144,6 @@ impl Parser {
                 Some(pos) => pos,
                 None => input.len(),
             };
-            self.line_add(1);
             token = Token::Comment(String::from(&input[2..pos]));
         } else if input.starts_with("/*") {
             let l = &input[2..];
@@ -200,6 +199,10 @@ impl Parser {
 
             token = Token::String(String::from(&l[..pos]));
             pos += 2;
+
+            let l = &input[..pos];
+            let v: Vec<&str> = l.matches("\n").collect();
+            self.line_add(v.len());
         } else if input.starts_with("'") {
             let l = &input[1..];
             pos = match l.find("'") {
@@ -245,7 +248,6 @@ impl Parser {
         // Find a statement keyword.
         while self.input_len() > 0 {
             let (token, pos) = self.get_token()?;
-println!("*** {:?}", token);
             match token {
                 // Ignore.
                 Token::Whitespace(_) |
@@ -259,15 +261,12 @@ println!("*** {:?}", token);
             }
         }
 
-println!("*** 10");
-
         if keyword == None {
             return Err(YangError::UnexpectedEof);
         }
 
         let mut arg: Option<String> = None;
         
-println!("*** 20");
         // Find an arg.
         while self.input_len() > 0 {
             let (token, pos) = self.get_token()?;
@@ -278,6 +277,7 @@ println!("*** 20");
                 // Module or submodule.
                 Token::Identifier(k) => {
                     arg = Some(k.clone());
+                    break;
                 }
                 _ => return Err(YangError::UnexpectedToken(self.line())),
             }
@@ -290,6 +290,7 @@ println!("*** 30");
 
 println!("*** 40");
         if keyword == Some("module".to_string()) {
+println!("*** 41");
             match self.parse_module(arg.unwrap()) {
                 Ok(module) => Ok(Yang::Module(module)),
                 Err(_) => Err(YangError::UnexpectedToken(self.line())),
@@ -306,6 +307,8 @@ println!("*** 40");
         let module = ModuleStmt::new(arg);
         let mut stack: usize = 0;
 
+println!("*** pm 11");
+
         while self.input_len() > 0 {
             let (token, pos) = self.get_token()?;
             match token {
@@ -320,6 +323,8 @@ println!("*** 40");
                 _ => return Err(YangError::UnexpectedToken(self.line())),
             }
         }
+
+println!("*** pm 21");
 
         while self.input_len() > 0 {
             let (token, pos) = self.get_token()?;
@@ -337,15 +342,16 @@ println!("*** 40");
                         break;
                     }
                 }
-                _ => return Err(YangError::UnexpectedToken(self.line())),
+                _ => {}
             }
         }
+println!("*** pm 31");
 
         if stack > 0 {
             return Err(YangError::UnexpectedEof);
         }
 
-        println!("*** line {}", self.line());
+        println!("*** line {} pos {}", self.line(), self.pos());
 
         Ok(module)
     }
