@@ -300,7 +300,7 @@ impl Parser {
 
     pub fn parse_module(&mut self, arg: String) -> Result<ModuleStmt, YangError> {
         let module = ModuleStmt::new(arg);
-        let mut stack: usize = 0;
+        let mut block: usize = 0;
 
         while self.input_len() > 0 {
             let (token, pos) = self.get_token()?;
@@ -310,7 +310,7 @@ impl Parser {
                 Token::Comment(_) => {}
                 // Module or submodule.
                 Token::BlockBegin => {
-                    stack += 1;
+                    block += 1;
                     break;
                 }
                 _ => return Err(YangError::UnexpectedToken(self.line())),
@@ -325,11 +325,11 @@ impl Parser {
                 Token::Comment(_) => {}
                 // Module or submodule.
                 Token::BlockBegin => {
-                    stack += 1;
+                    block += 1;
                 }
                 Token::BlockEnd => {
-                    stack -= 1;
-                    if stack == 0 {
+                    block -= 1;
+                    if block == 0 {
                         break;
                     }
                 }
@@ -337,7 +337,7 @@ impl Parser {
             }
         }
 
-        if stack > 0 {
+        if block > 0 {
             return Err(YangError::UnexpectedEof);
         }
 
