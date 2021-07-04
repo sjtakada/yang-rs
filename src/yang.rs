@@ -7,21 +7,39 @@ use std::collections::HashMap;
 use super::error::*;
 use super::parser::*;
 
+/// Get a statement arg.
+fn parse_arg(parser: &mut Parser) -> Result<String, YangError> {
+    while parser.input_len() > 0 {
+        let (token, _) = parser.get_token()?;
+        match token {
+            // Ignore comments and/or whitespaces.
+            Token::Whitespace(_) |
+            Token::Comment(_) => {}
+            // Statement argument.
+            Token::Identifier(s) => return Ok(s),
+            // Unexpected Token.
+            _ => return Err(YangError::UnexpectedToken(parser.line())),
+        }
+    }
+
+    Err(YangError::UnexpectedEof)
+}
+
 /// Single YANG file conists of a module or a submodule statement.
 pub enum Yang {
     Module(ModuleStmt),
     Submodule(SubmoduleStmt),
 }
 
-/// Yang Statement trait.
+/// YANG Statement trait for a single statement.
 pub trait Stmt {
-//    type Arg;
-
-//    /// Parse statement arg.
-//    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError>/* where Self: Sized*/;
-
     /// Parse statement body and return statement object.
     fn parse(parser: &mut Parser) -> Result<Box<Stmt>, YangError> where Self: Sized;
+}
+
+/// YANG Statements trait for a collection of statements.
+pub trait Stmts {
+
 }
 
 pub struct ModuleStmt {
@@ -40,13 +58,19 @@ impl ModuleStmt {
             identifier: arg,
         }
     }
+
 }
 
 impl Stmt for ModuleStmt {
+    /// Parse and get module-stmt.
     fn parse(parser: &mut Parser) -> Result<Box<Stmt>, YangError> {
-//        let arg = ModuleStmt::parse_arg(parser)?;
+        let arg = parse_arg(parser)?;
 
-        let arg = String::new();
+        // module-header-stmts
+        // linkage-stmts
+        // meta-stmts
+        // revision-stmts
+        // body-stmts
 
         let stmt = ModuleStmt {
             identifier: arg,
@@ -68,8 +92,7 @@ pub struct SubmoduleStmt {
 
 impl Stmt for SubmoduleStmt {
     fn parse(parser: &mut Parser) -> Result<Box<Stmt>, YangError> {
-//        let arg = SubmoduleStmt::parse_arg(parser)?;
-        let arg = String::new();
+        let arg = parse_arg(parser)?;
 
         let stmt = SubmoduleStmt {
             identifier: arg,
