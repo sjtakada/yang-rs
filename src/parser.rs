@@ -13,7 +13,8 @@ use std::path::Path;
 
 use super::error::*;
 use super::yang::*;
-use super::abnf::*;
+
+pub type StmtParser = fn(&mut Parser) -> Result<Box<dyn Stmt>, YangError>;
 
 /// Open and parse a YANG file.
 pub fn parse_file(filename: &str) -> std::io::Result<()> {
@@ -72,24 +73,28 @@ pub struct Parser {
     /// Line number at cursor.
     line: Cell<usize>,
 
-    /// YANG ABNF rulelist.
-    rulelist: Rulelist,
+    /// Saved token.
+    saved: Option<Token>,
+
+    /// Statement parser callbacks.
+    parse_stmt: HashMap<&'static str, StmtParser>,
 }
 
 impl Parser {
     /// Constructor.
     pub fn new(s: String) -> Parser {
-        let mut rulelist = get_yang_abnf_rulelist();
-
-        // TBD
-        rulelist.insert("yang-file".to_string(), Repetition { repeat: None, element: Element::Sequence(vec![Repetition { repeat: None, element: Element::Rulename("optsep".to_string()) }, Repetition { repeat: None, element: Element::Selection(vec![Repetition { repeat: None, element: Element::Rulename("module-stmt".to_string()) }, Repetition { repeat: None, element: Element::Rulename("submodule-stmt".to_string()) }]) }, Repetition { repeat: None, element: Element::Rulename("optsep".to_string()) }]) });
-
         Parser {
             input: s,
             pos: Cell::new(0),
             line: Cell::new(0),
-            rulelist: rulelist,
+            saved: None,
+            parse_stmt: HashMap::new(),
         }
+    }
+
+    /// Init Stmt parsers.
+    pub fn init_stmt_parsers(&mut self) {
+        self.register("module", ModuleStmt::parse);
     }
 
     /// Get input string at current position.
@@ -378,6 +383,17 @@ impl Parser {
         }
 
         Ok(())
+    }
+
+    /// Register Stmt Parser.
+    pub fn register(&mut self, keyword: &'static str, f: StmtParser) {
+        self.parse_stmt.insert(keyword, f);
+    }
+
+    /// Call Stmt Parsrer
+    pub fn parse_stmt(&mut self, keyword: &str) -> Result<Box<dyn Stmt>, YangError> {
+        let f = self.parse_stmt.get(keyword).unwrap();
+        f(self)
     }
 }
 
