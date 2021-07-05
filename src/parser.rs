@@ -57,7 +57,7 @@ pub enum Token {
     PlusSign,
     BlockBegin,
     BlockEnd,
-    String(String),
+    QuotedString(String),
     Identifier(String),
     StatementEnd,
     EndOfInput,
@@ -141,8 +141,21 @@ impl Parser {
 
     /// Get a token to wrap get_single_token().
     pub fn get_token(&mut self) -> Result<(Token, usize), YangError> {
+        let mut st = String::new();
+        let mut concat_str = false;
+
+        if let Some((token, pos)) = self.load_token() {
+            return Ok((token, pos));
+        }
+
         loop {
             if self.input_len() == 0 {
+                if st.len() > 0 {
+                    return Ok((Token::QuotedString(st), self.pos()));
+                } else if concat_str {
+                    return Err(YangError::UnexpectedEof);
+                }
+
                 return Ok((Token::EndOfInput, self.pos()));
             }
 
@@ -150,7 +163,33 @@ impl Parser {
             match token {
                 Token::Whitespace(s) |
                 Token::Comment(s) => {}
-                _ => return Ok((token, pos)),
+                Token::QuotedString(s) => {
+                    if st.len() == 0 || concat_str {
+                        st.push_str(&s);
+                        concat_str = false;
+                    } else {
+                        return Err(YangError::InvalidString);
+                    }
+                }
+                Token::PlusSign => {
+                    if concat_str {
+                        return Err(YangError::InvalidString);
+                    } else {
+                        concat_str = true;
+                    }
+                }
+                _ => {
+                    if concat_str {
+                        return Err(YangError::InvalidString);
+                    }
+
+                    if st.len() > 0 {
+                        self.save_token(token, pos);
+                        return Ok((Token::QuotedString(st), self.pos()));
+                    }
+
+                    return Ok((token, pos));
+                }
             }
         }
     }
@@ -232,7 +271,7 @@ impl Parser {
             let len = l[..pos].matches("\n").count();
             self.line_add(len);
 
-            token = Token::String(String::from(&l[..pos]));
+            token = Token::QuotedString(String::from(&l[..pos]));
             pos += 2;
         } else if input.starts_with("'") {
             let l = &input[1..];
@@ -240,7 +279,7 @@ impl Parser {
                 Some(pos) => pos,
                 None => return Err(YangError::InvalidString),
             };
-            token = Token::String(String::from(&l[..pos]));
+            token = Token::QuotedString(String::from(&l[..pos]));
             pos += 2;
         } else {
             // 6.1.3. Quoting
@@ -538,7 +577,7 @@ mod tests {
 //        assert_eq!(token, Token::Whitespace(" ".to_string()));
         
         let (token, _) = parser.get_token().unwrap();
-        assert_eq!(token, Token::String(String::from("string".to_string())));
+        assert_eq!(token, Token::QuotedString(String::from("string".to_string())));
 
 //        let (token, _) = parser.get_token().unwrap();
 //        assert_eq!(token, Token::Whitespace(" ".to_string()));
@@ -556,10 +595,28 @@ mod tests {
 //        assert_eq!(token, Token::Whitespace(" ".to_string()));
         
         let (token, _) = parser.get_token().unwrap();
-        assert_eq!(token, Token::String(String::from(r#""string""#.to_string())));
+        assert_eq!(token, Token::QuotedString(String::from(r#""string""#.to_string())));
 
 //        let (token, _) = parser.get_token().unwrap();
 //        assert_eq!(token, Token::Whitespace(" ".to_string()));
+
+        let (token, _) = parser.get_token().unwrap();
+        assert_eq!(token, Token::EndOfInput);
+    }
+
+    #[test]
+    pub fn test_get_token_8() {
+        let s = r#" "Hello" + "World" { }"#;
+        let mut parser = Parser::new(s.to_string());
+
+        let (token, _) = parser.get_token().unwrap();
+        assert_eq!(token, Token::QuotedString(String::from(r#"HelloWorld"#.to_string())));
+
+        let (token, _) = parser.get_token().unwrap();
+        assert_eq!(token, Token::BlockBegin);
+
+        let (token, _) = parser.get_token().unwrap();
+        assert_eq!(token, Token::BlockEnd);
 
         let (token, _) = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
