@@ -54,7 +54,7 @@ impl Repeat {
 }
 
 /// Get a list of statements in any order.
-fn parse_stmts(parser: &mut Parser, map: HashMap<&'static str, Repeat>) -> Result<HashMap<String, Vec<Stmt>>, YangError> {
+pub fn parse_stmts(parser: &mut Parser, map: HashMap<&'static str, Repeat>) -> Result<HashMap<String, Vec<Stmt>>, YangError> {
     let mut stmts: HashMap<String, Vec<Stmt>> = HashMap::new();
 
     loop {
@@ -98,7 +98,7 @@ fn parse_stmts(parser: &mut Parser, map: HashMap<&'static str, Repeat>) -> Resul
     Ok(stmts)
 }
 
-fn collect_a_stmt(stmts: &mut HashMap<String, Vec<Stmt>>, keyword: &str) -> Result<Stmt, YangError> {
+pub fn collect_a_stmt(stmts: &mut HashMap<String, Vec<Stmt>>, keyword: &str) -> Result<Stmt, YangError> {
     let stmt = match stmts.get_mut(keyword) {
         Some(v) => match v.pop() {
             Some(stmt) => stmt,
@@ -211,9 +211,9 @@ pub struct ModuleHeaderStmts {
 impl ModuleHeaderStmts {
     pub fn parse(parser: &mut Parser) -> Result<ModuleHeaderStmts, YangError> {
         let map: HashMap<&'static str, Repeat> = [
-            ("yang-version", Repeat::new(None, Some(1))),
-            ("namespace", Repeat::new(None, Some(1))),
-            ("prefix", Repeat::new(None, Some(1))),
+            ("yang-version", Repeat::new(Some(1), Some(1))),
+            ("namespace", Repeat::new(Some(1), Some(1))),
+            ("prefix", Repeat::new(Some(1), Some(1))),
         ].iter().cloned().collect();
 
         let mut stmts = parse_stmts(parser, map)?;
@@ -256,9 +256,11 @@ pub struct YangVersionStmt {
     yang_version_arg: String,
 }
 
-impl YangVersionStmt {
-    pub fn parse(parser: &mut Parser) -> Result<Stmt, YangError> {
+impl StmtParser for YangVersionStmt {
+    fn parse(parser: &mut Parser) -> Result<Stmt, YangError> {
         let arg = parse_arg(parser)?;
+
+        // TBD: check arg is "1.1"
 
         let stmt = YangVersionStmt {
             yang_version_arg: String::from("1.1"),
@@ -272,7 +274,7 @@ pub struct NamespaceStmt {
     uri_str: String,
 }
 
-impl NamespaceStmt {
+impl StmtParser for NamespaceStmt {
     fn parse(parser: &mut Parser) -> Result<Stmt, YangError> {
         let arg = parse_arg(parser)?;
 
@@ -288,7 +290,7 @@ pub struct PrefixStmt {
     prefix_arg: String,
 }
 
-impl PrefixStmt {
+impl StmtParser for PrefixStmt {
     fn parse(parser: &mut Parser) -> Result<Stmt, YangError> {
         let arg = parse_arg(parser)?;
 

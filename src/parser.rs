@@ -97,6 +97,9 @@ impl Parser {
     pub fn init_stmt_parsers(&mut self) {
         self.register("module", ModuleStmt::parse);
         self.register("submodule", SubmoduleStmt::parse);
+        self.register("yang-version", YangVersionStmt::parse);
+        self.register("namespace", NamespaceStmt::parse);
+        self.register("prefix", PrefixStmt::parse);
     }
 
     /// Get input string at current position.
@@ -313,8 +316,25 @@ impl Parser {
 
     /// Entry point of YANG parser. It will return a module or submodule.
     pub fn parse_yang(&mut self) -> Result<Yang, YangError> {
-        let mut keyword: Option<String> = None;
+        let map: HashMap<&'static str, Repeat> = [
+            ("module", Repeat::new(Some(0), Some(1))),
+            ("submodule", Repeat::new(Some(0), Some(1))),
+        ].iter().cloned().collect();
 
+        let mut stmts = parse_stmts(self, map)?;
+        match collect_a_stmt(&mut stmts, "module") {
+            Ok(Stmt::Module(module)) => return Ok(Yang::Module(module)),
+            _ => {}
+        }
+
+        match collect_a_stmt(&mut stmts, "submodule") {
+            Ok(Stmt::Submodule(submodule)) => return Ok(Yang::Submodule(submodule)),
+            _ => {}
+        }
+
+        Err(YangError::UnexpectedEof)
+
+/*
         // Find a statement keyword.
         while self.input_len() > 0 {
             let (token, pos) = self.get_token()?;
@@ -368,8 +388,11 @@ impl Parser {
         } else {
             Err(YangError::UnexpectedToken(self.line()))
         }
+*/
+
     }
 
+/*
     pub fn parse_module(&mut self, arg: String) -> Result<ModuleStmt, YangError> {
         let module = ModuleStmt::new(arg);
         let mut block: usize = 0;
@@ -416,42 +439,6 @@ impl Parser {
         println!("*** line {} pos {}", self.line(), self.pos());
 
         Ok(module)
-    }
-
-/*
-    /// Recursively parse input and build structs.
-    pub fn parse(&mut self) -> Result<(), YangError> {
-        // start from yang-file rule.
-
-
-        // get list of tokens toward the end of statement (; or {} ).
-        // match any of statement per keyword to choose, statement parser.
-        // if the statement include sub statemnts, call sub statement parser.
-
-        while self.input_len() > 0 {
-            let (token, _) = self.get_token()?;
-            match token {
-                Token::Whitespace(s) => {
-                }
-                Token::Comment(s) => {
-                }
-                Token::PlusSign => {
-                }
-                Token::BlockBegin => {
-                }
-                Token::BlockEnd => {
-                }
-                Token::String(s) => {
-                }
-                Token::Identifier(s) => {
-                }
-                Token::StatementEnd => {
-                }
-                _ => {}
-            }
-        }
-
-        Ok(())
     }
 */
 
