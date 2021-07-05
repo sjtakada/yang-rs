@@ -27,6 +27,12 @@ quick_error! {
         UnexpectedToken(line: usize) {
             display("Unexpected token at line {}", line)
         }
+        UnexpectedStatement(line: usize) {
+            display("Unexpected statement at line {}", line)
+        }
+        StatementMismatch(s: &'static str) {
+            display("Number of statements mismatch {}", s)
+        }
         MissingStatement {
             display("Missing statement")
         }
