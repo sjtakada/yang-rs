@@ -132,7 +132,7 @@ impl ModuleHeaderStmts {
             let (token, pos) = parser.get_token()?;
             match token {
                 Token::Identifier(ref keyword) => {
-                    if hs.contains(&keyword as &str) {
+                    if hs.contains(keyword as &str) {
                         let stmt = parser.parse_stmt(&keyword)?;
                         match stmt {
                             Stmt::YangVersion(stmt) => {
@@ -144,10 +144,11 @@ impl ModuleHeaderStmts {
                             Stmt::Prefix(stmt) => {
                                 prefix.replace(stmt);
                             }
-                            _ => {}
+                            _ => assert!(false),
                         }
                     } else {
                         parser.save_token(token, pos);
+                        break;
                     }
                 }
                 _ => {
