@@ -3,6 +3,7 @@
 //  Copyright (C) 2021 Toshiaki Takada
 //
 
+use std::fmt;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use super::error::*;
@@ -123,6 +124,20 @@ pub enum Stmt {
     Include(TBD),
     Namespace(NamespaceStmt),
     Prefix(PrefixStmt),
+}
+
+impl fmt::Debug for Stmt {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+	match &*self {
+            Stmt::Module(_stmt) => write!(f, "module"),
+            Stmt::Submodule(_stmt) => write!(f, "submodule"),
+            Stmt::YangVersion(_stmt) => write!(f, "yang-version"),
+            Stmt::Import(_stmt) => write!(f, "import"),
+            Stmt::Include(_stmt) => write!(f, "include"),
+            Stmt::Namespace(_stmt) => write!(f, "namespace"),
+            Stmt::Prefix(_stmt) => write!(f, "prefix"),
+        }
+    }
 }
 
 /// YANG Statement trait for a single statement.

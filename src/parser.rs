@@ -33,7 +33,7 @@ pub fn parse_file(filename: &str) -> std::io::Result<()> {
 
     match parser.parse_yang() {
         Ok(yang) => {
-            // TBD
+            println!("{:?}", yang)
         }
         Err(err) => {
             println!(
