@@ -125,12 +125,6 @@ pub enum Stmt {
     Prefix(PrefixStmt),
 }
 
-/// Single YANG file conists of a module or a submodule statement.
-pub enum Yang {
-    Module(ModuleStmt),
-    Submodule(SubmoduleStmt),
-}
-
 /// YANG Statement trait for a single statement.
 pub trait StmtParser {
     /// Parse statement body and return statement object.
@@ -142,29 +136,23 @@ pub trait Stmts {
 
 }
 
+// Yang "module" statement.
 pub struct ModuleStmt {
+    // Module identifier.
     identifier: String,
 
-//    module_header: ModuleHeaderStmts,
+    module_header: ModuleHeaderStmts,
 //    linkage: LinkageStmts,
 //    meta: MetaStmts,
 //    revision: RevisionStmts,
 //    body: BodyStmts,
 }
 
-impl ModuleStmt {
-    pub fn new(arg: String) -> ModuleStmt {
-        ModuleStmt {
-            identifier: arg,
-        }
-    }
-
-}
-
 impl StmtParser for ModuleStmt {
     /// Parse and get module-stmt.
     fn parse(parser: &mut Parser) -> Result<Stmt, YangError> {
         let arg = parse_arg(parser)?;
+        let module_header = ModuleHeaderStmts::parse(parser)?;
 
         // module-header-stmts
         // linkage-stmts
@@ -174,6 +162,7 @@ impl StmtParser for ModuleStmt {
 
         let stmt = ModuleStmt {
             identifier: arg,
+            module_header,
         };
 
         Ok(Stmt::Module(stmt))
@@ -266,7 +255,12 @@ impl StmtParser for YangVersionStmt {
             yang_version_arg: String::from("1.1"),
         };
 
-        Ok(Stmt::YangVersion(stmt))
+        let (token, _) = parser.get_token()?;
+        if let Token::StatementEnd = token {
+            Ok(Stmt::YangVersion(stmt))
+        } else {
+            Err(YangError::UnexpectedToken(parser.line()))
+        }
     }
 }
 
@@ -282,7 +276,12 @@ impl StmtParser for NamespaceStmt {
             uri_str: arg,
         };
 
-        Ok(Stmt::Namespace(stmt))
+        let (token, _) = parser.get_token()?;
+        if let Token::StatementEnd = token {
+            Ok(Stmt::Namespace(stmt))
+        } else {
+            Err(YangError::UnexpectedToken(parser.line()))
+        }
     }
 }
 
@@ -298,7 +297,12 @@ impl StmtParser for PrefixStmt {
             prefix_arg: arg,
         };
 
-        Ok(Stmt::Prefix(stmt))
+        let (token, _) = parser.get_token()?;
+        if let Token::StatementEnd = token {
+            Ok(Stmt::Prefix(stmt))
+        } else {
+            Err(YangError::UnexpectedToken(parser.line()))
+        }
     }
 }
 

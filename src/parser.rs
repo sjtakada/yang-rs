@@ -314,8 +314,8 @@ impl Parser {
         Ok((token, pos))
     }
 
-    /// Entry point of YANG parser. It will return a module or submodule.
-    pub fn parse_yang(&mut self) -> Result<Yang, YangError> {
+    /// Entry point of YANG parser. It will return a module or submodule statement.
+    pub fn parse_yang(&mut self) -> Result<Stmt, YangError> {
         let map: HashMap<&'static str, Repeat> = [
             ("module", Repeat::new(Some(0), Some(1))),
             ("submodule", Repeat::new(Some(0), Some(1))),
@@ -323,14 +323,16 @@ impl Parser {
 
         let mut stmts = parse_stmts(self, map)?;
         match collect_a_stmt(&mut stmts, "module") {
-            Ok(Stmt::Module(module)) => return Ok(Yang::Module(module)),
+            Ok(Stmt::Module(module)) => return Ok(Stmt::Module(module)),
             _ => {}
         }
 
         match collect_a_stmt(&mut stmts, "submodule") {
-            Ok(Stmt::Submodule(submodule)) => return Ok(Yang::Submodule(submodule)),
+            Ok(Stmt::Submodule(submodule)) => return Ok(Stmt::Submodule(submodule)),
             _ => {}
         }
+
+        // TBD: Or maybe wrong statement.
 
         Err(YangError::UnexpectedEof)
 
