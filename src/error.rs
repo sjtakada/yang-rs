@@ -27,6 +27,9 @@ quick_error! {
         UnexpectedToken(line: usize) {
             display("Unexpected token at line {}", line)
         }
+        MissingStatement {
+            display("Missing statement")
+        }
         PlaceHolder {
             display("placeholder")
         }

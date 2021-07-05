@@ -14,7 +14,7 @@ use std::path::Path;
 use super::error::*;
 use super::yang::*;
 
-pub type StmtParser = fn(&mut Parser) -> Result<Box<dyn Stmt>, YangError>;
+pub type StmtParserFn = fn(&mut Parser) -> Result<Stmt, YangError>;
 
 /// Open and parse a YANG file.
 pub fn parse_file(filename: &str) -> std::io::Result<()> {
@@ -78,7 +78,7 @@ pub struct Parser {
     saved: Cell<Option<(Token, usize)>>,
 
     /// Statement parser callbacks.
-    parse_stmt: HashMap<&'static str, StmtParser>,
+    parse_stmt: HashMap<&'static str, StmtParserFn>,
 }
 
 impl Parser {
@@ -456,12 +456,12 @@ impl Parser {
 */
 
     /// Register Stmt Parser.
-    pub fn register(&mut self, keyword: &'static str, f: StmtParser) {
+    pub fn register(&mut self, keyword: &'static str, f: StmtParserFn) {
         self.parse_stmt.insert(keyword, f);
     }
 
     /// Call Stmt Parsrer
-    pub fn parse_stmt(&mut self, keyword: &str) -> Result<Box<dyn Stmt>, YangError> {
+    pub fn parse_stmt(&mut self, keyword: &str) -> Result<Stmt, YangError> {
         let f = self.parse_stmt.get(keyword).unwrap();
         f(self)
     }

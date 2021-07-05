@@ -4,25 +4,36 @@
 //
 
 use std::collections::HashMap;
+use std::collections::HashSet;
 use super::error::*;
 use super::parser::*;
 
 /// Get a statement arg.
 fn parse_arg(parser: &mut Parser) -> Result<String, YangError> {
-    while parser.input_len() > 0 {
-        let (token, _) = parser.get_token()?;
-        match token {
-            // Ignore comments and/or whitespaces.
-            Token::Whitespace(_) |
-            Token::Comment(_) => {}
-            // Statement argument.
-            Token::Identifier(s) => return Ok(s),
-            // Unexpected Token.
-            _ => return Err(YangError::UnexpectedToken(parser.line())),
-        }
+    let (token, _) = parser.get_token()?;
+    match token {
+        // Statement argument.
+        Token::Identifier(s) => Ok(s),
+        Token::QuotedString(s) => Ok(s),
+        Token::EndOfInput => Err(YangError::UnexpectedEof),
+        // Unexpected Token.
+        _ => Err(YangError::UnexpectedToken(parser.line())),
     }
+}
 
-    Err(YangError::UnexpectedEof)
+pub struct TBD {
+
+}
+
+/// Yang Statement
+pub enum Stmt {
+    Module(ModuleStmt),
+    Submodule(SubmoduleStmt),
+    YangVersion(YangVersionStmt),
+    Import(TBD),
+    Include(TBD),
+    Namespace(NamespaceStmt),
+    Prefix(PrefixStmt),
 }
 
 /// Single YANG file conists of a module or a submodule statement.
@@ -32,9 +43,9 @@ pub enum Yang {
 }
 
 /// YANG Statement trait for a single statement.
-pub trait Stmt {
+pub trait StmtParser {
     /// Parse statement body and return statement object.
-    fn parse(parser: &mut Parser) -> Result<Box<Stmt>, YangError> where Self: Sized;
+    fn parse(parser: &mut Parser) -> Result<Stmt, YangError> where Self: Sized;
 }
 
 /// YANG Statements trait for a collection of statements.
@@ -61,9 +72,9 @@ impl ModuleStmt {
 
 }
 
-impl Stmt for ModuleStmt {
+impl StmtParser for ModuleStmt {
     /// Parse and get module-stmt.
-    fn parse(parser: &mut Parser) -> Result<Box<Stmt>, YangError> {
+    fn parse(parser: &mut Parser) -> Result<Stmt, YangError> {
         let arg = parse_arg(parser)?;
 
         // module-header-stmts
@@ -76,7 +87,7 @@ impl Stmt for ModuleStmt {
             identifier: arg,
         };
 
-        Ok(Box::new(stmt))
+        Ok(Stmt::Module(stmt))
     }
 }
 
@@ -90,28 +101,86 @@ pub struct SubmoduleStmt {
 //    body: BodyStmts,
 }
 
-impl Stmt for SubmoduleStmt {
-    fn parse(parser: &mut Parser) -> Result<Box<Stmt>, YangError> {
+impl StmtParser for SubmoduleStmt {
+    fn parse(parser: &mut Parser) -> Result<Stmt, YangError> {
         let arg = parse_arg(parser)?;
 
         let stmt = SubmoduleStmt {
             identifier: arg,
         };
 
-        Ok(Box::new(stmt))
+        Ok(Stmt::Submodule(stmt))
     }
 }
 
 
 
 pub struct ModuleHeaderStmts {
-    yang_version: YangVersionStmts,
-//    namespace: NamespaceStmt,
-//    prefix: PrefixStmt,
+    yang_version: YangVersionStmt,
+    namespace: NamespaceStmt,
+    prefix: PrefixStmt,
+}
+
+impl ModuleHeaderStmts {
+    pub fn parse(parser: &mut Parser) -> Result<ModuleHeaderStmts, YangError> {
+        let hs: HashSet<&'static str> = ["yang-version", "namespace", "prefix"].iter().cloned().collect();
+        let mut yang_version: Option<YangVersionStmt> = None;
+        let mut namespace: Option<NamespaceStmt> = None;
+        let mut prefix: Option<PrefixStmt> = None;
+
+        loop {
+            let (token, pos) = parser.get_token()?;
+            match token {
+                Token::Identifier(ref keyword) => {
+                    if hs.contains(&keyword as &str) {
+                        let stmt = parser.parse_stmt(&keyword)?;
+                        match stmt {
+                            Stmt::YangVersion(st) => {
+                                yang_version.replace(st);
+                            }
+                            Stmt::Namespace(st) => {
+                                namespace.replace(st);
+                            }
+                            Stmt::Prefix(st) => {
+                                prefix.replace(st);
+                            }
+                            _ => {}
+                        }
+                    } else {
+                        parser.save_token(token, pos);
+                    }
+                }
+                _ => {
+                    if let None = yang_version {
+                        return Err(YangError::MissingStatement);
+                    }
+
+                    if let None = namespace {
+                        return Err(YangError::MissingStatement);
+                    }
+
+                    if let None = prefix {
+                        return Err(YangError::MissingStatement);
+                    }
+
+                    parser.save_token(token, pos);
+                    break;
+                }
+            }
+        }
+
+        let stmts = ModuleHeaderStmts {
+            yang_version: yang_version.unwrap(),
+            namespace: namespace.unwrap(),
+            prefix: prefix.unwrap(),
+        };
+
+        Ok(stmts)
+    }
 }
 
 pub struct SubmoduleHeaderStmts {
-    yang_version: YangVersionStmts,
+    yang_version: YangVersionStmt,
 //    belong_to: BelongToStmt,
 }
 
@@ -131,8 +200,52 @@ pub struct RevisionStmts {
 //    revision: Vec<RevisionStmt>
 }
 
-pub struct YangVersionStmts {
+pub struct YangVersionStmt {
     yang_version_arg: String,
+}
+
+impl YangVersionStmt {
+    pub fn parse(parser: &mut Parser) -> Result<Stmt, YangError> {
+        let arg = parse_arg(parser)?;
+
+        let stmt = YangVersionStmt {
+            yang_version_arg: String::from("1.1"),
+        };
+
+        Ok(Stmt::YangVersion(stmt))
+    }
+}
+
+pub struct NamespaceStmt {
+    uri_str: String,
+}
+
+impl NamespaceStmt {
+    fn parse(parser: &mut Parser) -> Result<Stmt, YangError> {
+        let arg = parse_arg(parser)?;
+
+        let stmt = NamespaceStmt {
+            uri_str: arg,
+        };
+
+        Ok(Stmt::Namespace(stmt))
+    }
+}
+
+pub struct PrefixStmt {
+    prefix_arg: String,
+}
+
+impl PrefixStmt {
+    fn parse(parser: &mut Parser) -> Result<Stmt, YangError> {
+        let arg = parse_arg(parser)?;
+
+        let stmt = PrefixStmt {
+            prefix_arg: arg,
+        };
+
+        Ok(Stmt::Prefix(stmt))
+    }
 }
 
 pub struct BodyStmts {
