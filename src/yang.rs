@@ -135,14 +135,14 @@ impl ModuleHeaderStmts {
                     if hs.contains(&keyword as &str) {
                         let stmt = parser.parse_stmt(&keyword)?;
                         match stmt {
-                            Stmt::YangVersion(st) => {
-                                yang_version.replace(st);
+                            Stmt::YangVersion(stmt) => {
+                                yang_version.replace(stmt);
                             }
-                            Stmt::Namespace(st) => {
-                                namespace.replace(st);
+                            Stmt::Namespace(stmt) => {
+                                namespace.replace(stmt);
                             }
-                            Stmt::Prefix(st) => {
-                                prefix.replace(st);
+                            Stmt::Prefix(stmt) => {
+                                prefix.replace(stmt);
                             }
                             _ => {}
                         }
