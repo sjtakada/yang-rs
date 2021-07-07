@@ -30,6 +30,7 @@ pub fn parse_file(filename: &str) -> std::io::Result<()> {
 
     f.read_to_string(&mut s)?;
     let mut parser = Parser::new(s);
+    parser.init_stmt_parsers();
 
     match parser.parse_yang() {
         Ok(yang) => {
@@ -451,6 +452,7 @@ impl Parser {
 
     /// Call Stmt Parsrer
     pub fn parse_stmt(&mut self, keyword: &str) -> Result<Stmt, YangError> {
+println!("*** keywoird {}", keyword);
         let f = self.parse_stmt.get(keyword).unwrap();
         f(self)
     }
