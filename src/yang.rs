@@ -184,7 +184,7 @@ pub trait StmtParser {
     fn keyword() -> &'static str where Self: Sized;
 
     /// Return Any for downcasing.
-    fn as_any(&self) -> &dyn Box<Any>;
+    fn as_any(self) -> Box<dyn Any>;
 
     /// Parse statement body and return statement object.
     fn parse(parser: &mut Parser) -> Result<Box<dyn StmtParser>, YangError> where Self: Sized;
@@ -217,8 +217,8 @@ impl StmtParser for ModuleStmt {
     }
 
     /// Return Any for downcasing.
-    fn as_any(&self) -> &dyn Any {
-        self
+    fn as_any(self) -> Box<dyn Any> {
+        Box::new(self)
     }
 
     /// Parse and get module-stmt.
@@ -270,8 +270,8 @@ impl StmtParser for SubmoduleStmt {
     }
 
     /// Return Any for downcasing.
-    fn as_any(&self) -> &dyn Any {
-        self
+    fn as_any(self) -> Box<dyn Any> {
+        Box::new(self)
     }
 
     fn parse(parser: &mut Parser) -> Result<Box<dyn StmtParser>, YangError> {
@@ -373,8 +373,8 @@ impl StmtParser for YangVersionStmt {
     }
 
     /// Return Any for downcasing.
-    fn as_any(&self) -> &dyn Any {
-        self
+    fn as_any(self) -> Box<dyn Any> {
+        Box::new(self)
     }
 
     fn parse(parser: &mut Parser) -> Result<Box<dyn StmtParser>, YangError> {
@@ -411,8 +411,8 @@ impl StmtParser for ImportStmt {
     }
 
     /// Return Any for downcasing.
-    fn as_any(&self) -> &dyn Any {
-        self
+    fn as_any(self) -> Box<dyn Any> {
+        Box::new(self)
     }
 
     fn parse(parser: &mut Parser) -> Result<Box<dyn StmtParser>, YangError> {
@@ -461,8 +461,8 @@ impl StmtParser for IncludeStmt {
     }
 
     /// Return Any for downcasing.
-    fn as_any(&self) -> &dyn Any {
-        self
+    fn as_any(self) -> Box<dyn Any> {
+        Box::new(self)
     }
 
     fn parse(parser: &mut Parser) -> Result<Box<dyn StmtParser>, YangError> {
@@ -505,8 +505,8 @@ impl StmtParser for NamespaceStmt {
     }
 
     /// Return Any for downcasing.
-    fn as_any(&self) -> &dyn Any {
-        self
+    fn as_any(self) -> Box<dyn Any> {
+        Box::new(self)
     }
 
     fn parse(parser: &mut Parser) -> Result<Box<dyn StmtParser>, YangError> {
@@ -537,8 +537,8 @@ impl StmtParser for PrefixStmt {
     }
 
     /// Return Any for downcasing.
-    fn as_any(&self) -> &dyn Any {
-        self
+    fn as_any(self) -> Box<dyn Any> {
+        Box::new(self)
     }
 
     fn parse(parser: &mut Parser) -> Result<Box<dyn StmtParser>, YangError> {
@@ -569,8 +569,8 @@ impl StmtParser for DescriptionStmt {
     }
 
     /// Return Any for downcasing.
-    fn as_any(&self) -> &dyn Any {
-        self
+    fn as_any(self) -> Box<dyn Any> {
+        Box::new(self)
     }
 
     fn parse(parser: &mut Parser) -> Result<Box<dyn StmtParser>, YangError> {
@@ -601,8 +601,8 @@ impl StmtParser for ReferenceStmt {
     }
 
     /// Return Any for downcasing.
-    fn as_any(&self) -> &dyn Any {
-        self
+    fn as_any(self) -> Box<dyn Any> {
+        Box::new(self)
     }
 
     fn parse(parser: &mut Parser) -> Result<Box<dyn StmtParser>, YangError> {
@@ -630,8 +630,8 @@ impl StmtParser for DummyStmt {
     }
 
     /// Return Any for downcasing.
-    fn as_any(&self) -> &dyn Any {
-        self
+    fn as_any(self) -> Box<dyn Any> {
+        Box::new(self)
     }
 
     fn parse(parser: &mut Parser) -> Result<dyn Stmt, YangError> {
