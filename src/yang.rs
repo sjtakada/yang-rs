@@ -119,7 +119,7 @@ pub fn collect_a_stmt<S: 'static + StmtParser + Clone>(stmts: &mut StmtCollectio
 
 pub fn collect_vec_stmt<S: 'static + StmtParser>(stmts: &mut StmtCollection) -> Result<Vec<Box<S>>, YangError> {
     match stmts.get_mut(S::keyword()) {
-        Some(v) => Ok(v.drain(..).map(|s| Box::new(*s.as_any().downcast_ref::<S>().unwrap())).collect()),
+        Some(v) => Ok(v.drain(..).map(|s| s.as_any().downcast_ref::<S>().unwrap()).collect()),
         None => return Err(YangError::MissingStatement),
     }
 }
