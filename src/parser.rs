@@ -14,7 +14,7 @@ use std::path::Path;
 use super::error::*;
 use super::yang::*;
 
-pub type StmtParserFn = fn(&mut Parser) -> Result<Stmt, YangError>;
+pub type StmtParserFn = fn(&mut Parser) -> Result<Box<dyn StmtParser>, YangError>;
 
 /// Open and parse a YANG file.
 pub fn parse_file(filename: &str) -> std::io::Result<()> {
@@ -34,7 +34,7 @@ pub fn parse_file(filename: &str) -> std::io::Result<()> {
 
     match parser.parse_yang() {
         Ok(yang) => {
-            println!("{:?}", yang)
+//            println!("{:?}", yang)
         }
         Err(err) => {
             println!(
@@ -316,20 +316,20 @@ impl Parser {
     }
 
     /// Entry point of YANG parser. It will return a module or submodule statement.
-    pub fn parse_yang(&mut self) -> Result<Stmt, YangError> {
+    pub fn parse_yang(&mut self) -> Result<Box<dyn StmtParser>, YangError> {
         let map: HashMap<&'static str, Repeat> = [
             ("module", Repeat::new(Some(0), Some(1))),
             ("submodule", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
         let mut stmts = parse_stmts(self, map)?;
-        match collect_a_stmt(&mut stmts, "module") {
-            Ok(Stmt::Module(module)) => return Ok(Stmt::Module(module)),
+        match collect_a_stmt::<ModuleStmt>(&mut stmts) {
+            Ok(module) => return Ok(module),
             _ => {}
         }
 
-        match collect_a_stmt(&mut stmts, "submodule") {
-            Ok(Stmt::Submodule(submodule)) => return Ok(Stmt::Submodule(submodule)),
+        match collect_a_stmt::<SubmoduleStmt>(&mut stmts) {
+            Ok(submodule) => return Ok(submodule),
             _ => {}
         }
 
@@ -451,7 +451,7 @@ impl Parser {
     }
 
     /// Call Stmt Parsrer
-    pub fn parse_stmt(&mut self, keyword: &str) -> Result<Stmt, YangError> {
+    pub fn parse_stmt(&mut self, keyword: &str) -> Result<Box<dyn StmtParser>, YangError> {
 println!("*** keywoird {}", keyword);
         let f = self.parse_stmt.get(keyword).unwrap();
         f(self)
