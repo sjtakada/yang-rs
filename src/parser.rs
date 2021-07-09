@@ -165,8 +165,8 @@ impl Parser {
 
             let (token, pos) = self.get_single_token()?;
             match token {
-                Token::Whitespace(s) |
-                Token::Comment(s) => {}
+                Token::Whitespace(_) |
+                Token::Comment(_) => {}
                 Token::QuotedString(s) => {
                     if st.len() == 0 || concat_str {
                         st.push_str(&s);

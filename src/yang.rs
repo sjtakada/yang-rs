@@ -3,7 +3,7 @@
 //  Copyright (C) 2021 Toshiaki Takada
 //
 
-use std::fmt;
+//use std::fmt;
 use std::any::Any;
 use std::collections::HashMap;
 use super::error::*;
@@ -67,7 +67,7 @@ println!("*** parset_stmts {:?}", token);
             Token::Identifier(ref keyword) => {
                 if map.contains_key(keyword as &str) {
                     let stmt = parser.parse_stmt(&keyword)?;
-                    let mut v =  match stmts.get_mut(keyword as &str) {
+                    let v =  match stmts.get_mut(keyword as &str) {
                         Some(v) => v,
                         None => {
                             stmts.insert(keyword.to_string(), Vec::new());
@@ -104,12 +104,12 @@ println!("*** {} {:?} {}", k, rep, n);
     Ok(stmts)
 }
 
-pub fn collect_a_stmt<S: 'static + StmtParser + Clone>(stmts: &mut StmtCollection) -> Result<Box<S>, YangError> {
+pub fn collect_a_stmt<S: 'static + StmtParser>(stmts: &mut StmtCollection) -> Result<Box<S>, YangError> {
     match stmts.get_mut(S::keyword()) {
         Some(v) => match v.pop() {
             Some(s) => {
                 let stmt = s.as_any().downcast::<S>().unwrap();
-                Ok(Box::new(*stmt))
+                Ok(stmt)
             }
             None => Err(YangError::MissingStatement),
         },
@@ -119,7 +119,7 @@ pub fn collect_a_stmt<S: 'static + StmtParser + Clone>(stmts: &mut StmtCollectio
 
 pub fn collect_vec_stmt<S: 'static + StmtParser>(stmts: &mut StmtCollection) -> Result<Vec<Box<S>>, YangError> {
     match stmts.get_mut(S::keyword()) {
-        Some(v) => Ok(v.drain(..).map(|s| s.as_any().downcast_ref::<S>().unwrap()).collect()),
+        Some(v) => Ok(v.drain(..).map(|s| s.as_any().downcast::<S>().unwrap()).collect()),
         None => return Err(YangError::MissingStatement),
     }
 }
@@ -128,8 +128,8 @@ pub fn collect_opt_stmt<S: 'static + StmtParser>(stmts: &mut StmtCollection) -> 
     match stmts.get_mut(S::keyword()) {
         Some(v) => match v.pop() {
             Some(s) => {
-                let stmt = s.as_any().downcast_ref::<S>().unwrap();
-                Ok(Some(Box::new(*stmt)))
+                let stmt = s.as_any().downcast::<S>().unwrap();
+                Ok(Some(stmt))
             }
             None => Ok(None),
         },
@@ -306,9 +306,9 @@ impl ModuleHeaderStmts {
         let prefix = collect_a_stmt::<PrefixStmt>(&mut stmts)?;
 
         let stmts = ModuleHeaderStmts {
-            yang_version,//: if let Ok(Stmt::YangVersion(stmt)) = yang_version { stmt } else { panic!("") },
-            namespace,//: if let Ok(Stmt::Namespace(stmt)) = namespace { stmt } else { panic!("") },
-            prefix,//: if let Ok(Stmt::Prefix(stmt)) = prefix { stmt } else { panic!("") },
+            yang_version,
+            namespace,
+            prefix,
         };
 
         Ok(stmts)
@@ -432,9 +432,9 @@ impl StmtParser for ImportStmt {
 
         let stmt = ImportStmt {
             identifier_arg: arg,
-            prefix,//: if let Ok(Stmt::Prefix(stmt)) = prefix { stmt } else { panic!("") },
-            description, //if let Ok(Some(Stmt::Description(stmt))) = description { Some(stmt) } else { panic!("") },
-            reference,//: //if let Ok(Some(Stmt::Reference(stmt))) = reference { Some(stmt) } else { panic!("") },
+            prefix,
+            description,
+            reference,
         };
 
         let (token, _) = parser.get_token()?;
