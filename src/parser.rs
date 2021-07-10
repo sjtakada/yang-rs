@@ -3,6 +3,8 @@
 //  Copyright (C) 2021 Toshiaki Takada
 //
 
+//use std::mem::size_of;
+
 use std::cell::Cell;
 use std::collections::HashMap;
 use std::fs::File;
@@ -324,6 +326,8 @@ impl Parser {
             ("module", Repeat::new(Some(0), Some(1))),
             ("submodule", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
+
+//        println!("*** size_of {}", size_of::<ModuleStmt>());
 
         let mut stmts = parse_stmts(self, map)?;
         if stmts.contains_key("module") {

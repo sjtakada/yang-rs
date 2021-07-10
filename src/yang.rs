@@ -67,7 +67,7 @@ pub fn parse_stmts(parser: &mut Parser, map: HashMap<&'static str, Repeat>) -> R
 
     loop {
         let (token, pos) = parser.get_token()?;
-println!("*** parset_stmts {:?}", token);
+println!("*** parse_stmts {:?}", token);
         match token {
             Token::Identifier(ref keyword) => {
                 if map.contains_key(keyword as &str) {
@@ -121,8 +121,8 @@ pub enum StmtType {
     NamespaceStmt(NamespaceStmt),
     PrefixStmt(PrefixStmt),
     BelongsToStmt(TBD),
-    OrganizationStmt(TBD),
-    ContactStmt(TBD),
+    OrganizationStmt(OrganizationStmt),
+    ContactStmt(ContactStmt),
     DescriptionStmt(DescriptionStmt),
     ReferenceStmt(ReferenceStmt),
 }
@@ -153,7 +153,7 @@ pub trait Stmt {
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized;
 
-    /// Parse statement body and return statement object.
+    /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> where Self: Sized;
 }
 
@@ -171,7 +171,7 @@ pub struct ModuleStmt {
     identifier: String,
 
     module_header: ModuleHeaderStmts,
-//    linkage: LinkageStmts,
+    linkage: LinkageStmts,
 //    meta: MetaStmts,
 //    revision: RevisionStmts,
 //    body: BodyStmts,
@@ -183,14 +183,13 @@ impl Stmt for ModuleStmt {
         "module"
     }
 
-    /// Parse and get module-stmt.
+    /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = parse_arg(parser)?;
         let (token, _) = parser.get_token()?;
         if let Token::BlockBegin = token {
-            
             let module_header = ModuleHeaderStmts::parse(parser)?;
-            // linkage-stmts
+            let linkage = LinkageStmts::parse(parser)?;
             // meta-stmts
             // revision-stmts
             // body-stmts
@@ -198,6 +197,7 @@ impl Stmt for ModuleStmt {
             let stmt = ModuleStmt {
                 identifier: arg,
                 module_header,
+                linkage,
             };
 
             let (token, _) = parser.get_token()?;
@@ -231,6 +231,7 @@ impl Stmt for SubmoduleStmt {
         "submodule"
     }
 
+    /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = parse_arg(parser)?;
 
@@ -272,6 +273,7 @@ impl ModuleHeaderStmts {
     }
 }
 
+#[derive(Clone)]
 pub struct LinkageStmts {
     import: Vec<ImportStmt>,
     include: Vec<IncludeStmt>,
@@ -305,10 +307,10 @@ pub struct SubmoduleHeaderStmts {
 
 //#[derive(Copy, Clone)]
 pub struct MetaStmts {
-//    organization: Option<OrganizationStmt>,
-//    contact: Option<ContactStmt>,
-//    description: Option<DescriptionStmt>,
-//    reference: Option<ReferenceStmt>,
+    organization: Option<OrganizationStmt>,
+    contact: Option<ContactStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
 }
 
 #[derive(Clone)]
@@ -327,6 +329,7 @@ impl Stmt for YangVersionStmt {
         "yang-version"
     }
 
+    /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = parse_arg(parser)?;
 
@@ -360,6 +363,7 @@ impl Stmt for ImportStmt {
         "import"
     }
 
+    /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = parse_arg(parser)?;
 
@@ -406,6 +410,7 @@ impl Stmt for IncludeStmt {
         "incluse"
     }
 
+    /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = parse_arg(parser)?;
 
@@ -445,6 +450,7 @@ impl Stmt for NamespaceStmt {
         "namespace"
     }
 
+    /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = parse_arg(parser)?;
 
@@ -472,6 +478,7 @@ impl Stmt for PrefixStmt {
         "prefix"
     }
 
+    /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = parse_arg(parser)?;
 
@@ -489,8 +496,64 @@ impl Stmt for PrefixStmt {
 }
 
 #[derive(Clone)]
+pub struct OrganizationStmt {
+    string: String,
+}
+
+impl Stmt for OrganizationStmt {
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str where Self: Sized {
+        "organization"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        let arg = parse_arg(parser)?;
+
+        let stmt = OrganizationStmt {
+            string: arg,
+        };
+
+        let (token, _) = parser.get_token()?;
+        if let Token::StatementEnd = token {
+            Ok(StmtType::OrganizationStmt(stmt))
+        } else {
+            Err(YangError::UnexpectedToken(parser.line()))
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct ContactStmt {
+    string: String,
+}
+
+impl Stmt for ContactStmt {
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str where Self: Sized {
+        "contact"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        let arg = parse_arg(parser)?;
+
+        let stmt = ContactStmt {
+            string: arg,
+        };
+
+        let (token, _) = parser.get_token()?;
+        if let Token::StatementEnd = token {
+            Ok(StmtType::ContactStmt(stmt))
+        } else {
+            Err(YangError::UnexpectedToken(parser.line()))
+        }
+    }
+}
+
+#[derive(Clone)]
 pub struct DescriptionStmt {
-    identifier_arg: String,
+    string: String,
 }
 
 impl Stmt for DescriptionStmt {
@@ -499,11 +562,12 @@ impl Stmt for DescriptionStmt {
         "description"
     }
 
+    /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = parse_arg(parser)?;
 
         let stmt = DescriptionStmt {
-            identifier_arg: arg,
+            string: arg,
         };
 
         let (token, _) = parser.get_token()?;
@@ -517,7 +581,7 @@ impl Stmt for DescriptionStmt {
 
 #[derive(Clone)]
 pub struct ReferenceStmt {
-    arg: String,
+    string: String,
 }
 
 impl Stmt for ReferenceStmt {
@@ -526,11 +590,12 @@ impl Stmt for ReferenceStmt {
         "reference"
     }
 
+    /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = parse_arg(parser)?;
 
         let stmt = ReferenceStmt {
-            arg: arg,
+            string: arg,
         };
 
         let (token, _) = parser.get_token()?;
@@ -541,29 +606,3 @@ impl Stmt for ReferenceStmt {
         }
     }
 }
-
-
-/*
-impl Stmt for DummyStmt {
-    /// Return statement keyword in &str.
-    fn keyword() -> &'static str where Self: Sized {
-        ""
-    }
-
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = parse_arg(parser)?;
-
-        let stmt = ReferenceStmt {
-            arg: arg,
-        };
-
-        let (token, _) = parser.get_token()?;
-        if let Token::StatementEnd = token {
-            Ok(Stmt::Reference(stmt))
-        } else {
-            Err(YangError::UnexpectedToken(parser.line()))
-        }
-    }
-}
-
-*/

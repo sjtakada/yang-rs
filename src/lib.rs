@@ -37,7 +37,7 @@ macro_rules! collect_vec_stmt {
                     .collect();
                 Ok(w)
             }
-            None => Err(YangError::MissingStatement),
+            None => Ok(Vec::new()),
         }
     );
 }
