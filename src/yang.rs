@@ -3,13 +3,16 @@
 //  Copyright (C) 2021 Toshiaki Takada
 //
 
-//use std::fmt;
+use std::fmt;
 use std::any::Any;
 use std::collections::HashMap;
 use super::error::*;
 use super::parser::*;
 
-pub type StmtCollection = HashMap<String, Vec<Box<dyn StmtParser>>>;
+#[macro_use]
+use crate::collect_a_stmt;
+
+pub type StmtCollection = HashMap<String, Vec<StmtType>>;
 
 /// Get a statement arg.
 fn parse_arg(parser: &mut Parser) -> Result<String, YangError> {
@@ -104,12 +107,14 @@ println!("*** {} {:?} {}", k, rep, n);
     Ok(stmts)
 }
 
-pub fn collect_a_stmt<S: 'static + StmtParser>(stmts: &mut StmtCollection) -> Result<Box<S>, YangError> {
+/*
+pub fn collect_a_stmt<S: 'static + StmtParser>(stmts: &mut StmtCollection) -> Result<Box<dyn StmtParser>, YangError> {
     match stmts.get_mut(S::keyword()) {
         Some(v) => match v.pop() {
             Some(s) => {
-                let stmt = s.as_any().downcast::<S>().unwrap();
-                Ok(stmt)
+//                let stmt = s.as_any().downcast::<S>().unwrap();
+//                Ok(stmt)
+                Ok(s)
             }
             None => Err(YangError::MissingStatement),
         },
@@ -136,14 +141,12 @@ pub fn collect_opt_stmt<S: 'static + StmtParser>(stmts: &mut StmtCollection) -> 
         None => Err(YangError::MissingStatement),
     }
 }
+*/
 
-pub struct TBD {
-
-}
+pub struct TBD {}
 
 /// Yang Statement
-/*
-pub enum Stmt {
+pub enum StmtType {
     Module(ModuleStmt),
     Submodule(SubmoduleStmt),
     YangVersion(YangVersionStmt),
@@ -158,28 +161,29 @@ pub enum Stmt {
     Reference(ReferenceStmt),
 }
 
-impl fmt::Debug for Stmt {
+impl fmt::Debug for StmtType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 	match &*self {
-            Stmt::Module(_stmt) => write!(f, "module"),
-            Stmt::Submodule(_stmt) => write!(f, "submodule"),
-            Stmt::YangVersion(_stmt) => write!(f, "yang-version"),
-            Stmt::Import(_stmt) => write!(f, "import"),
-            Stmt::Include(_stmt) => write!(f, "include"),
-            Stmt::Namespace(_stmt) => write!(f, "namespace"),
-            Stmt::Prefix(_stmt) => write!(f, "prefix"),
-            Stmt::BelongsTo(_stmt) => write!(f, "belongs-to"),
-            Stmt::Organization(_stmt) => write!(f, "organization"),
-            Stmt::Contact(_stmt) => write!(f, "contact"),
-            Stmt::Description(_stmt) => write!(f, "description"),
-            Stmt::Reference(_stmt) => write!(f, "reference"),
+            StmtType::Module(_stmt) => write!(f, "module"),
+            StmtType::Submodule(_stmt) => write!(f, "submodule"),
+            StmtType::YangVersion(_stmt) => write!(f, "yang-version"),
+            StmtType::Import(_stmt) => write!(f, "import"),
+            StmtType::Include(_stmt) => write!(f, "include"),
+            StmtType::Namespace(_stmt) => write!(f, "namespace"),
+            StmtType::Prefix(_stmt) => write!(f, "prefix"),
+            StmtType::BelongsTo(_stmt) => write!(f, "belongs-to"),
+            StmtType::Organization(_stmt) => write!(f, "organization"),
+            StmtType::Contact(_stmt) => write!(f, "contact"),
+            StmtType::Description(_stmt) => write!(f, "description"),
+            StmtType::Reference(_stmt) => write!(f, "reference"),
         }
     }
 }
-*/
+
 
 /// YANG Statement trait for a single statement.
 pub trait StmtParser {
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized;
 
@@ -187,7 +191,7 @@ pub trait StmtParser {
     fn as_any(self) -> Box<dyn Any>;
 
     /// Parse statement body and return statement object.
-    fn parse(parser: &mut Parser) -> Result<Box<dyn StmtParser>, YangError> where Self: Sized;
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> where Self: Sized;
 }
 
 /*
@@ -222,7 +226,7 @@ impl StmtParser for ModuleStmt {
     }
 
     /// Parse and get module-stmt.
-    fn parse(parser: &mut Parser) -> Result<Box<dyn StmtParser>, YangError> {
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = parse_arg(parser)?;
         let (token, _) = parser.get_token()?;
         if let Token::BlockBegin = token {
@@ -245,7 +249,7 @@ impl StmtParser for ModuleStmt {
                 return Err(YangError::UnexpectedToken(parser.line()));
             }
 
-            Ok(Box::new(stmt))
+            Ok(StmtType::Module(stmt))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
@@ -274,22 +278,22 @@ impl StmtParser for SubmoduleStmt {
         Box::new(self)
     }
 
-    fn parse(parser: &mut Parser) -> Result<Box<dyn StmtParser>, YangError> {
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = parse_arg(parser)?;
 
         let stmt = SubmoduleStmt {
             identifier: arg,
         };
 
-        Ok(Box::new(stmt))
+        Ok(StmtType::Submodule(stmt))
     }
 }
 
 #[derive(Clone)]
 pub struct ModuleHeaderStmts {
-    yang_version: Box<YangVersionStmt>,
-    namespace: Box<NamespaceStmt>,
-    prefix: Box<PrefixStmt>,
+    yang_version: YangVersionStmt,
+    namespace: NamespaceStmt,
+    prefix: PrefixStmt,
 }
 
 impl ModuleHeaderStmts {
@@ -301,9 +305,9 @@ impl ModuleHeaderStmts {
         ].iter().cloned().collect();
 
         let mut stmts = parse_stmts(parser, map)?;
-        let yang_version = collect_a_stmt::<YangVersionStmt>(&mut stmts)?;
-        let namespace = collect_a_stmt::<NamespaceStmt>(&mut stmts)?;
-        let prefix = collect_a_stmt::<PrefixStmt>(&mut stmts)?;
+        let yang_version = collect_a_stmt!(YangVersion, YangVersionStmt, stmts)?;
+        let namespace = collect_a_stmt!(Namespace, NamespaceStmt, stmts)?;
+        let prefix = collect_a_stmt!(Prefix, PrefixStmt, stmts)?;
 
         let stmts = ModuleHeaderStmts {
             yang_version,
@@ -327,11 +331,11 @@ impl LinkageStmts {
             ("include", Repeat::new(Some(0), None)),
         ].iter().cloned().collect();
 
+        Err(YangError::UnexpectedToken(parser.line()))
+/*
         let mut stmts = parse_stmts(parser, map)?;
         let import = collect_vec_stmt::<ImportStmt>(&mut stmts)?;
         let include = collect_vec_stmt::<IncludeStmt>(&mut stmts)?;
-//        let import = import_vec.drain(..).map(|i| if let Stmt::Import(stmt) = i { stmt } else { panic!("") }).collect();
-//        let include = include_vec.drain(..).map(|i| if let Stmt::Include(stmt) = i { stmt } else { panic!("") }).collect();
 
         let stmts = LinkageStmts {
             import,
@@ -339,6 +343,7 @@ impl LinkageStmts {
         };
 
         Ok(stmts)
+*/
     }
 }
 
@@ -377,7 +382,7 @@ impl StmtParser for YangVersionStmt {
         Box::new(self)
     }
 
-    fn parse(parser: &mut Parser) -> Result<Box<dyn StmtParser>, YangError> {
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = parse_arg(parser)?;
 
         // TBD: check arg is "1.1"
@@ -388,7 +393,7 @@ impl StmtParser for YangVersionStmt {
 
         let (token, _) = parser.get_token()?;
         if let Token::StatementEnd = token {
-            Ok(Box::new(stmt))
+            Ok(StmtType::YangVersion(stmt))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
@@ -415,7 +420,7 @@ impl StmtParser for ImportStmt {
         Box::new(self)
     }
 
-    fn parse(parser: &mut Parser) -> Result<Box<dyn StmtParser>, YangError> {
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = parse_arg(parser)?;
 
         let map: HashMap<&'static str, Repeat> = [
@@ -425,6 +430,7 @@ impl StmtParser for ImportStmt {
             ("reference", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
+/*
         let mut stmts = parse_stmts(parser, map)?;
         let prefix = collect_a_stmt::<PrefixStmt>(&mut stmts)?;
         let description = collect_opt_stmt::<DescriptionStmt>(&mut stmts)?;
@@ -436,10 +442,11 @@ impl StmtParser for ImportStmt {
             description,
             reference,
         };
-
+*/
         let (token, _) = parser.get_token()?;
         if let Token::StatementEnd = token {
-            Ok(Box::new(stmt))
+//            Ok(StmtType::Import(stmt))
+            Err(YangError::UnexpectedToken(parser.line()))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
@@ -465,7 +472,7 @@ impl StmtParser for IncludeStmt {
         Box::new(self)
     }
 
-    fn parse(parser: &mut Parser) -> Result<Box<dyn StmtParser>, YangError> {
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = parse_arg(parser)?;
 
         let map: HashMap<&'static str, Repeat> = [
@@ -474,6 +481,7 @@ impl StmtParser for IncludeStmt {
             ("reference", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
+/*
         let mut stmts = parse_stmts(parser, map)?;
         let description = collect_opt_stmt::<DescriptionStmt>(&mut stmts)?;
         let reference = collect_opt_stmt::<ReferenceStmt>(&mut stmts)?;
@@ -483,10 +491,12 @@ impl StmtParser for IncludeStmt {
             description,
             reference,
         };
+*/
 
         let (token, _) = parser.get_token()?;
         if let Token::StatementEnd = token {
-            Ok(Box::new(stmt))
+//            Ok(StmtType::Include(stmt))
+            Err(YangError::UnexpectedToken(parser.line()))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
@@ -509,7 +519,7 @@ impl StmtParser for NamespaceStmt {
         Box::new(self)
     }
 
-    fn parse(parser: &mut Parser) -> Result<Box<dyn StmtParser>, YangError> {
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = parse_arg(parser)?;
 
         let stmt = NamespaceStmt {
@@ -518,7 +528,7 @@ impl StmtParser for NamespaceStmt {
 
         let (token, _) = parser.get_token()?;
         if let Token::StatementEnd = token {
-            Ok(Box::new(stmt))
+            Ok(StmtType::Namespace(stmt))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
@@ -541,7 +551,7 @@ impl StmtParser for PrefixStmt {
         Box::new(self)
     }
 
-    fn parse(parser: &mut Parser) -> Result<Box<dyn StmtParser>, YangError> {
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = parse_arg(parser)?;
 
         let stmt = PrefixStmt {
@@ -550,7 +560,7 @@ impl StmtParser for PrefixStmt {
 
         let (token, _) = parser.get_token()?;
         if let Token::StatementEnd = token {
-            Ok(Box::new(stmt))
+            Ok(StmtType::Prefix(stmt))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
@@ -573,7 +583,7 @@ impl StmtParser for DescriptionStmt {
         Box::new(self)
     }
 
-    fn parse(parser: &mut Parser) -> Result<Box<dyn StmtParser>, YangError> {
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = parse_arg(parser)?;
 
         let stmt = DescriptionStmt {
@@ -582,7 +592,7 @@ impl StmtParser for DescriptionStmt {
 
         let (token, _) = parser.get_token()?;
         if let Token::StatementEnd = token {
-            Ok(Box::new(stmt))
+            Ok(StmtType::Description(stmt))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
@@ -605,7 +615,7 @@ impl StmtParser for ReferenceStmt {
         Box::new(self)
     }
 
-    fn parse(parser: &mut Parser) -> Result<Box<dyn StmtParser>, YangError> {
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = parse_arg(parser)?;
 
         let stmt = ReferenceStmt {
@@ -614,7 +624,7 @@ impl StmtParser for ReferenceStmt {
 
         let (token, _) = parser.get_token()?;
         if let Token::StatementEnd = token {
-            Ok(Box::new(stmt))
+            Ok(StmtType::Reference(stmt))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
@@ -634,7 +644,7 @@ impl StmtParser for DummyStmt {
         Box::new(self)
     }
 
-    fn parse(parser: &mut Parser) -> Result<dyn Stmt, YangError> {
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = parse_arg(parser)?;
 
         let stmt = ReferenceStmt {

@@ -11,4 +11,19 @@ pub mod collate;
 pub mod yang;
 
 
-//pub mod abnf;
+#[macro_export]
+macro_rules! collect_a_stmt {
+    ($stype:ident, $st:ident, $stmts:expr) => (
+        match $stmts.get_mut(<$st>::keyword()) {
+            Some(vec) => match vec.pop() {
+                Some(t) => match t {
+                    StmtType::$stype(stmt) => Ok(stmt),
+                    _ => Err(YangError::MissingStatement),
+                }
+                None => Err(YangError::MissingStatement),
+            },
+            None => Err(YangError::MissingStatement),
+        }
+    );
+}
+
