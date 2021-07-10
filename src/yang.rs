@@ -11,6 +11,8 @@ use super::parser::*;
 
 #[macro_use]
 use crate::collect_a_stmt;
+use crate::collect_vec_stmt;
+use crate::collect_opt_stmt;
 
 pub type StmtCollection = HashMap<String, Vec<StmtType>>;
 
@@ -106,42 +108,6 @@ println!("*** {} {:?} {}", k, rep, n);
 
     Ok(stmts)
 }
-
-/*
-pub fn collect_a_stmt<S: 'static + StmtParser>(stmts: &mut StmtCollection) -> Result<Box<dyn StmtParser>, YangError> {
-    match stmts.get_mut(S::keyword()) {
-        Some(v) => match v.pop() {
-            Some(s) => {
-//                let stmt = s.as_any().downcast::<S>().unwrap();
-//                Ok(stmt)
-                Ok(s)
-            }
-            None => Err(YangError::MissingStatement),
-        },
-        None => Err(YangError::MissingStatement),
-    }
-}
-
-pub fn collect_vec_stmt<S: 'static + StmtParser>(stmts: &mut StmtCollection) -> Result<Vec<Box<S>>, YangError> {
-    match stmts.get_mut(S::keyword()) {
-        Some(v) => Ok(v.drain(..).map(|s| s.as_any().downcast::<S>().unwrap()).collect()),
-        None => return Err(YangError::MissingStatement),
-    }
-}
-
-pub fn collect_opt_stmt<S: 'static + StmtParser>(stmts: &mut StmtCollection) -> Result<Option<Box<S>>, YangError> {
-    match stmts.get_mut(S::keyword()) {
-        Some(v) => match v.pop() {
-            Some(s) => {
-                let stmt = s.as_any().downcast::<S>().unwrap();
-                Ok(Some(stmt))
-            }
-            None => Ok(None),
-        },
-        None => Err(YangError::MissingStatement),
-    }
-}
-*/
 
 pub struct TBD {}
 
@@ -307,8 +273,8 @@ impl ModuleHeaderStmts {
 }
 
 pub struct LinkageStmts {
-    import: Vec<Box<ImportStmt>>,
-    include: Vec<Box<IncludeStmt>>,
+    import: Vec<ImportStmt>,
+    include: Vec<IncludeStmt>,
 }
 
 impl LinkageStmts {
@@ -318,11 +284,9 @@ impl LinkageStmts {
             ("include", Repeat::new(Some(0), None)),
         ].iter().cloned().collect();
 
-        Err(YangError::UnexpectedToken(parser.line()))
-/*
         let mut stmts = parse_stmts(parser, map)?;
-        let import = collect_vec_stmt::<ImportStmt>(&mut stmts)?;
-        let include = collect_vec_stmt::<IncludeStmt>(&mut stmts)?;
+        let import = collect_vec_stmt!(stmts, ImportStmt)?;
+        let include = collect_vec_stmt!(stmts, IncludeStmt)?;
 
         let stmts = LinkageStmts {
             import,
@@ -330,7 +294,6 @@ impl LinkageStmts {
         };
 
         Ok(stmts)
-*/
     }
 }
 
@@ -385,10 +348,10 @@ impl Stmt for YangVersionStmt {
 #[derive(Clone)]
 pub struct ImportStmt {
     identifier_arg: String,
-    prefix: Box<PrefixStmt>,
+    prefix: PrefixStmt,
 //    revision_date: Option<RevisionDateStmt>,
-    description: Option<Box<DescriptionStmt>>,
-    reference: Option<Box<ReferenceStmt>>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
 }
 
 impl Stmt for ImportStmt {
@@ -407,11 +370,10 @@ impl Stmt for ImportStmt {
             ("reference", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
-/*
         let mut stmts = parse_stmts(parser, map)?;
-        let prefix = collect_a_stmt::<PrefixStmt>(&mut stmts)?;
-        let description = collect_opt_stmt::<DescriptionStmt>(&mut stmts)?;
-        let reference = collect_opt_stmt::<ReferenceStmt>(&mut stmts)?;
+        let prefix = collect_a_stmt!(stmts, PrefixStmt)?;
+        let description = collect_opt_stmt!(stmts, DescriptionStmt)?;
+        let reference = collect_opt_stmt!(stmts, ReferenceStmt)?;
 
         let stmt = ImportStmt {
             identifier_arg: arg,
@@ -419,11 +381,11 @@ impl Stmt for ImportStmt {
             description,
             reference,
         };
-*/
+
         let (token, _) = parser.get_token()?;
+
         if let Token::StatementEnd = token {
-//            Ok(StmtType::ImportStmt(stmt))
-            Err(YangError::UnexpectedToken(parser.line()))
+            Ok(StmtType::ImportStmt(stmt))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
@@ -434,8 +396,8 @@ impl Stmt for ImportStmt {
 pub struct IncludeStmt {
     identifier_arg: String,
 //    revision_date: Option<RevisionDateStmt>,
-    description: Option<Box<DescriptionStmt>>,
-    reference: Option<Box<ReferenceStmt>>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
 }
 
 impl Stmt for IncludeStmt {
@@ -453,22 +415,19 @@ impl Stmt for IncludeStmt {
             ("reference", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
-/*
         let mut stmts = parse_stmts(parser, map)?;
-        let description = collect_opt_stmt::<DescriptionStmt>(&mut stmts)?;
-        let reference = collect_opt_stmt::<ReferenceStmt>(&mut stmts)?;
+        let description = collect_opt_stmt!(stmts, DescriptionStmt)?;
+        let reference = collect_opt_stmt!(stmts, ReferenceStmt)?;
 
         let stmt = IncludeStmt {
             identifier_arg: arg,
             description,
             reference,
         };
-*/
 
         let (token, _) = parser.get_token()?;
         if let Token::StatementEnd = token {
-//            Ok(StmtType::IncludeStmt(stmt))
-            Err(YangError::UnexpectedToken(parser.line()))
+            Ok(StmtType::IncludeStmt(stmt))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
