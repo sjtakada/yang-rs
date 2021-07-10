@@ -13,11 +13,11 @@ pub mod yang;
 
 #[macro_export]
 macro_rules! collect_a_stmt {
-    ($stype:ident, $st:ident, $stmts:expr) => (
+    ($stmts:expr, $st:ident) => (
         match $stmts.get_mut(<$st>::keyword()) {
             Some(vec) => match vec.pop() {
                 Some(t) => match t {
-                    StmtType::$stype(stmt) => Ok(stmt),
+                    StmtType::$st(stmt) => Ok(stmt),
                     _ => Err(YangError::MissingStatement),
                 }
                 None => Err(YangError::MissingStatement),

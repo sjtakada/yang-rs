@@ -147,48 +147,45 @@ pub struct TBD {}
 
 /// Yang Statement
 pub enum StmtType {
-    Module(ModuleStmt),
-    Submodule(SubmoduleStmt),
-    YangVersion(YangVersionStmt),
-    Import(ImportStmt),
-    Include(IncludeStmt),
-    Namespace(NamespaceStmt),
-    Prefix(PrefixStmt),
-    BelongsTo(TBD),
-    Organization(TBD),
-    Contact(TBD),
-    Description(DescriptionStmt),
-    Reference(ReferenceStmt),
+    ModuleStmt(ModuleStmt),
+    SubmoduleStmt(SubmoduleStmt),
+    YangVersionStmt(YangVersionStmt),
+    ImportStmt(ImportStmt),
+    IncludeStmt(IncludeStmt),
+    NamespaceStmt(NamespaceStmt),
+    PrefixStmt(PrefixStmt),
+    BelongsToStmt(TBD),
+    OrganizationStmt(TBD),
+    ContactStmt(TBD),
+    DescriptionStmt(DescriptionStmt),
+    ReferenceStmt(ReferenceStmt),
 }
 
 impl fmt::Debug for StmtType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 	match &*self {
-            StmtType::Module(_stmt) => write!(f, "module"),
-            StmtType::Submodule(_stmt) => write!(f, "submodule"),
-            StmtType::YangVersion(_stmt) => write!(f, "yang-version"),
-            StmtType::Import(_stmt) => write!(f, "import"),
-            StmtType::Include(_stmt) => write!(f, "include"),
-            StmtType::Namespace(_stmt) => write!(f, "namespace"),
-            StmtType::Prefix(_stmt) => write!(f, "prefix"),
-            StmtType::BelongsTo(_stmt) => write!(f, "belongs-to"),
-            StmtType::Organization(_stmt) => write!(f, "organization"),
-            StmtType::Contact(_stmt) => write!(f, "contact"),
-            StmtType::Description(_stmt) => write!(f, "description"),
-            StmtType::Reference(_stmt) => write!(f, "reference"),
+            StmtType::ModuleStmt(_stmt) => write!(f, "module"),
+            StmtType::SubmoduleStmt(_stmt) => write!(f, "submodule"),
+            StmtType::YangVersionStmt(_stmt) => write!(f, "yang-version"),
+            StmtType::ImportStmt(_stmt) => write!(f, "import"),
+            StmtType::IncludeStmt(_stmt) => write!(f, "include"),
+            StmtType::NamespaceStmt(_stmt) => write!(f, "namespace"),
+            StmtType::PrefixStmt(_stmt) => write!(f, "prefix"),
+            StmtType::BelongsToStmt(_stmt) => write!(f, "belongs-to"),
+            StmtType::OrganizationStmt(_stmt) => write!(f, "organization"),
+            StmtType::ContactStmt(_stmt) => write!(f, "contact"),
+            StmtType::DescriptionStmt(_stmt) => write!(f, "description"),
+            StmtType::ReferenceStmt(_stmt) => write!(f, "reference"),
         }
     }
 }
 
 
 /// YANG Statement trait for a single statement.
-pub trait StmtParser {
+pub trait Stmt {
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized;
-
-    /// Return Any for downcasing.
-    fn as_any(self) -> Box<dyn Any>;
 
     /// Parse statement body and return statement object.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> where Self: Sized;
@@ -214,15 +211,10 @@ pub struct ModuleStmt {
 //    body: BodyStmts,
 }
 
-impl StmtParser for ModuleStmt {
+impl Stmt for ModuleStmt {
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
         "module"
-    }
-
-    /// Return Any for downcasing.
-    fn as_any(self) -> Box<dyn Any> {
-        Box::new(self)
     }
 
     /// Parse and get module-stmt.
@@ -249,7 +241,7 @@ impl StmtParser for ModuleStmt {
                 return Err(YangError::UnexpectedToken(parser.line()));
             }
 
-            Ok(StmtType::Module(stmt))
+            Ok(StmtType::ModuleStmt(stmt))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
@@ -267,15 +259,10 @@ pub struct SubmoduleStmt {
 //    body: BodyStmts,
 }
 
-impl StmtParser for SubmoduleStmt {
+impl Stmt for SubmoduleStmt {
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
         "submodule"
-    }
-
-    /// Return Any for downcasing.
-    fn as_any(self) -> Box<dyn Any> {
-        Box::new(self)
     }
 
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
@@ -285,7 +272,7 @@ impl StmtParser for SubmoduleStmt {
             identifier: arg,
         };
 
-        Ok(StmtType::Submodule(stmt))
+        Ok(StmtType::SubmoduleStmt(stmt))
     }
 }
 
@@ -305,9 +292,9 @@ impl ModuleHeaderStmts {
         ].iter().cloned().collect();
 
         let mut stmts = parse_stmts(parser, map)?;
-        let yang_version = collect_a_stmt!(YangVersion, YangVersionStmt, stmts)?;
-        let namespace = collect_a_stmt!(Namespace, NamespaceStmt, stmts)?;
-        let prefix = collect_a_stmt!(Prefix, PrefixStmt, stmts)?;
+        let yang_version = collect_a_stmt!(stmts, YangVersionStmt)?;
+        let namespace = collect_a_stmt!(stmts, NamespaceStmt)?;
+        let prefix = collect_a_stmt!(stmts, PrefixStmt)?;
 
         let stmts = ModuleHeaderStmts {
             yang_version,
@@ -371,15 +358,10 @@ pub struct YangVersionStmt {
     yang_version_arg: String,
 }
 
-impl StmtParser for YangVersionStmt {
+impl Stmt for YangVersionStmt {
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
         "yang-version"
-    }
-
-    /// Return Any for downcasing.
-    fn as_any(self) -> Box<dyn Any> {
-        Box::new(self)
     }
 
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
@@ -393,7 +375,7 @@ impl StmtParser for YangVersionStmt {
 
         let (token, _) = parser.get_token()?;
         if let Token::StatementEnd = token {
-            Ok(StmtType::YangVersion(stmt))
+            Ok(StmtType::YangVersionStmt(stmt))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
@@ -409,15 +391,10 @@ pub struct ImportStmt {
     reference: Option<Box<ReferenceStmt>>,
 }
 
-impl StmtParser for ImportStmt {
+impl Stmt for ImportStmt {
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
         "import"
-    }
-
-    /// Return Any for downcasing.
-    fn as_any(self) -> Box<dyn Any> {
-        Box::new(self)
     }
 
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
@@ -445,7 +422,7 @@ impl StmtParser for ImportStmt {
 */
         let (token, _) = parser.get_token()?;
         if let Token::StatementEnd = token {
-//            Ok(StmtType::Import(stmt))
+//            Ok(StmtType::ImportStmt(stmt))
             Err(YangError::UnexpectedToken(parser.line()))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
@@ -461,15 +438,10 @@ pub struct IncludeStmt {
     reference: Option<Box<ReferenceStmt>>,
 }
 
-impl StmtParser for IncludeStmt {
+impl Stmt for IncludeStmt {
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
         "incluse"
-    }
-
-    /// Return Any for downcasing.
-    fn as_any(self) -> Box<dyn Any> {
-        Box::new(self)
     }
 
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
@@ -495,7 +467,7 @@ impl StmtParser for IncludeStmt {
 
         let (token, _) = parser.get_token()?;
         if let Token::StatementEnd = token {
-//            Ok(StmtType::Include(stmt))
+//            Ok(StmtType::IncludeStmt(stmt))
             Err(YangError::UnexpectedToken(parser.line()))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
@@ -508,15 +480,10 @@ pub struct NamespaceStmt {
     uri_str: String,
 }
 
-impl StmtParser for NamespaceStmt {
+impl Stmt for NamespaceStmt {
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
         "namespace"
-    }
-
-    /// Return Any for downcasing.
-    fn as_any(self) -> Box<dyn Any> {
-        Box::new(self)
     }
 
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
@@ -528,7 +495,7 @@ impl StmtParser for NamespaceStmt {
 
         let (token, _) = parser.get_token()?;
         if let Token::StatementEnd = token {
-            Ok(StmtType::Namespace(stmt))
+            Ok(StmtType::NamespaceStmt(stmt))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
@@ -540,15 +507,10 @@ pub struct PrefixStmt {
     prefix_arg: String,
 }
 
-impl StmtParser for PrefixStmt {
+impl Stmt for PrefixStmt {
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
         "prefix"
-    }
-
-    /// Return Any for downcasing.
-    fn as_any(self) -> Box<dyn Any> {
-        Box::new(self)
     }
 
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
@@ -560,7 +522,7 @@ impl StmtParser for PrefixStmt {
 
         let (token, _) = parser.get_token()?;
         if let Token::StatementEnd = token {
-            Ok(StmtType::Prefix(stmt))
+            Ok(StmtType::PrefixStmt(stmt))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
@@ -572,15 +534,10 @@ pub struct DescriptionStmt {
     identifier_arg: String,
 }
 
-impl StmtParser for DescriptionStmt {
+impl Stmt for DescriptionStmt {
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
         "description"
-    }
-
-    /// Return Any for downcasing.
-    fn as_any(self) -> Box<dyn Any> {
-        Box::new(self)
     }
 
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
@@ -592,7 +549,7 @@ impl StmtParser for DescriptionStmt {
 
         let (token, _) = parser.get_token()?;
         if let Token::StatementEnd = token {
-            Ok(StmtType::Description(stmt))
+            Ok(StmtType::DescriptionStmt(stmt))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
@@ -604,15 +561,10 @@ pub struct ReferenceStmt {
     arg: String,
 }
 
-impl StmtParser for ReferenceStmt {
+impl Stmt for ReferenceStmt {
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
         "reference"
-    }
-
-    /// Return Any for downcasing.
-    fn as_any(self) -> Box<dyn Any> {
-        Box::new(self)
     }
 
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
@@ -624,7 +576,7 @@ impl StmtParser for ReferenceStmt {
 
         let (token, _) = parser.get_token()?;
         if let Token::StatementEnd = token {
-            Ok(StmtType::Reference(stmt))
+            Ok(StmtType::ReferenceStmt(stmt))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
@@ -633,15 +585,10 @@ impl StmtParser for ReferenceStmt {
 
 
 /*
-impl StmtParser for DummyStmt {
+impl Stmt for DummyStmt {
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
         ""
-    }
-
-    /// Return Any for downcasing.
-    fn as_any(self) -> Box<dyn Any> {
-        Box::new(self)
     }
 
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {

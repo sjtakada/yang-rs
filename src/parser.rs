@@ -326,12 +326,12 @@ impl Parser {
         ].iter().cloned().collect();
 
         let mut stmts = parse_stmts(self, map)?;
-        let module = collect_a_stmt!(Module, ModuleStmt, stmts)?;
+        let module = collect_a_stmt!(stmts, ModuleStmt)?;
 //            Ok(module) => return Ok(StmtType::Module(module)),
 //            _ => {}
 //        }
 
-        let submodule = collect_a_stmt!(Submodule, SubmoduleStmt, stmts)?;
+        let submodule = collect_a_stmt!(stmts, SubmoduleStmt)?;
 //            Ok(submodule) => return Ok(StmtType::Submodule(submodule)),
 //            _ => {}
 //        }
