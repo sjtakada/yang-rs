@@ -146,7 +146,7 @@ impl Parser {
         self.saved.replace(None)
     }
 
-    /// Get a token to wrap get_single_token().
+    /// Get a token except whitespace and comment.
     pub fn get_token(&mut self) -> Result<(Token, usize), YangError> {
         let mut st = String::new();
         let mut concat_str = false;
@@ -201,7 +201,7 @@ impl Parser {
         }
     }
 
-    /// Get single token and position.
+    /// Get a single token and position.
     pub fn get_single_token(&mut self) -> Result<(Token, usize), YangError> {
         let input = &self.input();
         let token: Token;
@@ -326,76 +326,15 @@ impl Parser {
         ].iter().cloned().collect();
 
         let mut stmts = parse_stmts(self, map)?;
-        let module = collect_a_stmt!(stmts, ModuleStmt)?;
-//            Ok(module) => return Ok(StmtType::Module(module)),
-//            _ => {}
-//        }
-
-        let submodule = collect_a_stmt!(stmts, SubmoduleStmt)?;
-//            Ok(submodule) => return Ok(StmtType::Submodule(submodule)),
-//            _ => {}
-//        }
-
-        // TBD: Or maybe wrong statement.
-
-        Err(YangError::UnexpectedEof)
-
-/*
-        // Find a statement keyword.
-        while self.input_len() > 0 {
-            let (token, pos) = self.get_token()?;
-            match token {
-                // Ignore.
-                Token::Whitespace(_) |
-                Token::Comment(_) => {}
-                // Module or submodule.
-                Token::Identifier(k) => {
-                    keyword = Some(k.clone());
-                    break;
-                }
-                _ => return Err(YangError::UnexpectedToken(self.line())),
-            }
-        }
-
-        if keyword == None {
-            return Err(YangError::UnexpectedEof);
-        }
-
-        let mut arg: Option<String> = None;
-        
-        // Find an arg.
-        while self.input_len() > 0 {
-            let (token, _) = self.get_token()?;
-            match token {
-                // Ignore.
-                Token::Whitespace(_) |
-                Token::Comment(_) => {}
-                // Module or submodule.
-                Token::Identifier(k) => {
-                    arg = Some(k.clone());
-                    break;
-                }
-                _ => return Err(YangError::UnexpectedToken(self.line())),
-            }
-        }
-
-        if arg == None {
-            return Err(YangError::UnexpectedEof);
-        }
-
-        if keyword == Some("module".to_string()) {
-            match self.parse_module(arg.unwrap()) {
-                Ok(module) => Ok(Yang::Module(module)),
-                Err(_) => Err(YangError::UnexpectedToken(self.line())),
-            }
-        } else if keyword == Some("submodule".to_string()) {
-//            let submodule = self.parse_module();
-            Err(YangError::UnexpectedToken(self.line()))
+        if stmts.contains_key("module") {
+            let module = collect_a_stmt!(stmts, ModuleStmt)?;
+            Ok(StmtType::ModuleStmt(module))
+        } else if stmts.contains_key("submodule") {
+            let submodule = collect_a_stmt!(stmts, SubmoduleStmt)?;
+            Ok(StmtType::SubmoduleStmt(submodule))
         } else {
-            Err(YangError::UnexpectedToken(self.line()))
+            Err(YangError::UnexpectedEof)
         }
-*/
-
     }
 
 /*
@@ -455,7 +394,7 @@ impl Parser {
 
     /// Call Stmt Parsrer
     pub fn parse_stmt(&mut self, keyword: &str) -> Result<StmtType, YangError> {
-println!("*** keywoird {}", keyword);
+println!("*** keyword {}", keyword);
         let f = self.parse_stmt.get(keyword).unwrap();
         f(self)
     }
