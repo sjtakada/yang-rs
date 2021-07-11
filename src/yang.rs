@@ -99,8 +99,6 @@ println!("*** parse_stmts {:?}", token);
             None => 0,
         };
 
-println!("*** {} {:?} {}", k, rep, n);
-
         if !rep.validate(n) {
             return Err(YangError::StatementMismatch(k));
         }
@@ -109,6 +107,7 @@ println!("*** {} {:?} {}", k, rep, n);
     Ok(stmts)
 }
 
+#[derive(Debug, Clone)]
 pub struct TBD {}
 
 /// Yang Statement
@@ -130,18 +129,18 @@ pub enum StmtType {
 impl fmt::Debug for StmtType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 	match &*self {
-            StmtType::ModuleStmt(_stmt) => write!(f, "module"),
-            StmtType::SubmoduleStmt(_stmt) => write!(f, "submodule"),
-            StmtType::YangVersionStmt(_stmt) => write!(f, "yang-version"),
-            StmtType::ImportStmt(_stmt) => write!(f, "import"),
-            StmtType::IncludeStmt(_stmt) => write!(f, "include"),
-            StmtType::NamespaceStmt(_stmt) => write!(f, "namespace"),
-            StmtType::PrefixStmt(_stmt) => write!(f, "prefix"),
-            StmtType::BelongsToStmt(_stmt) => write!(f, "belongs-to"),
-            StmtType::OrganizationStmt(_stmt) => write!(f, "organization"),
-            StmtType::ContactStmt(_stmt) => write!(f, "contact"),
-            StmtType::DescriptionStmt(_stmt) => write!(f, "description"),
-            StmtType::ReferenceStmt(_stmt) => write!(f, "reference"),
+            StmtType::ModuleStmt(stmt) => write!(f, "module {:?}", stmt),
+            StmtType::SubmoduleStmt(stmt) => write!(f, "submodule {:?}", stmt),
+            StmtType::YangVersionStmt(stmt) => write!(f, "yang-version {:?}", stmt),
+            StmtType::ImportStmt(stmt) => write!(f, "import {:?}", stmt),
+            StmtType::IncludeStmt(stmt) => write!(f, "include {:?}", stmt),
+            StmtType::NamespaceStmt(stmt) => write!(f, "namespace {:?}", stmt),
+            StmtType::PrefixStmt(stmt) => write!(f, "prefix {:?}", stmt),
+            StmtType::BelongsToStmt(stmt) => write!(f, "belongs-to {:?}", stmt),
+            StmtType::OrganizationStmt(stmt) => write!(f, "organization {:?}", stmt),
+            StmtType::ContactStmt(stmt) => write!(f, "contact {:?}", stmt),
+            StmtType::DescriptionStmt(stmt) => write!(f, "description {:?}", stmt),
+            StmtType::ReferenceStmt(stmt) => write!(f, "reference {:?}", stmt),
         }
     }
 }
@@ -165,7 +164,7 @@ pub trait Stmts {
 */
 
 // Yang "module" statement.
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct ModuleStmt {
     // Module identifier.
     identifier: String,
@@ -214,7 +213,7 @@ impl Stmt for ModuleStmt {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SubmoduleStmt {
     identifier: String,
 
@@ -243,7 +242,7 @@ impl Stmt for SubmoduleStmt {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct ModuleHeaderStmts {
     yang_version: YangVersionStmt,
     namespace: NamespaceStmt,
@@ -273,7 +272,7 @@ impl ModuleHeaderStmts {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct LinkageStmts {
     import: Vec<ImportStmt>,
     include: Vec<IncludeStmt>,
@@ -313,12 +312,12 @@ pub struct MetaStmts {
     reference: Option<ReferenceStmt>,
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct RevisionStmts {
 //    revision: Vec<RevisionStmt>
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct YangVersionStmt {
     yang_version_arg: String,
 }
@@ -348,7 +347,7 @@ impl Stmt for YangVersionStmt {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct ImportStmt {
     identifier_arg: String,
     prefix: PrefixStmt,
@@ -396,7 +395,7 @@ impl Stmt for ImportStmt {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct IncludeStmt {
     identifier_arg: String,
 //    revision_date: Option<RevisionDateStmt>,
@@ -439,7 +438,7 @@ impl Stmt for IncludeStmt {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct NamespaceStmt {
     uri_str: String,
 }
@@ -467,7 +466,7 @@ impl Stmt for NamespaceStmt {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct PrefixStmt {
     prefix_arg: String,
 }
@@ -495,7 +494,7 @@ impl Stmt for PrefixStmt {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct OrganizationStmt {
     string: String,
 }
@@ -523,7 +522,7 @@ impl Stmt for OrganizationStmt {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct ContactStmt {
     string: String,
 }
@@ -551,7 +550,7 @@ impl Stmt for ContactStmt {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct DescriptionStmt {
     string: String,
 }
@@ -579,7 +578,7 @@ impl Stmt for DescriptionStmt {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct ReferenceStmt {
     string: String,
 }
