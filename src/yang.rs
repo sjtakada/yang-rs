@@ -16,8 +16,8 @@ use crate::collect_opt_stmt;
 
 pub type StmtCollection = HashMap<String, Vec<StmtType>>;
 
-/// Get a statement arg.
-fn parse_arg(parser: &mut Parser) -> Result<String, YangError> {
+/// YANG string, quoted or unquoted.
+fn parse_string(parser: &mut Parser) -> Result<String, YangError> {
     let (token, _) = parser.get_token()?;
     match token {
         // Statement argument.
@@ -195,7 +195,7 @@ impl Stmt for ModuleStmt {
 
     /// Parse a statement arg.
     fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
-        Ok(parse_arg(parser)?)
+        Ok(parse_string(parser)?)
     }
 
     /// Parse a statement and return the object wrapped in enum.
@@ -249,9 +249,14 @@ impl Stmt for SubmoduleStmt {
         "submodule"
     }
 
+    /// Parse a statement arg.
+    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
+        Ok(parse_string(parser)?)
+    }
+
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = parse_arg(parser)?;
+        let arg = SubmoduleStmt::parse_arg(parser)?;
 
         let stmt = SubmoduleStmt {
             identifier: arg,
@@ -350,9 +355,14 @@ impl Stmt for YangVersionStmt {
         "yang-version"
     }
 
+    /// Parse a statement arg.
+    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
+        Ok(parse_string(parser)?)
+    }
+
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = parse_arg(parser)?;
+        let arg = YangVersionStmt::parse_arg(parser)?;
 
         // TBD: check arg is "1.1"
 
@@ -387,9 +397,14 @@ impl Stmt for ImportStmt {
         "import"
     }
 
+    /// Parse a statement arg.
+    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
+        Ok(parse_string(parser)?)
+    }
+
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = parse_arg(parser)?;
+        let arg = ImportStmt::parse_arg(parser)?;
 
         let map: HashMap<&'static str, Repeat> = [
             ("prefix", Repeat::new(Some(1), Some(1))),
@@ -437,9 +452,14 @@ impl Stmt for IncludeStmt {
         "incluse"
     }
 
+    /// Parse a statement arg.
+    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
+        Ok(parse_string(parser)?)
+    }
+
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = parse_arg(parser)?;
+        let arg = IncludeStmt::parse_arg(parser)?;
 
         let map: HashMap<&'static str, Repeat> = [
 //            ("revision-date", Repeat::new(Some(1), Some(1))),
@@ -480,9 +500,14 @@ impl Stmt for NamespaceStmt {
         "namespace"
     }
 
+    /// Parse a statement arg.
+    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
+        Ok(parse_string(parser)?)
+    }
+
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = parse_arg(parser)?;
+        let arg = NamespaceStmt::parse_arg(parser)?;
 
         let stmt = NamespaceStmt {
             uri_str: arg,
@@ -511,9 +536,14 @@ impl Stmt for PrefixStmt {
         "prefix"
     }
 
+    /// Parse a statement arg.
+    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
+        Ok(parse_string(parser)?)
+    }
+
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = parse_arg(parser)?;
+        let arg = PrefixStmt::parse_arg(parser)?;
 
         let stmt = PrefixStmt {
             prefix_arg: arg,
@@ -542,9 +572,14 @@ impl Stmt for OrganizationStmt {
         "organization"
     }
 
+    /// Parse a statement arg.
+    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
+        Ok(parse_string(parser)?)
+    }
+
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = parse_arg(parser)?;
+        let arg = OrganizationStmt::parse_arg(parser)?;
 
         let stmt = OrganizationStmt {
             string: arg,
@@ -573,9 +608,14 @@ impl Stmt for ContactStmt {
         "contact"
     }
 
+    /// Parse a statement arg.
+    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
+        Ok(parse_string(parser)?)
+    }
+
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = parse_arg(parser)?;
+        let arg = ContactStmt::parse_arg(parser)?;
 
         let stmt = ContactStmt {
             string: arg,
@@ -604,9 +644,14 @@ impl Stmt for DescriptionStmt {
         "description"
     }
 
+    /// Parse a statement arg.
+    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
+        Ok(parse_string(parser)?)
+    }
+
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = parse_arg(parser)?;
+        let arg = DescriptionStmt::parse_arg(parser)?;
 
         let stmt = DescriptionStmt {
             string: arg,
@@ -635,9 +680,14 @@ impl Stmt for ReferenceStmt {
         "reference"
     }
 
+    /// Parse a statement arg.
+    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
+        Ok(parse_string(parser)?)
+    }
+
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = parse_arg(parser)?;
+        let arg = ReferenceStmt::parse_arg(parser)?;
 
         let stmt = ReferenceStmt {
             string: arg,
