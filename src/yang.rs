@@ -21,8 +21,9 @@ fn parse_arg(parser: &mut Parser) -> Result<String, YangError> {
     let (token, _) = parser.get_token()?;
     match token {
         // Statement argument.
-        Token::Identifier(s) => Ok(s),
+        Token::Identifier(s) |
         Token::QuotedString(s) => Ok(s),
+        // 
         Token::EndOfInput => Err(YangError::UnexpectedEof),
         // Unexpected Token.
         _ => Err(YangError::UnexpectedToken(parser.line())),
@@ -148,12 +149,19 @@ impl fmt::Debug for StmtType {
 
 /// YANG Statement trait for a single statement.
 pub trait Stmt {
+    /// Arg type.
+    type Arg;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized;
 
+    /// Parse a statement arg.
+    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
+        Err(YangError::MethodNotImplemented)
+    }
+
     /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> where Self: Sized;
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError>;// where Self: Sized;
 }
 
 /*
@@ -163,10 +171,10 @@ pub trait Stmts {
 }
 */
 
-// Yang "module" statement.
+/// Yang "module" statement.
 #[derive(Debug, Clone)]
 pub struct ModuleStmt {
-    // Module identifier.
+    /// Module identifier.
     identifier: String,
 
     module_header: ModuleHeaderStmts,
@@ -177,14 +185,22 @@ pub struct ModuleStmt {
 }
 
 impl Stmt for ModuleStmt {
+    /// Arg type.
+    type Arg = String;
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
         "module"
     }
 
+    /// Parse a statement arg.
+    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
+        Ok(parse_arg(parser)?)
+    }
+
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = parse_arg(parser)?;
+        let arg = ModuleStmt::parse_arg(parser)?;
         let (token, _) = parser.get_token()?;
         if let Token::BlockBegin = token {
             let module_header = ModuleHeaderStmts::parse(parser)?;
@@ -225,6 +241,9 @@ pub struct SubmoduleStmt {
 }
 
 impl Stmt for SubmoduleStmt {
+    /// Arg type.
+    type Arg = String;
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
         "submodule"
@@ -323,6 +342,9 @@ pub struct YangVersionStmt {
 }
 
 impl Stmt for YangVersionStmt {
+    /// Arg type.
+    type Arg = String;
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
         "yang-version"
@@ -357,6 +379,9 @@ pub struct ImportStmt {
 }
 
 impl Stmt for ImportStmt {
+    /// Arg type.
+    type Arg = String;
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
         "import"
@@ -404,6 +429,9 @@ pub struct IncludeStmt {
 }
 
 impl Stmt for IncludeStmt {
+    /// Arg type.
+    type Arg = String;
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
         "incluse"
@@ -444,6 +472,9 @@ pub struct NamespaceStmt {
 }
 
 impl Stmt for NamespaceStmt {
+    /// Arg type.
+    type Arg = String;
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
         "namespace"
@@ -472,6 +503,9 @@ pub struct PrefixStmt {
 }
 
 impl Stmt for PrefixStmt {
+    /// Arg type.
+    type Arg = String;
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
         "prefix"
@@ -500,6 +534,9 @@ pub struct OrganizationStmt {
 }
 
 impl Stmt for OrganizationStmt {
+    /// Arg type.
+    type Arg = String;
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
         "organization"
@@ -528,6 +565,9 @@ pub struct ContactStmt {
 }
 
 impl Stmt for ContactStmt {
+    /// Arg type.
+    type Arg = String;
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
         "contact"
@@ -556,6 +596,9 @@ pub struct DescriptionStmt {
 }
 
 impl Stmt for DescriptionStmt {
+    /// Arg type.
+    type Arg = String;
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
         "description"
@@ -584,6 +627,9 @@ pub struct ReferenceStmt {
 }
 
 impl Stmt for ReferenceStmt {
+    /// Arg type.
+    type Arg = String;
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
         "reference"

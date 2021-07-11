@@ -36,6 +36,9 @@ quick_error! {
         MissingStatement {
             display("Missing statement")
         }
+        MethodNotImplemented {
+            display("Method not implemented")
+        }
         PlaceHolder {
             display("placeholder")
         }
