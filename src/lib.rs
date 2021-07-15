@@ -18,11 +18,11 @@ macro_rules! collect_a_stmt {
             Some(v) => match v.pop() {
                 Some(en) => match en {
                     StmtType::$st(stmt) => Ok(stmt),
-                    _ => Err(YangError::MissingStatement),
+                    _ => Err(YangError::MissingStatement(<$st>::keyword())),
                 }
-                None => Err(YangError::MissingStatement),
+                None => Err(YangError::MissingStatement(<$st>::keyword())),
             },
-            None => Err(YangError::MissingStatement),
+            None => Err(YangError::MissingStatement(<$st>::keyword())),
         }
     );
 }
@@ -49,11 +49,11 @@ macro_rules! collect_opt_stmt {
             Some(v) => match v.pop() {
                 Some(en) => match en {
                     StmtType::$st(stmt) => Ok(Some(stmt)),
-                    _ => Err(YangError::MissingStatement),
+                    _ => Err(YangError::MissingStatement(<$st>::keyword())),
                 }
                 None => Ok(None),
             },
-            None => Err(YangError::MissingStatement),
+            None => Ok(None),
         }
     );
 }

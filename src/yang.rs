@@ -93,6 +93,8 @@ println!("*** parse_stmts {:?}", token);
         }
     }
 
+println!("*** pre validation");
+
     // Validation against repetition.
     for (k, rep) in map.iter() {
         let n = match stmts.get(&k.to_string()) {
@@ -101,6 +103,7 @@ println!("*** parse_stmts {:?}", token);
         };
 
         if !rep.validate(n) {
+println!("*** rep {:?}", rep);
             return Err(YangError::StatementMismatch(k));
         }
     }
@@ -205,6 +208,7 @@ impl Stmt for ModuleStmt {
         if let Token::BlockBegin = token {
             let module_header = ModuleHeaderStmts::parse(parser)?;
             let linkage = LinkageStmts::parse(parser)?;
+
             // meta-stmts
             // revision-stmts
             // body-stmts
@@ -318,6 +322,7 @@ impl LinkageStmts {
             include,
         };
 
+
         Ok(stmts)
     }
 }
@@ -406,6 +411,8 @@ impl Stmt for ImportStmt {
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = ImportStmt::parse_arg(parser)?;
 
+println!("*** import  0002");
+
         let map: HashMap<&'static str, Repeat> = [
             ("prefix", Repeat::new(Some(1), Some(1))),
 //            ("revision-date", Repeat::new(Some(1), Some(1))),
@@ -413,22 +420,31 @@ impl Stmt for ImportStmt {
             ("reference", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
-        let mut stmts = parse_stmts(parser, map)?;
-        let prefix = collect_a_stmt!(stmts, PrefixStmt)?;
-        let description = collect_opt_stmt!(stmts, DescriptionStmt)?;
-        let reference = collect_opt_stmt!(stmts, ReferenceStmt)?;
-
-        let stmt = ImportStmt {
-            identifier_arg: arg,
-            prefix,
-            description,
-            reference,
-        };
-
+println!("*** import  0004");
         let (token, _) = parser.get_token()?;
+        if let Token::BlockBegin = token {
+println!("*** import  0006");
+            let mut stmts = parse_stmts(parser, map)?;
+println!("*** import  0008");
+            let prefix = collect_a_stmt!(stmts, PrefixStmt)?;
+            let description = collect_opt_stmt!(stmts, DescriptionStmt)?;
+            let reference = collect_opt_stmt!(stmts, ReferenceStmt)?;
+println!("*** import  0010");
 
-        if let Token::StatementEnd = token {
-            Ok(StmtType::ImportStmt(stmt))
+            let stmt = ImportStmt {
+                identifier_arg: arg,
+                prefix,
+                description,
+                reference,
+            };
+
+            let (token, _) = parser.get_token()?;
+
+            if let Token::BlockEnd = token {
+                Ok(StmtType::ImportStmt(stmt))
+            } else {
+                Err(YangError::UnexpectedToken(parser.line()))
+            }
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }

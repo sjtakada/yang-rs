@@ -33,8 +33,8 @@ quick_error! {
         StatementMismatch(s: &'static str) {
             display("Number of statements mismatch {}", s)
         }
-        MissingStatement {
-            display("Missing statement")
+        MissingStatement(s: &'static str) {
+            display("Missing statement {}", s)
         }
         MethodNotImplemented {
             display("Method not implemented")

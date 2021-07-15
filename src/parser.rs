@@ -104,8 +104,14 @@ impl Parser {
         self.register("module", ModuleStmt::parse);
         self.register("submodule", SubmoduleStmt::parse);
         self.register("yang-version", YangVersionStmt::parse);
+        self.register("import", ImportStmt::parse);
+        self.register("include", IncludeStmt::parse);
         self.register("namespace", NamespaceStmt::parse);
         self.register("prefix", PrefixStmt::parse);
+        self.register("organization", OrganizationStmt::parse);
+        self.register("contact", ContactStmt::parse);
+        self.register("description", DescriptionStmt::parse);
+        self.register("reference", ReferenceStmt::parse);
     }
 
     /// Get input string at current position.
