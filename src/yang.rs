@@ -93,8 +93,6 @@ println!("*** parse_stmts {:?}", token);
         }
     }
 
-println!("*** pre validation");
-
     // Validation against repetition.
     for (k, rep) in map.iter() {
         let n = match stmts.get(&k.to_string()) {
@@ -436,8 +434,6 @@ impl Stmt for ImportStmt {
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = ImportStmt::parse_arg(parser)?;
 
-println!("*** import  0002");
-
         let map: HashMap<&'static str, Repeat> = [
             ("prefix", Repeat::new(Some(1), Some(1))),
 //            ("revision-date", Repeat::new(Some(1), Some(1))),
@@ -445,16 +441,12 @@ println!("*** import  0002");
             ("reference", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
-println!("*** import  0004");
         let (token, _) = parser.get_token()?;
         if let Token::BlockBegin = token {
-println!("*** import  0006");
             let mut stmts = parse_stmts(parser, map)?;
-println!("*** import  0008");
             let prefix = collect_a_stmt!(stmts, PrefixStmt)?;
             let description = collect_opt_stmt!(stmts, DescriptionStmt)?;
             let reference = collect_opt_stmt!(stmts, ReferenceStmt)?;
-println!("*** import  0010");
 
             let stmt = ImportStmt {
                 identifier_arg: arg,
