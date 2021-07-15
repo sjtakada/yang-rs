@@ -182,7 +182,7 @@ pub struct ModuleStmt {
 
     module_header: ModuleHeaderStmts,
     linkage: LinkageStmts,
-//    meta: MetaStmts,
+    meta: MetaStmts,
 //    revision: RevisionStmts,
 //    body: BodyStmts,
 }
@@ -216,6 +216,7 @@ impl Stmt for ModuleStmt {
                 identifier: arg,
                 module_header,
                 linkage,
+                meta,
             };
 
             let (token, _) = parser.get_token()?;
