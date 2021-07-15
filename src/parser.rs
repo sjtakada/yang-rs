@@ -421,15 +421,9 @@ mod tests {
 
         let (token, _) = parser.get_token().unwrap();
         assert_eq!(token, Token::Identifier("module".to_string()));
-
-//        let (token, _) = parser.get_token().unwrap();
-//        assert_eq!(token, Token::Whitespace(" ".to_string()));
         
         let (token, _) = parser.get_token().unwrap();
         assert_eq!(token, Token::BlockBegin);
-
-//        let (token, _) = parser.get_token().unwrap();
-//        assert_eq!(token, Token::Whitespace(" ".to_string()));
         
         let (token, _) = parser.get_token().unwrap();
         assert_eq!(token, Token::BlockEnd);
@@ -446,15 +440,6 @@ mod tests {
         let (token, _) = parser.get_token().unwrap();
         assert_eq!(token, Token::StatementEnd);
 
-//        let (token, _) = parser.get_token().unwrap();
-//        assert_eq!(token, Token::Whitespace(" ".to_string()));
-        
-//        let (token, _) = parser.get_token().unwrap();
-//        assert_eq!(token, Token::Comment(" comment ".to_string()));
-
-//        let (token, _) = parser.get_token().unwrap();
-//        assert_eq!(token, Token::Whitespace(" ".to_string()));
-        
         let (token, _) = parser.get_token().unwrap();
         assert_eq!(token, Token::Identifier("statement".to_string()));
     }
@@ -468,15 +453,6 @@ mod tests {
         let (token, _) = parser.get_token().unwrap();
         assert_eq!(token, Token::Identifier("module".to_string()));
 
-//        let (token, _) = parser.get_token().unwrap();
-//        assert_eq!(token, Token::Whitespace(" ".to_string()));
-        
-//        let (token, _) = parser.get_token().unwrap();
-//        assert_eq!(token, Token::Comment(" comment".to_string()));
-
-//        let (token, _) = parser.get_token().unwrap();
-//        assert_eq!(token, Token::Whitespace("\n".to_string()));
-
         let (token, _) = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
     }
@@ -485,12 +461,6 @@ mod tests {
     pub fn test_get_token_4() {
         let s = "/* comment // */ module";
         let mut parser = Parser::new(s.to_string());
-
-//        let (token, _) = parser.get_token().unwrap();
-//        assert_eq!(token, Token::Comment(" comment // ".to_string()));
-
-//        let (token, _) = parser.get_token().unwrap();
-//        assert_eq!(token, Token::Whitespace(" ".to_string()));
         
         let (token, _) = parser.get_token().unwrap();
         assert_eq!(token, Token::Identifier("module".to_string()));
@@ -504,9 +474,6 @@ mod tests {
         let s = "// /* comment */ module";
         let mut parser = Parser::new(s.to_string());
 
-//        let (token, _) = parser.get_token().unwrap();
-//        assert_eq!(token, Token::Comment(" /* comment */ module".to_string()));
-
         let (token, _) = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
     }
@@ -515,15 +482,9 @@ mod tests {
     pub fn test_get_token_6() {
         let s = r#" "string" "#;
         let mut parser = Parser::new(s.to_string());
-
-//        let (token, _) = parser.get_token().unwrap();
-//        assert_eq!(token, Token::Whitespace(" ".to_string()));
         
         let (token, _) = parser.get_token().unwrap();
         assert_eq!(token, Token::QuotedString(String::from("string".to_string())));
-
-//        let (token, _) = parser.get_token().unwrap();
-//        assert_eq!(token, Token::Whitespace(" ".to_string()));
 
         let (token, _) = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
@@ -533,15 +494,9 @@ mod tests {
     pub fn test_get_token_7() {
         let s = r#" '"string"' "#;
         let mut parser = Parser::new(s.to_string());
-
-//        let (token, _) = parser.get_token().unwrap();
-//        assert_eq!(token, Token::Whitespace(" ".to_string()));
         
         let (token, _) = parser.get_token().unwrap();
         assert_eq!(token, Token::QuotedString(String::from(r#""string""#.to_string())));
-
-//        let (token, _) = parser.get_token().unwrap();
-//        assert_eq!(token, Token::Whitespace(" ".to_string()));
 
         let (token, _) = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
