@@ -208,8 +208,7 @@ impl Stmt for ModuleStmt {
         if let Token::BlockBegin = token {
             let module_header = ModuleHeaderStmts::parse(parser)?;
             let linkage = LinkageStmts::parse(parser)?;
-
-            // meta-stmts
+            let meta = MetaStmts::parse(parser)?;
             // revision-stmts
             // body-stmts
 
@@ -322,7 +321,6 @@ impl LinkageStmts {
             include,
         };
 
-
         Ok(stmts)
     }
 }
@@ -333,12 +331,38 @@ pub struct SubmoduleHeaderStmts {
 //    belong_to: BelongToStmt,
 }
 
-//#[derive(Copy, Clone)]
+#[derive(Debug, Clone)]
 pub struct MetaStmts {
     organization: Option<OrganizationStmt>,
     contact: Option<ContactStmt>,
     description: Option<DescriptionStmt>,
     reference: Option<ReferenceStmt>,
+}
+
+impl MetaStmts {
+    pub fn parse(parser: &mut Parser) -> Result<MetaStmts, YangError> {
+        let map: HashMap<&'static str, Repeat> = [
+            ("organization", Repeat::new(Some(0), None)),
+            ("contact", Repeat::new(Some(0), None)),
+            ("description", Repeat::new(Some(0), None)),
+            ("reference", Repeat::new(Some(0), None)),
+        ].iter().cloned().collect();
+
+        let mut stmts = parse_stmts(parser, map)?;
+        let organization = collect_opt_stmt!(stmts, OrganizationStmt)?;
+        let contact = collect_opt_stmt!(stmts, ContactStmt)?;
+        let description = collect_opt_stmt!(stmts, DescriptionStmt)?;
+        let reference = collect_opt_stmt!(stmts, ReferenceStmt)?;
+
+        let stmts = MetaStmts {
+            organization,
+            contact,
+            description,
+            reference,
+        };
+
+        Ok(stmts)
+    }
 }
 
 #[derive(Debug, Clone)]
