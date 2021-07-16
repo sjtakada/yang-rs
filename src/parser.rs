@@ -219,8 +219,8 @@ impl Parser {
 
     /// Set chars to column from last linefeed.
     pub fn column_set_from(&self, l: &str) {
-        let rpos = l.find("\n").unwrap();
-        self.column.set(l.len() - rpos);
+        let rpos = l.rfind("\n").unwrap();
+        self.column.set(l.len() - rpos - 1);
     }
 
     /// Save token to saved.
@@ -317,21 +317,23 @@ impl Parser {
             };
             token = Token::Comment(String::from(&input[2..pos]));
         } else if input.starts_with("/*") {
-            let l = &input[2..];
+            let mut l = &input[2..];
             pos = match l.find("*/") {
                 Some(pos) => pos,
                 None => return Err(YangError::InvalidComment),
             };
 
-            let line = l[..pos].matches("\n").count();
+            l = &l[..pos];
+
+            let line = l.matches("\n").count();
             if line > 0 {
                 self.column_set_from(l);
                 self.line_add(line);
             } else {
-                self.column_add(l.len());
+                self.column_add(pos + 4);
             }
 
-            token = Token::Comment(String::from(&l[..pos]));
+            token = Token::Comment(String::from(l));
             pos += 4;
         } else if input.starts_with('+') {
             pos = 1;
@@ -379,7 +381,6 @@ impl Parser {
             let line = l[..pos].matches("\n").count();
             if line > 0 {
                 let column = self.column.get() + 1;
-println!("*** col = {}", column);
                 let s = trim_spaces(l, column);
 
                 self.line_add(line);
@@ -605,7 +606,7 @@ mod tests {
 
     #[test]
     pub fn test_get_token_11() {
-        let s = r#"    "string1
+        let s = r#"/**/"string1
 
       string2   	 
 	
