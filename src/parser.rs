@@ -452,56 +452,6 @@ println!("*** col = {}", column);
         }
     }
 
-/*
-    pub fn parse_module(&mut self, arg: String) -> Result<ModuleStmt, YangError> {
-        let module = ModuleStmt::new(arg);
-        let mut block: usize = 0;
-
-        while self.input_len() > 0 {
-            let (token, _) = self.get_token()?;
-            match token {
-                // Ignore.
-                Token::Whitespace(_) |
-                Token::Comment(_) => {}
-                // Module or submodule.
-                Token::BlockBegin => {
-                    block += 1;
-                    break;
-                }
-                _ => return Err(YangError::UnexpectedToken(self.line())),
-            }
-        }
-
-        while self.input_len() > 0 {
-            let (token, _) = self.get_token()?;
-            match token {
-                // Ignore.
-                Token::Whitespace(_) |
-                Token::Comment(_) => {}
-                // Module or submodule.
-                Token::BlockBegin => {
-                    block += 1;
-                }
-                Token::BlockEnd => {
-                    block -= 1;
-                    if block == 0 {
-                        break;
-                    }
-                }
-                _ => {}
-            }
-        }
-
-        if block > 0 {
-            return Err(YangError::UnexpectedEof);
-        }
-
-        println!("*** line {} pos {}", self.line(), self.pos());
-
-        Ok(module)
-    }
-*/
-
     /// Register Stmt Parser.
     pub fn register(&mut self, keyword: &'static str, f: StmtParserFn) {
         self.parse_stmt.insert(keyword, f);
