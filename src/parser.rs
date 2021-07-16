@@ -610,12 +610,12 @@ mod tests {
 
       string2   	 
 	
- string3	" "#;
+ string3	" + "string4" "#;
 
         let mut parser = Parser::new(s.to_string());
         
         let (token, _) = parser.get_token().unwrap();
-        assert_eq!(token, Token::QuotedString(String::from("string1\n\n string2\n\nstring3	".to_string())));
+        assert_eq!(token, Token::QuotedString(String::from("string1\n\n string2\n\nstring3	string4".to_string())));
 
         let (token, _) = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
