@@ -54,8 +54,72 @@ pub fn parse_file(filename: &str) -> std::io::Result<()> {
     Ok(())
 }
 
+/// 6.1.3. Quoting
+///
+///   If a double-quoted string contains a line break followed by space or
+///   tab characters that are used to indent the text according to the
+///   layout in the YANG file, this leading whitespace is stripped from the
+///   string, up to and including the column of the starting double quote
+///   character, or to the first non-whitespace character, whichever occurs
+///   first.  Any tab character in a succeeding line that must be examined
+///   for stripping is first converted into 8 space characters.
+///
+///   If a double-quoted string contains space or tab characters before a
+///   line break, this trailing whitespace is stripped from the string.
+///
+fn trim_spaces(l: &str, indent: usize) -> String {
+    let mut s = String::new();
+    let mut chars = l.chars();
 
-// YANG Token type.
+    'outer: while let Some(mut c) = chars.next() {
+        let mut count = 0;
+        loop {
+            if c == ' ' {
+                count += 1;
+            } else if c == '\t' {
+                count += 8;
+            } else if c == '\n' {
+                s.push('\n');
+                continue 'outer;
+            } else {
+                break;
+            }
+
+            if let Some(d) = chars.next() {
+                c = d;
+            } else {
+                return s;
+            }
+        }
+
+        if count > indent {
+            s.push_str(&(" ".repeat(count - indent)));
+        }
+        s.push(c);
+
+        loop {
+            if let Some(d) = chars.next() {
+                if d == '\n' {
+                    break;
+                } else {
+                    s.push(d);
+                }
+            } else {
+                return s;
+            }
+        }
+
+        while s.ends_with(|c: char| c == ' ' || c == '\t') {
+            s.pop().unwrap();
+        }
+
+        s.push('\n');
+    }
+
+    s
+}
+
+/// YANG Token type.
 #[derive(PartialEq, Debug, Clone)]
 pub enum Token {
     Whitespace(String),
@@ -69,7 +133,7 @@ pub enum Token {
     EndOfInput,
 }
 
-// Parser.
+/// Parser.
 pub struct Parser {
     /// Input string.
     input: String,
@@ -79,6 +143,9 @@ pub struct Parser {
 
     /// Line number at cursor.
     line: Cell<usize>,
+
+    /// Chars from last line feed.
+    column: Cell<usize>,
 
     /// Saved token.
     saved: Cell<Option<(Token, usize)>>,
@@ -94,6 +161,7 @@ impl Parser {
             input: s,
             pos: Cell::new(0),
             line: Cell::new(0),
+            column: Cell::new(0),
             saved: Cell::new(None),
             parse_stmt: HashMap::new(),
         }
@@ -129,8 +197,8 @@ impl Parser {
         self.pos.get()
     }
 
-    /// Set cursor position.
-    pub fn pos_set(&mut self, pos: usize) {
+    /// Move cursor position forward.
+    pub fn pos_add(&mut self, pos: usize) {
         self.pos.set(self.pos.get() + pos);
     }
 
@@ -142,6 +210,17 @@ impl Parser {
     /// Add len to line number.
     pub fn line_add(&self, len: usize) {
         self.line.set(self.line.get() + len);
+    }
+
+    /// Add chars to column.
+    pub fn column_add(&self, num: usize) {
+        self.column.set(self.column.get() + num);
+    }
+
+    /// Set chars to column from last linefeed.
+    pub fn column_set_from(&self, l: &str) {
+        let rpos = l.find("\n").unwrap();
+        self.column.set(l.len() - rpos);
     }
 
     /// Save token to saved.
@@ -222,8 +301,13 @@ impl Parser {
             };
 
             let l = &input[..pos];
-            let len = l.matches("\n").count();
-            self.line_add(len);
+            let line = l.matches("\n").count();
+            if line > 0 {
+                self.column_set_from(l);
+                self.line_add(line);
+            } else {
+                self.column_add(l.len());
+            }
 
             token = Token::Whitespace(String::from(l));
         } else if input.starts_with("//") {
@@ -239,25 +323,34 @@ impl Parser {
                 None => return Err(YangError::InvalidComment),
             };
 
-            let len = l[..pos].matches("\n").count();
-            self.line_add(len);
+            let line = l[..pos].matches("\n").count();
+            if line > 0 {
+                self.column_set_from(l);
+                self.line_add(line);
+            } else {
+                self.column_add(l.len());
+            }
 
             token = Token::Comment(String::from(&l[..pos]));
             pos += 4;
         } else if input.starts_with('+') {
             pos = 1;
+            self.column_add(1);
             token = Token::PlusSign;
         } else if input.starts_with('{') {
             pos = 1;
+            self.column_add(1);
             token = Token::BlockBegin;
         } else if input.starts_with('}') {
             pos = 1;
+            self.column_add(1);
             token = Token::BlockEnd;
         } else if input.starts_with(';') {
             pos = 1;
+            self.column_add(1);
             token = Token::StatementEnd;
         } else if input.starts_with('"') {
-            let l = &input[1..];
+            let mut l = &input[1..];
 
             let mut chars = l.chars();
             loop {
@@ -275,18 +368,26 @@ impl Parser {
                         return Err(YangError::InvalidString);
                     } 
                     pos += 2;
-
                 } else if c == '"' {
+                    l = &l[..pos];
                     break;
                 } else {
                     pos += c.len_utf8();
                 }
             }
 
-            let len = l[..pos].matches("\n").count();
-            self.line_add(len);
+            let line = l[..pos].matches("\n").count();
+            if line > 0 {
+                let column = self.column.get() + 1;
+println!("*** col = {}", column);
+                let s = trim_spaces(l, column);
 
-            token = Token::QuotedString(String::from(&l[..pos]));
+                self.line_add(line);
+                token = Token::QuotedString(s);
+            } else {
+                token = Token::QuotedString(String::from(&l[..pos]));
+            }
+
             pos += 2;
         } else if input.starts_with("'") {
             let l = &input[1..];
@@ -294,6 +395,10 @@ impl Parser {
                 Some(pos) => pos,
                 None => return Err(YangError::InvalidString),
             };
+
+            let line = l[..pos].matches("\n").count();
+            self.line_add(line);
+
             token = Token::QuotedString(String::from(&l[..pos]));
             pos += 2;
         } else {
@@ -322,7 +427,7 @@ impl Parser {
             token = Token::Identifier(String::from(&input[..pos]));
         }
 
-        self.pos_set(pos);
+        self.pos_add(pos);
         Ok((token, pos))
     }
 
@@ -515,6 +620,51 @@ mod tests {
 
         let (token, _) = parser.get_token().unwrap();
         assert_eq!(token, Token::BlockEnd);
+
+        let (token, _) = parser.get_token().unwrap();
+        assert_eq!(token, Token::EndOfInput);
+    }
+
+    #[test]
+    pub fn test_get_token_9() {
+        let s = r#" 'string1
+ string2 ' "#;
+
+        let mut parser = Parser::new(s.to_string());
+        
+        let (token, _) = parser.get_token().unwrap();
+        assert_eq!(token, Token::QuotedString(String::from("string1\n string2 ".to_string())));
+
+        let (token, _) = parser.get_token().unwrap();
+        assert_eq!(token, Token::EndOfInput);
+    }
+
+    #[test]
+    pub fn test_get_token_10() {
+        let s = r#"    "string1
+     string2" "#;
+
+        let mut parser = Parser::new(s.to_string());
+        
+        let (token, _) = parser.get_token().unwrap();
+        assert_eq!(token, Token::QuotedString(String::from("string1\nstring2".to_string())));
+
+        let (token, _) = parser.get_token().unwrap();
+        assert_eq!(token, Token::EndOfInput);
+    }
+
+    #[test]
+    pub fn test_get_token_11() {
+        let s = r#"    "string1
+
+      string2   	 
+	
+ string3	" "#;
+
+        let mut parser = Parser::new(s.to_string());
+        
+        let (token, _) = parser.get_token().unwrap();
+        assert_eq!(token, Token::QuotedString(String::from("string1\n\n string2\n\nstring3	".to_string())));
 
         let (token, _) = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
