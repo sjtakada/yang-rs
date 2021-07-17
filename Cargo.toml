@@ -13,4 +13,5 @@ categories = ["network-programming", "parser-implementations"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+lazy_static = "1.4.0"
 quick-error = "2.0.1"

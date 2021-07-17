@@ -19,8 +19,6 @@ use super::yang::*;
 #[macro_use]
 use crate::collect_a_stmt;
 
-pub type StmtParserFn = fn(&mut Parser) -> Result<StmtType, YangError>;
-
 /// Open and parse a YANG file.
 pub fn parse_file(filename: &str) -> std::io::Result<()> {
     let mut f = File::open(filename)?;
@@ -35,7 +33,7 @@ pub fn parse_file(filename: &str) -> std::io::Result<()> {
 
     f.read_to_string(&mut s)?;
     let mut parser = Parser::new(s);
-    parser.init_stmt_parsers();
+//    parser.init_stmt_parsers();
 
     match parser.parse_yang() {
         Ok(yang) => {
@@ -151,6 +149,7 @@ pub enum Token {
 }
 
 /// Parser.
+
 pub struct Parser {
     /// Input string.
     input: String,
@@ -166,9 +165,6 @@ pub struct Parser {
 
     /// Saved token.
     saved: Cell<Option<(Token, usize)>>,
-
-    /// Statement parser callbacks.
-    parse_stmt: HashMap<&'static str, StmtParserFn>,
 }
 
 impl Parser {
@@ -180,23 +176,7 @@ impl Parser {
             line: Cell::new(0),
             column: Cell::new(0),
             saved: Cell::new(None),
-            parse_stmt: HashMap::new(),
         }
-    }
-
-    /// Init Stmt parsers.
-    pub fn init_stmt_parsers(&mut self) {
-        self.register("module", ModuleStmt::parse);
-        self.register("submodule", SubmoduleStmt::parse);
-        self.register("yang-version", YangVersionStmt::parse);
-        self.register("import", ImportStmt::parse);
-        self.register("include", IncludeStmt::parse);
-        self.register("namespace", NamespaceStmt::parse);
-        self.register("prefix", PrefixStmt::parse);
-        self.register("organization", OrganizationStmt::parse);
-        self.register("contact", ContactStmt::parse);
-        self.register("description", DescriptionStmt::parse);
-        self.register("reference", ReferenceStmt::parse);
     }
 
     /// Get input string at current position.
@@ -468,18 +448,6 @@ impl Parser {
         } else {
             Err(YangError::UnexpectedEof)
         }
-    }
-
-    /// Register Stmt Parser.
-    pub fn register(&mut self, keyword: &'static str, f: StmtParserFn) {
-        self.parse_stmt.insert(keyword, f);
-    }
-
-    /// Call Stmt Parsrer
-    pub fn parse_stmt(&mut self, keyword: &str) -> Result<StmtType, YangError> {
-println!("*** keyword {}", keyword);
-        let f = self.parse_stmt.get(keyword).unwrap();
-        f(self)
     }
 }
 

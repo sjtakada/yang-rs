@@ -4,7 +4,6 @@
 //
 
 use std::fmt;
-use std::any::Any;
 use std::collections::HashMap;
 use super::error::*;
 use super::parser::*;
@@ -90,6 +89,12 @@ impl Repeat {
 
 pub type StmtCollection = HashMap<String, Vec<StmtType>>;
 
+/// Parse a single statement.
+pub fn call_stmt_parser(parser: &mut Parser, keyword: &str) -> Result<StmtType, YangError> {
+    let f = STMT_PARSER.get(keyword).unwrap();
+    f(parser)
+}
+
 /// Get a list of statements in any order.
 pub fn parse_stmts(parser: &mut Parser, map: HashMap<&'static str, Repeat>) -> Result<StmtCollection, YangError> {
     let mut stmts: StmtCollection = HashMap::new();
@@ -100,7 +105,7 @@ println!("*** parse_stmts {:?}", token);
         match token {
             Token::Identifier(ref keyword) => {
                 if map.contains_key(keyword as &str) {
-                    let stmt = parser.parse_stmt(&keyword)?;
+                    let stmt = call_stmt_parser(parser, &keyword)?;
                     let v =  match stmts.get_mut(keyword as &str) {
                         Some(v) => v,
                         None => {
@@ -763,4 +768,28 @@ impl Stmt for ReferenceStmt {
             Err(YangError::UnexpectedToken(parser.line()))
         }
     }
+}
+
+/// Statement Parser callback type.
+pub type StmtParserFn = fn(&mut Parser) -> Result<StmtType, YangError>;
+
+/// Statement Parser initialization.
+lazy_static! {
+    static ref STMT_PARSER: HashMap<&'static str, StmtParserFn> = {
+        let mut m = HashMap::new();
+
+        m.insert("module", ModuleStmt::parse as StmtParserFn);
+        m.insert("submodule", SubmoduleStmt::parse as StmtParserFn);
+        m.insert("yang-version", YangVersionStmt::parse as StmtParserFn);
+        m.insert("import", ImportStmt::parse as StmtParserFn);
+        m.insert("include", IncludeStmt::parse as StmtParserFn);
+        m.insert("namespace", NamespaceStmt::parse as StmtParserFn);
+        m.insert("prefix", PrefixStmt::parse as StmtParserFn);
+        m.insert("organization", OrganizationStmt::parse as StmtParserFn);
+        m.insert("contact", ContactStmt::parse as StmtParserFn);
+        m.insert("description", DescriptionStmt::parse as StmtParserFn);
+        m.insert("reference", ReferenceStmt::parse as StmtParserFn);
+
+        m
+    };
 }

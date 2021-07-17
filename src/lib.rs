@@ -10,6 +10,9 @@ pub mod parser;
 pub mod collate;
 pub mod yang;
 
+#[macro_use]
+extern crate lazy_static;
+
 
 #[macro_export]
 macro_rules! collect_a_stmt {
