@@ -5,6 +5,9 @@
 
 use std::fmt;
 use std::collections::HashMap;
+
+use url::Url;
+
 use super::error::*;
 use super::parser::*;
 
@@ -87,16 +90,41 @@ impl Repeat {
     }
 }
 
-pub type StmtCollection = HashMap<String, Vec<StmtType>>;
+/// Collection of statements in HashMap.
+type StmtCollection = HashMap<String, Vec<StmtType>>;
+
+/// Statement Parser callback type.
+type StmtParserFn = fn(&mut Parser) -> Result<StmtType, YangError>;
+
+/// Statement Parser initialization.
+lazy_static! {
+    static ref STMT_PARSER: HashMap<&'static str, StmtParserFn> = {
+        let mut m = HashMap::new();
+
+        m.insert("module", ModuleStmt::parse as StmtParserFn);
+        m.insert("submodule", SubmoduleStmt::parse as StmtParserFn);
+        m.insert("yang-version", YangVersionStmt::parse as StmtParserFn);
+        m.insert("import", ImportStmt::parse as StmtParserFn);
+        m.insert("include", IncludeStmt::parse as StmtParserFn);
+        m.insert("namespace", NamespaceStmt::parse as StmtParserFn);
+        m.insert("prefix", PrefixStmt::parse as StmtParserFn);
+        m.insert("organization", OrganizationStmt::parse as StmtParserFn);
+        m.insert("contact", ContactStmt::parse as StmtParserFn);
+        m.insert("description", DescriptionStmt::parse as StmtParserFn);
+        m.insert("reference", ReferenceStmt::parse as StmtParserFn);
+
+        m
+    };
+}
 
 /// Parse a single statement.
-pub fn call_stmt_parser(parser: &mut Parser, keyword: &str) -> Result<StmtType, YangError> {
+fn call_stmt_parser(parser: &mut Parser, keyword: &str) -> Result<StmtType, YangError> {
     let f = STMT_PARSER.get(keyword).unwrap();
     f(parser)
 }
 
 /// Get a list of statements in any order.
-pub fn parse_stmts(parser: &mut Parser, map: HashMap<&'static str, Repeat>) -> Result<StmtCollection, YangError> {
+pub fn parse_stmt_collection(parser: &mut Parser, map: HashMap<&'static str, Repeat>) -> Result<StmtCollection, YangError> {
     let mut stmts: StmtCollection = HashMap::new();
 
     loop {
@@ -316,18 +344,16 @@ impl ModuleHeaderStmts {
             ("prefix", Repeat::new(Some(1), Some(1))),
         ].iter().cloned().collect();
 
-        let mut stmts = parse_stmts(parser, map)?;
+        let mut stmts = parse_stmt_collection(parser, map)?;
         let yang_version = collect_a_stmt!(stmts, YangVersionStmt)?;
         let namespace = collect_a_stmt!(stmts, NamespaceStmt)?;
         let prefix = collect_a_stmt!(stmts, PrefixStmt)?;
 
-        let stmts = ModuleHeaderStmts {
+        Ok(ModuleHeaderStmts {
             yang_version,
             namespace,
             prefix,
-        };
-
-        Ok(stmts)
+        })
     }
 }
 
@@ -344,16 +370,14 @@ impl LinkageStmts {
             ("include", Repeat::new(Some(0), None)),
         ].iter().cloned().collect();
 
-        let mut stmts = parse_stmts(parser, map)?;
+        let mut stmts = parse_stmt_collection(parser, map)?;
         let import = collect_vec_stmt!(stmts, ImportStmt)?;
         let include = collect_vec_stmt!(stmts, IncludeStmt)?;
 
-        let stmts = LinkageStmts {
+        Ok(LinkageStmts {
             import,
             include,
-        };
-
-        Ok(stmts)
+        })
     }
 }
 
@@ -380,21 +404,19 @@ impl MetaStmts {
             ("reference", Repeat::new(Some(0), None)),
         ].iter().cloned().collect();
 
-        let mut stmts = parse_stmts(parser, map)?;
+        let mut stmts = parse_stmt_collection(parser, map)?;
         let organization = collect_opt_stmt!(stmts, OrganizationStmt)?;
         let contact = collect_opt_stmt!(stmts, ContactStmt)?;
         let description = collect_opt_stmt!(stmts, DescriptionStmt)?;
         let reference = collect_opt_stmt!(stmts, ReferenceStmt)?;
 
-        let stmts = MetaStmts {
+        Ok(MetaStmts {
             organization,
             contact,
             description,
             reference,
-        };
-
-        Ok(stmts)
-    }
+        })
+  }
 }
 
 #[derive(Debug, Clone)]
@@ -476,21 +498,21 @@ impl Stmt for ImportStmt {
 
         let (token, _) = parser.get_token()?;
         if let Token::BlockBegin = token {
-            let mut stmts = parse_stmts(parser, map)?;
+            let mut stmts = parse_stmt_collection(parser, map)?;
             let prefix = collect_a_stmt!(stmts, PrefixStmt)?;
             let description = collect_opt_stmt!(stmts, DescriptionStmt)?;
             let reference = collect_opt_stmt!(stmts, ReferenceStmt)?;
 
-            let stmt = ImportStmt {
-                identifier_arg: arg,
-                prefix,
-                description,
-                reference,
-            };
-
             let (token, _) = parser.get_token()?;
 
             if let Token::BlockEnd = token {
+                let stmt = ImportStmt {
+                    identifier_arg: arg,
+                    prefix,
+                    description,
+                    reference,
+                };
+
                 Ok(StmtType::ImportStmt(stmt))
             } else {
                 Err(YangError::UnexpectedToken(parser.line()))
@@ -525,7 +547,7 @@ impl Stmt for IncludeStmt {
 
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = IncludeStmt::parse_arg(parser)?;
+        let identifier_arg = IncludeStmt::parse_arg(parser)?;
 
         let map: HashMap<&'static str, Repeat> = [
 //            ("revision-date", Repeat::new(Some(1), Some(1))),
@@ -533,18 +555,18 @@ impl Stmt for IncludeStmt {
             ("reference", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
-        let mut stmts = parse_stmts(parser, map)?;
+        let mut stmts = parse_stmt_collection(parser, map)?;
         let description = collect_opt_stmt!(stmts, DescriptionStmt)?;
         let reference = collect_opt_stmt!(stmts, ReferenceStmt)?;
 
-        let stmt = IncludeStmt {
-            identifier_arg: arg,
-            description,
-            reference,
-        };
-
         let (token, _) = parser.get_token()?;
         if let Token::StatementEnd = token {
+            let stmt = IncludeStmt {
+                identifier_arg,
+                description,
+                reference,
+            };
+
             Ok(StmtType::IncludeStmt(stmt))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
@@ -554,12 +576,12 @@ impl Stmt for IncludeStmt {
 
 #[derive(Debug, Clone)]
 pub struct NamespaceStmt {
-    uri_str: String,
+    uri_str: Url,
 }
 
 impl Stmt for NamespaceStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Url;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str where Self: Sized {
@@ -568,20 +590,24 @@ impl Stmt for NamespaceStmt {
 
     /// Parse a statement arg.
     fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
-        Ok(parse_string(parser)?)
+        let s = parse_string(parser)?;
+        match Url::parse(&s) {
+            Ok(url) => Ok(url),
+            Err(err) => Err(YangError::ArgumentParseError(err.to_string())),
+        }
     }
 
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = NamespaceStmt::parse_arg(parser)?;
-
-        let stmt = NamespaceStmt {
-            uri_str: arg,
-        };
-
+        let uri_str = NamespaceStmt::parse_arg(parser)?;
         let (token, _) = parser.get_token()?;
+
         if let Token::StatementEnd = token {
-            Ok(StmtType::NamespaceStmt(stmt))
+            Ok(StmtType::NamespaceStmt(
+                NamespaceStmt {
+                    uri_str,
+                }
+            ))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
@@ -770,26 +796,3 @@ impl Stmt for ReferenceStmt {
     }
 }
 
-/// Statement Parser callback type.
-pub type StmtParserFn = fn(&mut Parser) -> Result<StmtType, YangError>;
-
-/// Statement Parser initialization.
-lazy_static! {
-    static ref STMT_PARSER: HashMap<&'static str, StmtParserFn> = {
-        let mut m = HashMap::new();
-
-        m.insert("module", ModuleStmt::parse as StmtParserFn);
-        m.insert("submodule", SubmoduleStmt::parse as StmtParserFn);
-        m.insert("yang-version", YangVersionStmt::parse as StmtParserFn);
-        m.insert("import", ImportStmt::parse as StmtParserFn);
-        m.insert("include", IncludeStmt::parse as StmtParserFn);
-        m.insert("namespace", NamespaceStmt::parse as StmtParserFn);
-        m.insert("prefix", PrefixStmt::parse as StmtParserFn);
-        m.insert("organization", OrganizationStmt::parse as StmtParserFn);
-        m.insert("contact", ContactStmt::parse as StmtParserFn);
-        m.insert("description", DescriptionStmt::parse as StmtParserFn);
-        m.insert("reference", ReferenceStmt::parse as StmtParserFn);
-
-        m
-    };
-}

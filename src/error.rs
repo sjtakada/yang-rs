@@ -39,6 +39,9 @@ quick_error! {
         MethodNotImplemented {
             display("Method not implemented")
         }
+        ArgumentParseError(s: String) {
+            display("Agument parse error: {}", s)
+        }
         PlaceHolder {
             display("placeholder")
         }

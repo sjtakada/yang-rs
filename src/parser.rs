@@ -438,7 +438,7 @@ impl Parser {
 
 //        println!("*** size_of {}", size_of::<ModuleStmt>());
 
-        let mut stmts = parse_stmts(self, map)?;
+        let mut stmts = parse_stmt_collection(self, map)?;
         if stmts.contains_key("module") {
             let module = collect_a_stmt!(stmts, ModuleStmt)?;
             Ok(StmtType::ModuleStmt(module))
