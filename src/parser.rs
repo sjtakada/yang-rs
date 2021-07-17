@@ -122,14 +122,31 @@ fn trim_spaces(l: &str, indent: usize) -> String {
 /// YANG Token type.
 #[derive(PartialEq, Debug, Clone)]
 pub enum Token {
+    /// Space, tab, carriage return and/or line feed.
     Whitespace(String),
+
+    /// Single line or multi line comments.
     Comment(String),
+
+    /// "+"
     PlusSign,
+
+    /// "{".
     BlockBegin,
+
+    /// "}".
     BlockEnd,
+
+    /// Single quoted or double qouted string.
     QuotedString(String),
+
+    /// Unquoted identifier.
     Identifier(String),
+
+    /// ";".
     StatementEnd,
+
+    /// End of Input.
     EndOfInput,
 }
 
