@@ -14,8 +14,34 @@ use crate::collect_a_stmt;
 use crate::collect_vec_stmt;
 use crate::collect_opt_stmt;
 
-pub type StmtCollection = HashMap<String, Vec<StmtType>>;
-
+/// TBD
+///
+///   yang-string         = *yang-char
+///
+///   ;; any Unicode or ISO/IEC 10646 character, including tab, carriage
+///   ;; return, and line feed but excluding the other C0 control
+///   ;; characters, the surrogate blocks, and the noncharacters
+///   yang-char = %x09 / %x0A / %x0D / %x20-D7FF /
+///                               ; exclude surrogate blocks %xD800-DFFF
+///              %xE000-FDCF /    ; exclude noncharacters %xFDD0-FDEF
+///              %xFDF0-FFFD /    ; exclude noncharacters %xFFFE-FFFF
+///              %x10000-1FFFD /  ; exclude noncharacters %x1FFFE-1FFFF
+///              %x20000-2FFFD /  ; exclude noncharacters %x2FFFE-2FFFF
+///              %x30000-3FFFD /  ; exclude noncharacters %x3FFFE-3FFFF
+///              %x40000-4FFFD /  ; exclude noncharacters %x4FFFE-4FFFF
+///              %x50000-5FFFD /  ; exclude noncharacters %x5FFFE-5FFFF
+///              %x60000-6FFFD /  ; exclude noncharacters %x6FFFE-6FFFF
+///              %x70000-7FFFD /  ; exclude noncharacters %x7FFFE-7FFFF
+///              %x80000-8FFFD /  ; exclude noncharacters %x8FFFE-8FFFF
+///              %x90000-9FFFD /  ; exclude noncharacters %x9FFFE-9FFFF
+///              %xA0000-AFFFD /  ; exclude noncharacters %xAFFFE-AFFFF
+///              %xB0000-BFFFD /  ; exclude noncharacters %xBFFFE-BFFFF
+///              %xC0000-CFFFD /  ; exclude noncharacters %xCFFFE-CFFFF
+///              %xD0000-DFFFD /  ; exclude noncharacters %xDFFFE-DFFFF
+///              %xE0000-EFFFD /  ; exclude noncharacters %xEFFFE-EFFFF
+///              %xF0000-FFFFD /  ; exclude noncharacters %xFFFFE-FFFFF
+///              %x100000-10FFFD  ; exclude noncharacters %x10FFFE-10FFFF
+/// 
 /// YANG string, quoted or unquoted.
 fn parse_string(parser: &mut Parser) -> Result<String, YangError> {
     let (token, _) = parser.get_token()?;
@@ -61,6 +87,8 @@ impl Repeat {
         }
     }
 }
+
+pub type StmtCollection = HashMap<String, Vec<StmtType>>;
 
 /// Get a list of statements in any order.
 pub fn parse_stmts(parser: &mut Parser, map: HashMap<&'static str, Repeat>) -> Result<StmtCollection, YangError> {
