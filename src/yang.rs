@@ -209,13 +209,13 @@ impl fmt::Debug for StmtType {
 }
 
 
-/// YANG Statement trait for a single statement.
+/// Trait for a single YANG statement.
 pub trait Stmt {
     /// Arg type.
     type Arg;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str where Self: Sized;
+    fn keyword() -> &'static str;
 
     /// Parse a statement arg.
     fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
@@ -223,7 +223,7 @@ pub trait Stmt {
     }
 
     /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError>;// where Self: Sized;
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError>;
 }
 
 /*
@@ -251,7 +251,7 @@ impl Stmt for ModuleStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str where Self: Sized {
+    fn keyword() -> &'static str {
         "module"
     }
 
@@ -308,7 +308,7 @@ impl Stmt for SubmoduleStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str where Self: Sized {
+    fn keyword() -> &'static str {
         "submodule"
     }
 
@@ -434,7 +434,7 @@ impl Stmt for YangVersionStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str where Self: Sized {
+    fn keyword() -> &'static str {
         "yang-version"
     }
 
@@ -476,7 +476,7 @@ impl Stmt for ImportStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str where Self: Sized {
+    fn keyword() -> &'static str {
         "import"
     }
 
@@ -536,7 +536,7 @@ impl Stmt for IncludeStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str where Self: Sized {
+    fn keyword() -> &'static str {
         "incluse"
     }
 
@@ -584,7 +584,7 @@ impl Stmt for NamespaceStmt {
     type Arg = Url;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str where Self: Sized {
+    fn keyword() -> &'static str {
         "namespace"
     }
 
@@ -614,42 +614,48 @@ impl Stmt for NamespaceStmt {
     }
 }
 
+pub type Identifier = String;
+
+///
+/// 7.1.4. The "prefix" Statement.
+///
 #[derive(Debug, Clone)]
 pub struct PrefixStmt {
-    prefix_arg: String,
+    prefix_arg_str: Identifier,
 }
 
 impl Stmt for PrefixStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str where Self: Sized {
+    fn keyword() -> &'static str {
         "prefix"
     }
 
     /// Parse a statement arg.
     fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
-        Ok(parse_string(parser)?)
+        let s = parse_string(parser)?;
+
+        Ok(s)
     }
 
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = PrefixStmt::parse_arg(parser)?;
-
-        let stmt = PrefixStmt {
-            prefix_arg: arg,
-        };
+        let prefix_arg_str = PrefixStmt::parse_arg(parser)?;
 
         let (token, _) = parser.get_token()?;
         if let Token::StatementEnd = token {
-            Ok(StmtType::PrefixStmt(stmt))
+            Ok(StmtType::PrefixStmt(PrefixStmt { prefix_arg_str }))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
     }
 }
 
+///
+/// 7.1.7. The "Organization" Statement.
+///
 #[derive(Debug, Clone)]
 pub struct OrganizationStmt {
     string: String,
@@ -660,7 +666,7 @@ impl Stmt for OrganizationStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str where Self: Sized {
+    fn keyword() -> &'static str {
         "organization"
     }
 
@@ -671,21 +677,20 @@ impl Stmt for OrganizationStmt {
 
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = OrganizationStmt::parse_arg(parser)?;
-
-        let stmt = OrganizationStmt {
-            string: arg,
-        };
-
+        let string = OrganizationStmt::parse_arg(parser)?;
         let (token, _) = parser.get_token()?;
+
         if let Token::StatementEnd = token {
-            Ok(StmtType::OrganizationStmt(stmt))
+            Ok(StmtType::OrganizationStmt(OrganizationStmt { string }))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
     }
 }
 
+///
+/// 7.1.8. The "contact" Statement.
+///
 #[derive(Debug, Clone)]
 pub struct ContactStmt {
     string: String,
@@ -696,7 +701,7 @@ impl Stmt for ContactStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str where Self: Sized {
+    fn keyword() -> &'static str {
         "contact"
     }
 
@@ -707,23 +712,20 @@ impl Stmt for ContactStmt {
 
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = ContactStmt::parse_arg(parser)?;
-
-println!("**** '{}'", arg);
-
-        let stmt = ContactStmt {
-            string: arg,
-        };
-
+        let string = ContactStmt::parse_arg(parser)?;
         let (token, _) = parser.get_token()?;
+
         if let Token::StatementEnd = token {
-            Ok(StmtType::ContactStmt(stmt))
+            Ok(StmtType::ContactStmt(ContactStmt { string }))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
     }
 }
 
+///
+/// 7.21.3. "The "description" Statement.
+/// 
 #[derive(Debug, Clone)]
 pub struct DescriptionStmt {
     string: String,
@@ -734,7 +736,7 @@ impl Stmt for DescriptionStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str where Self: Sized {
+    fn keyword() -> &'static str {
         "description"
     }
 
@@ -745,21 +747,20 @@ impl Stmt for DescriptionStmt {
 
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = DescriptionStmt::parse_arg(parser)?;
-
-        let stmt = DescriptionStmt {
-            string: arg,
-        };
-
+        let string = DescriptionStmt::parse_arg(parser)?;
         let (token, _) = parser.get_token()?;
+
         if let Token::StatementEnd = token {
-            Ok(StmtType::DescriptionStmt(stmt))
+            Ok(StmtType::DescriptionStmt(DescriptionStmt { string }))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
     }
 }
 
+///
+/// 7.21.4. "The "reference" Statement.
+/// 
 #[derive(Debug, Clone)]
 pub struct ReferenceStmt {
     string: String,
@@ -770,7 +771,7 @@ impl Stmt for ReferenceStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str where Self: Sized {
+    fn keyword() -> &'static str {
         "reference"
     }
 
@@ -781,15 +782,11 @@ impl Stmt for ReferenceStmt {
 
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = ReferenceStmt::parse_arg(parser)?;
-
-        let stmt = ReferenceStmt {
-            string: arg,
-        };
-
+        let string = ReferenceStmt::parse_arg(parser)?;
         let (token, _) = parser.get_token()?;
+
         if let Token::StatementEnd = token {
-            Ok(StmtType::ReferenceStmt(stmt))
+            Ok(StmtType::ReferenceStmt(ReferenceStmt { string }))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
