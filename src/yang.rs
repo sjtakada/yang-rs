@@ -218,8 +218,8 @@ pub trait Stmt {
     fn keyword() -> &'static str;
 
     /// Parse a statement arg.
-    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
-        Err(YangError::MethodNotImplemented)
+    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> where Self::Arg: StmtArg {
+        Self::Arg::parse(parser)
     }
 
     /// Parse a statement and return the object wrapped in enum.
@@ -588,15 +588,6 @@ impl Stmt for NamespaceStmt {
         "namespace"
     }
 
-    /// Parse a statement arg.
-    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
-        let s = parse_string(parser)?;
-        match Url::parse(&s) {
-            Ok(url) => Ok(url),
-            Err(err) => Err(YangError::ArgumentParseError(err.to_string())),
-        }
-    }
-
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let uri_str = NamespaceStmt::parse_arg(parser)?;
@@ -614,7 +605,44 @@ impl Stmt for NamespaceStmt {
     }
 }
 
-pub type Identifier = String;
+//pub type Identifier = String;
+
+pub trait StmtArg {
+    fn parse(parser: &mut Parser) -> Result<Self, YangError> where Self: Sized;
+}
+
+#[derive(Debug, Clone)]
+pub struct Identifier {
+    str: String,
+}
+
+impl StmtArg for Identifier {
+    fn parse(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+
+        Ok(Identifier { str })
+    }
+}
+
+impl StmtArg for String {
+    fn parse(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+
+        Ok(str)
+    }
+}
+
+impl StmtArg for Url {
+    fn parse(parser: &mut Parser) -> Result<Self, YangError> {
+        let s = parse_string(parser)?;
+println!("**** StmtArg for Url");
+
+        match Url::parse(&s) {
+            Ok(url) => Ok(url),
+            Err(err) => Err(YangError::ArgumentParseError(err.to_string())),
+        }
+    }
+}
 
 ///
 /// 7.1.4. The "prefix" Statement.
@@ -635,9 +663,9 @@ impl Stmt for PrefixStmt {
 
     /// Parse a statement arg.
     fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
-        let s = parse_string(parser)?;
-
-        Ok(s)
+        Self::Arg::parse(parser)
+//        let s = parse_string(parser)?;
+//        Ok(s)
     }
 
     /// Parse a statement and return the object wrapped in enum.
