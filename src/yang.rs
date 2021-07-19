@@ -294,22 +294,31 @@ pub trait Stmts {
 }
 */
 
+///
+/// 7.1. The "module" Statement.
+///
 /// Yang "module" statement.
 #[derive(Debug, Clone)]
 pub struct ModuleStmt {
     /// Module identifier.
-    identifier: String,
+    identifier_arg: Identifier,
 
+    ///
     module_header: ModuleHeaderStmts,
+
+    ///
     linkage: LinkageStmts,
+
+    ///
     meta: MetaStmts,
+
 //    revision: RevisionStmts,
 //    body: BodyStmts,
 }
 
 impl Stmt for ModuleStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
@@ -318,7 +327,7 @@ impl Stmt for ModuleStmt {
 
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = ModuleStmt::parse_arg(parser)?;
+        let identifier_arg = ModuleStmt::parse_arg(parser)?;
         let (token, _) = parser.get_token()?;
         if let Token::BlockBegin = token {
             let module_header = ModuleHeaderStmts::parse(parser)?;
@@ -328,7 +337,7 @@ impl Stmt for ModuleStmt {
             // body-stmts
 
             let stmt = ModuleStmt {
-                identifier: arg,
+                identifier_arg,
                 module_header,
                 linkage,
                 meta,
@@ -348,9 +357,12 @@ impl Stmt for ModuleStmt {
     }
 }
 
+///
+/// 7.2. The "submodule" Statement.
+///
 #[derive(Debug, Clone)]
 pub struct SubmoduleStmt {
-    identifier: String,
+    identifier_arg: Identifier,
 
 //    submodule_header: SubmoduleHeaderStmts,
 //    liknage: LinkageStmts,
@@ -361,7 +373,7 @@ pub struct SubmoduleStmt {
 
 impl Stmt for SubmoduleStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
@@ -370,10 +382,10 @@ impl Stmt for SubmoduleStmt {
 
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = SubmoduleStmt::parse_arg(parser)?;
+        let identifier_arg = SubmoduleStmt::parse_arg(parser)?;
 
         let stmt = SubmoduleStmt {
-            identifier: arg,
+            identifier_arg,
         };
 
         Ok(StmtType::SubmoduleStmt(stmt))
@@ -475,6 +487,9 @@ pub struct RevisionStmts {
 //    revision: Vec<RevisionStmt>
 }
 
+///
+/// 7.1.2. The "yang-version" Statement.
+///
 #[derive(Debug, Clone)]
 pub struct YangVersionStmt {
     yang_version_arg: String,
@@ -508,9 +523,12 @@ impl Stmt for YangVersionStmt {
     }
 }
 
+///
+/// 7.1.5. The "import" Statement.
+///
 #[derive(Debug, Clone)]
 pub struct ImportStmt {
-    identifier_arg: String,
+    identifier_arg: Identifier,
     prefix: PrefixStmt,
 //    revision_date: Option<RevisionDateStmt>,
     description: Option<DescriptionStmt>,
@@ -519,7 +537,7 @@ pub struct ImportStmt {
 
 impl Stmt for ImportStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
@@ -528,7 +546,7 @@ impl Stmt for ImportStmt {
 
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = ImportStmt::parse_arg(parser)?;
+        let identifier_arg = ImportStmt::parse_arg(parser)?;
 
         let map: HashMap<&'static str, Repeat> = [
             ("prefix", Repeat::new(Some(1), Some(1))),
@@ -548,7 +566,7 @@ impl Stmt for ImportStmt {
 
             if let Token::BlockEnd = token {
                 let stmt = ImportStmt {
-                    identifier_arg: arg,
+                    identifier_arg,
                     prefix,
                     description,
                     reference,
@@ -564,9 +582,12 @@ impl Stmt for ImportStmt {
     }
 }
 
+///
+/// 7.1.6. The "include" Statement.
+///
 #[derive(Debug, Clone)]
 pub struct IncludeStmt {
-    identifier_arg: String,
+    identifier_arg: Identifier,
 //    revision_date: Option<RevisionDateStmt>,
     description: Option<DescriptionStmt>,
     reference: Option<ReferenceStmt>,
@@ -574,7 +595,7 @@ pub struct IncludeStmt {
 
 impl Stmt for IncludeStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
@@ -610,6 +631,9 @@ impl Stmt for IncludeStmt {
     }
 }
 
+///
+/// 7.1.3. The "namespace" Statement.
+///
 #[derive(Debug, Clone)]
 pub struct NamespaceStmt {
     uri_str: Url,
