@@ -90,6 +90,59 @@ impl Repeat {
     }
 }
 
+
+///
+/// Trait for statement arg.
+///
+pub trait StmtArg {
+    /// Parse token and return StmtArg if it is valid.
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> where Self: Sized;
+
+//    /// Get argment into string.
+//    fn to_string(&self) -> String;
+}
+
+/// Yang Identifier.
+#[derive(Debug, Clone)]
+pub struct Identifier {
+    str: String,
+}
+
+impl StmtArg for Identifier {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+
+        Ok(Identifier { str })
+    }
+
+/*
+    fn to_string(&self) -> String {
+        String::from(self.str)
+    }
+*/
+}
+
+/// Yang String.
+impl StmtArg for String {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        Ok(parse_string(parser)?)
+    }
+}
+
+/// URL string.
+impl StmtArg for Url {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let s = parse_string(parser)?;
+println!("**** StmtArg for Url");
+
+        match Url::parse(&s) {
+            Ok(url) => Ok(url),
+            Err(err) => Err(YangError::ArgumentParseError(err.to_string())),
+        }
+    }
+}
+
+
 /// Collection of statements in HashMap.
 type StmtCollection = HashMap<String, Vec<StmtType>>;
 
@@ -209,7 +262,9 @@ impl fmt::Debug for StmtType {
 }
 
 
+///
 /// Trait for a single YANG statement.
+///
 pub trait Stmt {
     /// Arg type.
     type Arg;
@@ -219,7 +274,7 @@ pub trait Stmt {
 
     /// Parse a statement arg.
     fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> where Self::Arg: StmtArg {
-        Self::Arg::parse(parser)
+        Self::Arg::parse_arg(parser)
     }
 
     /// Parse a statement and return the object wrapped in enum.
@@ -253,11 +308,6 @@ impl Stmt for ModuleStmt {
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "module"
-    }
-
-    /// Parse a statement arg.
-    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
-        Ok(parse_string(parser)?)
     }
 
     /// Parse a statement and return the object wrapped in enum.
@@ -310,11 +360,6 @@ impl Stmt for SubmoduleStmt {
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "submodule"
-    }
-
-    /// Parse a statement arg.
-    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
-        Ok(parse_string(parser)?)
     }
 
     /// Parse a statement and return the object wrapped in enum.
@@ -438,11 +483,6 @@ impl Stmt for YangVersionStmt {
         "yang-version"
     }
 
-    /// Parse a statement arg.
-    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
-        Ok(parse_string(parser)?)
-    }
-
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let arg = YangVersionStmt::parse_arg(parser)?;
@@ -478,11 +518,6 @@ impl Stmt for ImportStmt {
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "import"
-    }
-
-    /// Parse a statement arg.
-    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
-        Ok(parse_string(parser)?)
     }
 
     /// Parse a statement and return the object wrapped in enum.
@@ -538,11 +573,6 @@ impl Stmt for IncludeStmt {
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "incluse"
-    }
-
-    /// Parse a statement arg.
-    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
-        Ok(parse_string(parser)?)
     }
 
     /// Parse a statement and return the object wrapped in enum.
@@ -605,45 +635,6 @@ impl Stmt for NamespaceStmt {
     }
 }
 
-//pub type Identifier = String;
-
-pub trait StmtArg {
-    fn parse(parser: &mut Parser) -> Result<Self, YangError> where Self: Sized;
-}
-
-#[derive(Debug, Clone)]
-pub struct Identifier {
-    str: String,
-}
-
-impl StmtArg for Identifier {
-    fn parse(parser: &mut Parser) -> Result<Self, YangError> {
-        let str = parse_string(parser)?;
-
-        Ok(Identifier { str })
-    }
-}
-
-impl StmtArg for String {
-    fn parse(parser: &mut Parser) -> Result<Self, YangError> {
-        let str = parse_string(parser)?;
-
-        Ok(str)
-    }
-}
-
-impl StmtArg for Url {
-    fn parse(parser: &mut Parser) -> Result<Self, YangError> {
-        let s = parse_string(parser)?;
-println!("**** StmtArg for Url");
-
-        match Url::parse(&s) {
-            Ok(url) => Ok(url),
-            Err(err) => Err(YangError::ArgumentParseError(err.to_string())),
-        }
-    }
-}
-
 ///
 /// 7.1.4. The "prefix" Statement.
 ///
@@ -659,13 +650,6 @@ impl Stmt for PrefixStmt {
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "prefix"
-    }
-
-    /// Parse a statement arg.
-    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
-        Self::Arg::parse(parser)
-//        let s = parse_string(parser)?;
-//        Ok(s)
     }
 
     /// Parse a statement and return the object wrapped in enum.
@@ -698,11 +682,6 @@ impl Stmt for OrganizationStmt {
         "organization"
     }
 
-    /// Parse a statement arg.
-    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
-        Ok(parse_string(parser)?)
-    }
-
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let string = OrganizationStmt::parse_arg(parser)?;
@@ -731,11 +710,6 @@ impl Stmt for ContactStmt {
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "contact"
-    }
-
-    /// Parse a statement arg.
-    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
-        Ok(parse_string(parser)?)
     }
 
     /// Parse a statement and return the object wrapped in enum.
@@ -768,11 +742,6 @@ impl Stmt for DescriptionStmt {
         "description"
     }
 
-    /// Parse a statement arg.
-    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
-        Ok(parse_string(parser)?)
-    }
-
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let string = DescriptionStmt::parse_arg(parser)?;
@@ -801,11 +770,6 @@ impl Stmt for ReferenceStmt {
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "reference"
-    }
-
-    /// Parse a statement arg.
-    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> {
-        Ok(parse_string(parser)?)
     }
 
     /// Parse a statement and return the object wrapped in enum.
