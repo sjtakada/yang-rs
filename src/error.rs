@@ -18,6 +18,9 @@ quick_error! {
         InvalidString {
             display("Invalid string")
         }
+        InvalidIdentifier {
+            display("Invalid identifier")
+        }
         NoSuchRulename(s: String) {
             display("No such rulename {}", s)
         }

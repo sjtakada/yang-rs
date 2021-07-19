@@ -112,6 +112,15 @@ impl StmtArg for Identifier {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
+        if !str.starts_with(|c: char| c.is_alphabetic() || c == '_') {
+            return Err(YangError::InvalidIdentifier);
+        }
+
+        if str.len() > 1 {
+            if let Some(_) = &str[1..].find(|c: char| !c.is_alphabetic() && !c.is_digit(10) && c != '_' && c != '-' && c != '.') {
+                return Err(YangError::InvalidIdentifier);
+            }
+        }
         Ok(Identifier { str })
     }
 
@@ -135,7 +144,6 @@ impl StmtArg for String {
 impl StmtArg for Url {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let s = parse_string(parser)?;
-println!("**** StmtArg for Url");
 
         match Url::parse(&s) {
             Ok(url) => Ok(url),
