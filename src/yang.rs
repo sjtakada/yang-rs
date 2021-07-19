@@ -98,8 +98,8 @@ pub trait StmtArg {
     /// Parse token and return StmtArg if it is valid.
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> where Self: Sized;
 
-//    /// Get argment into string.
-//    fn to_string(&self) -> String;
+    /// Get argment into string.
+    fn get_arg(&self) -> String;
 }
 
 /// Yang Identifier.
@@ -115,17 +115,19 @@ impl StmtArg for Identifier {
         Ok(Identifier { str })
     }
 
-/*
-    fn to_string(&self) -> String {
-        String::from(self.str)
+    fn get_arg(&self) -> String {
+        self.str.clone()
     }
-*/
 }
 
 /// Yang String.
 impl StmtArg for String {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         Ok(parse_string(parser)?)
+    }
+
+    fn get_arg(&self) -> String {
+        self.clone()
     }
 }
 
@@ -139,6 +141,10 @@ println!("**** StmtArg for Url");
             Ok(url) => Ok(url),
             Err(err) => Err(YangError::ArgumentParseError(err.to_string())),
         }
+    }
+
+    fn get_arg(&self) -> String {
+        self.to_string()
     }
 }
 
