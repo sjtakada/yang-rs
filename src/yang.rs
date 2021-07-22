@@ -46,7 +46,7 @@ use crate::collect_opt_stmt;
 /// 
 /// YANG string, quoted or unquoted.
 fn parse_string(parser: &mut Parser) -> Result<String, YangError> {
-    let (token, _) = parser.get_token()?;
+    let token = parser.get_token()?;
     match token {
         // Statement argument.
         Token::Identifier(s) |
@@ -195,7 +195,7 @@ pub fn parse_stmt_collection(parser: &mut Parser, map: HashMap<&'static str, Rep
     let mut stmts: StmtCollection = HashMap::new();
 
     loop {
-        let (token, pos) = parser.get_token()?;
+        let token = parser.get_token()?;
 println!("*** parse_stmts {:?}", token);
         match token {
             Token::Identifier(ref keyword) => {
@@ -210,12 +210,12 @@ println!("*** parse_stmts {:?}", token);
                     };
                     v.push(stmt);
                 } else {
-                    parser.save_token(token, pos);
+                    parser.save_token(token);
                     break;
                 }
             }
             _ => {
-                parser.save_token(token, pos);
+                parser.save_token(token);
                 break;
             }
         }
@@ -336,7 +336,7 @@ impl Stmt for ModuleStmt {
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let identifier_arg = ModuleStmt::parse_arg(parser)?;
-        let (token, _) = parser.get_token()?;
+        let token = parser.get_token()?;
         if let Token::BlockBegin = token {
             let module_header = ModuleHeaderStmts::parse(parser)?;
             let linkage = LinkageStmts::parse(parser)?;
@@ -351,7 +351,7 @@ impl Stmt for ModuleStmt {
                 meta,
             };
 
-            let (token, _) = parser.get_token()?;
+            let token = parser.get_token()?;
             if let Token::BlockEnd = token {
                 println!("*** blockend??");
             } else {
@@ -522,7 +522,7 @@ impl Stmt for YangVersionStmt {
             yang_version_arg: String::from("1.1"),
         };
 
-        let (token, _) = parser.get_token()?;
+        let token = parser.get_token()?;
         if let Token::StatementEnd = token {
             Ok(StmtType::YangVersionStmt(stmt))
         } else {
@@ -563,14 +563,14 @@ impl Stmt for ImportStmt {
             ("reference", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
-        let (token, _) = parser.get_token()?;
+        let token = parser.get_token()?;
         if let Token::BlockBegin = token {
             let mut stmts = parse_stmt_collection(parser, map)?;
             let prefix = collect_a_stmt!(stmts, PrefixStmt)?;
             let description = collect_opt_stmt!(stmts, DescriptionStmt)?;
             let reference = collect_opt_stmt!(stmts, ReferenceStmt)?;
 
-            let (token, _) = parser.get_token()?;
+            let token = parser.get_token()?;
 
             if let Token::BlockEnd = token {
                 let stmt = ImportStmt {
@@ -624,7 +624,7 @@ impl Stmt for IncludeStmt {
         let description = collect_opt_stmt!(stmts, DescriptionStmt)?;
         let reference = collect_opt_stmt!(stmts, ReferenceStmt)?;
 
-        let (token, _) = parser.get_token()?;
+        let token = parser.get_token()?;
         if let Token::StatementEnd = token {
             let stmt = IncludeStmt {
                 identifier_arg,
@@ -659,7 +659,7 @@ impl Stmt for NamespaceStmt {
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let uri_str = NamespaceStmt::parse_arg(parser)?;
-        let (token, _) = parser.get_token()?;
+        let token = parser.get_token()?;
 
         if let Token::StatementEnd = token {
             Ok(StmtType::NamespaceStmt(
@@ -694,7 +694,7 @@ impl Stmt for PrefixStmt {
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let prefix_arg_str = PrefixStmt::parse_arg(parser)?;
 
-        let (token, _) = parser.get_token()?;
+        let token = parser.get_token()?;
         if let Token::StatementEnd = token {
             Ok(StmtType::PrefixStmt(PrefixStmt { prefix_arg_str }))
         } else {
@@ -723,7 +723,7 @@ impl Stmt for OrganizationStmt {
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let string = OrganizationStmt::parse_arg(parser)?;
-        let (token, _) = parser.get_token()?;
+        let token = parser.get_token()?;
 
         if let Token::StatementEnd = token {
             Ok(StmtType::OrganizationStmt(OrganizationStmt { string }))
@@ -753,7 +753,7 @@ impl Stmt for ContactStmt {
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let string = ContactStmt::parse_arg(parser)?;
-        let (token, _) = parser.get_token()?;
+        let token = parser.get_token()?;
 
         if let Token::StatementEnd = token {
             Ok(StmtType::ContactStmt(ContactStmt { string }))
@@ -783,7 +783,7 @@ impl Stmt for DescriptionStmt {
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let string = DescriptionStmt::parse_arg(parser)?;
-        let (token, _) = parser.get_token()?;
+        let token = parser.get_token()?;
 
         if let Token::StatementEnd = token {
             Ok(StmtType::DescriptionStmt(DescriptionStmt { string }))
@@ -813,7 +813,7 @@ impl Stmt for ReferenceStmt {
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let string = ReferenceStmt::parse_arg(parser)?;
-        let (token, _) = parser.get_token()?;
+        let token = parser.get_token()?;
 
         if let Token::StatementEnd = token {
             Ok(StmtType::ReferenceStmt(ReferenceStmt { string }))
