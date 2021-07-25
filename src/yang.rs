@@ -886,9 +886,8 @@ impl Stmt for NamespaceStmt {
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let uri_str = NamespaceStmt::parse_arg(parser)?;
-        let token = parser.get_token()?;
 
-        if let Token::StatementEnd = token {
+        if let Token::StatementEnd = parser.get_token()? {
             Ok(StmtType::NamespaceStmt(
                 NamespaceStmt {
                     uri_str,
@@ -921,8 +920,7 @@ impl Stmt for PrefixStmt {
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let prefix_arg_str = PrefixStmt::parse_arg(parser)?;
 
-        let token = parser.get_token()?;
-        if let Token::StatementEnd = token {
+        if let Token::StatementEnd = parser.get_token()? {
             Ok(StmtType::PrefixStmt(PrefixStmt { prefix_arg_str }))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
@@ -955,21 +953,19 @@ impl Stmt for BelongsToStmt {
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let identifier_arg = BelongsToStmt::parse_arg(parser)?;
 
-        let map: HashMap<&'static str, Repeat> = [
-            ("prefix", Repeat::new(Some(1), Some(1))),
-        ].iter().cloned().collect();
-
         if let Token::BlockBegin = parser.get_token()? {
+            let map: HashMap<&'static str, Repeat> = [
+                ("prefix", Repeat::new(Some(1), Some(1))),
+            ].iter().cloned().collect();
+
             let mut stmts = parse_stmt_collection(parser, map)?;
             let prefix = collect_a_stmt!(stmts, PrefixStmt)?;
 
             if let Token::BlockEnd = parser.get_token()? {
-                let stmt = BelongsToStmt {
+                Ok(StmtType::BelongsToStmt(BelongsToStmt {
                     identifier_arg,
                     prefix,
-                };
-
-                Ok(StmtType::BelongsToStmt(stmt))
+                }))
             } else {
                 Err(YangError::UnexpectedToken(parser.line()))
             }
@@ -999,9 +995,8 @@ impl Stmt for OrganizationStmt {
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let string = OrganizationStmt::parse_arg(parser)?;
-        let token = parser.get_token()?;
 
-        if let Token::StatementEnd = token {
+        if let Token::StatementEnd = parser.get_token()? {
             Ok(StmtType::OrganizationStmt(OrganizationStmt { string }))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
@@ -1029,9 +1024,8 @@ impl Stmt for ContactStmt {
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let string = ContactStmt::parse_arg(parser)?;
-        let token = parser.get_token()?;
 
-        if let Token::StatementEnd = token {
+        if let Token::StatementEnd = parser.get_token()? {
             Ok(StmtType::ContactStmt(ContactStmt { string }))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
@@ -1059,9 +1053,8 @@ impl Stmt for DescriptionStmt {
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let string = DescriptionStmt::parse_arg(parser)?;
-        let token = parser.get_token()?;
 
-        if let Token::StatementEnd = token {
+        if let Token::StatementEnd = parser.get_token()? {
             Ok(StmtType::DescriptionStmt(DescriptionStmt { string }))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
@@ -1089,9 +1082,8 @@ impl Stmt for ReferenceStmt {
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let string = ReferenceStmt::parse_arg(parser)?;
-        let token = parser.get_token()?;
 
-        if let Token::StatementEnd = token {
+        if let Token::StatementEnd = parser.get_token()?; {
             Ok(StmtType::ReferenceStmt(ReferenceStmt { string }))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
