@@ -1083,7 +1083,7 @@ impl Stmt for ReferenceStmt {
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let string = ReferenceStmt::parse_arg(parser)?;
 
-        if let Token::StatementEnd = parser.get_token()?; {
+        if let Token::StatementEnd = parser.get_token()? {
             Ok(StmtType::ReferenceStmt(ReferenceStmt { string }))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
