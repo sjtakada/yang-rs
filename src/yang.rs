@@ -900,6 +900,24 @@ impl Stmt for BelongsToStmt {
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let identifier_arg = BelongsToStmt::parse_arg(parser)?;
 
+        let map: HashMap<&'static str, Repeat> = [
+            ("prefix", Repeat::new(Some(1), Some(1))),
+        ].iter().cloned().collect();
+
+        if let Token::BlockBegin = parser.get_token()? {
+            let mut stmts = parse_stmt_collection(parser, map)?;
+            let prefix = collect_a_stmt!(stmts, PrefixStmt)?;
+
+            if let Token::BlockEnd = parser.get_token()? {
+                let stmt = BelongsToStmt {
+                    identifier_arg,
+                    prefix,
+                };
+
+                Ok(StmtType::BelongsToStmt(stmt))
+            } else {
+                Err(YangError::UnexpectedToken(parser.line()))
+            }
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
