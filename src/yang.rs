@@ -237,9 +237,6 @@ println!("*** rep {:?}", rep);
     Ok(stmts)
 }
 
-#[derive(Debug, Clone)]
-pub struct TBD {}
-
 /// Yang Statement
 pub enum StmtType {
     ModuleStmt(ModuleStmt),
@@ -249,28 +246,150 @@ pub enum StmtType {
     IncludeStmt(IncludeStmt),
     NamespaceStmt(NamespaceStmt),
     PrefixStmt(PrefixStmt),
-    BelongsToStmt(TBD),
+    BelongsToStmt(BelongsToStmt),
     OrganizationStmt(OrganizationStmt),
     ContactStmt(ContactStmt),
     DescriptionStmt(DescriptionStmt),
     ReferenceStmt(ReferenceStmt),
+    UnitsStmt(UnitsStmt),
+    RevisionStmt(RevisionStmt),
+    RevisionDateStmt(RevisionDateStmt),
+    ExtensionStmt(ExtensionStmt),
+    ArgumentStmt(ArgumentStmt),
+    YinElementStmt(YinElementStmt),
+    IdentityStmt(IdentityStmt),
+    BaseStmt(BaseStmt),
+    FeatureStmt(FeatureStmt),
+    IfFeatureStmt(IfFeatureStmt),
+    TypedefStmt(TypedefStmt),
+    TypeStmt(TypeStmt),
+    RangeStmt(RangeStmt),
+    FractionDigitsStmt(FractionDigitsStmt),
+    LengthStmt(LengthStmt),
+    PatternStmt(PatternStmt),
+    ModifierStmt(ModifierStmt),
+    DefaultStmt(DefaultStmt),
+    EnumStmt(EnumStmt),
+    PathStmt(PathStmt),
+    RequireInstanceStmt(RequireInstanceStmt),
+    BitStmt(BitStmt),
+    PositionStmt(PositionStmt),
+    StatusStmt(StatusStmt),
+    ConfigStmt(ConfigStmt),
+    MandatoryStmt(MandatoryStmt),
+    PresenseStmt(PresenseStmt),
+    OrderedByStmt(OrderedByStmt),
+    MustStmt(MustStmt),
+    ErrorMessageStmt(ErrorMessageStmt),
+    ErrorAppTagStmt(ErrorAppTagStmt),
+    MinElementsStmt(MinElementsStmt),
+    MaxElementsStmt(MaxElementsStmt),
+    ValueStmt(ValueStmt),
+    GroupingStmt(GroupingStmt),
+    ContainerStmt(ContainerStmt),
+    LeafStmt(LeafStmt),
+    LeafListStmt(LeafListStmt),
+    ListStmt(ListStmt),
+    KeyStmt(KeyStmt),
+    UniqueStmt(UniqueStmt),
+    ChoiceStmt(ChoiceStmt),
+    ShortCaseStmt(ShortCaseStmt),
+    CaseStmt(CaseStmt),
+    AnydataStmt(AnydataStmt),
+    AnyxmlStmt(AnyxmlStmt),
+    UsesStmt(UsesStmt),
+    RefineStmt(RefineStmt),
+    UsesAugmentStmt(UsesAugmentStmt),
+    AugmentStmt(AugmentStmt),
+    WhenStmt(WhenStmt),
+    RpcStmt(RpcStmt),
+    ActionStmt(ActionStmt),
+    InputStmt(InputStmt),
+    OutputStmt(OutputStmt),
+    NotificationStmt(NotificationStmt),
+    DeviationStmt(DeviationStmt),
+    DeviationNotSupportedStmt(DeviationNotSupportedStmt),
+    DeviateAddStmt(DeviateAddStmt),
+    DeviateDeleteStmt(DeviateDeleteStmt),
+    DeviateReplaceStmt(DeviateReplaceStmt),
 }
 
 impl fmt::Debug for StmtType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 	match &*self {
-            StmtType::ModuleStmt(stmt) => write!(f, "module {:?}", stmt),
-            StmtType::SubmoduleStmt(stmt) => write!(f, "submodule {:?}", stmt),
-            StmtType::YangVersionStmt(stmt) => write!(f, "yang-version {:?}", stmt),
-            StmtType::ImportStmt(stmt) => write!(f, "import {:?}", stmt),
-            StmtType::IncludeStmt(stmt) => write!(f, "include {:?}", stmt),
-            StmtType::NamespaceStmt(stmt) => write!(f, "namespace {:?}", stmt),
-            StmtType::PrefixStmt(stmt) => write!(f, "prefix {:?}", stmt),
-            StmtType::BelongsToStmt(stmt) => write!(f, "belongs-to {:?}", stmt),
-            StmtType::OrganizationStmt(stmt) => write!(f, "organization {:?}", stmt),
-            StmtType::ContactStmt(stmt) => write!(f, "contact {:?}", stmt),
-            StmtType::DescriptionStmt(stmt) => write!(f, "description {:?}", stmt),
-            StmtType::ReferenceStmt(stmt) => write!(f, "reference {:?}", stmt),
+            StmtType::ModuleStmt(stmt) => write!(f, "module-stmt {:?}", stmt),
+            StmtType::SubmoduleStmt(stmt) => write!(f, "submodule-stmt {:?}", stmt),
+            StmtType::YangVersionStmt(stmt) => write!(f, "yang-version-stmt {:?}", stmt),
+            StmtType::ImportStmt(stmt) => write!(f, "import-stmt {:?}", stmt),
+            StmtType::IncludeStmt(stmt) => write!(f, "include-stmt {:?}", stmt),
+            StmtType::NamespaceStmt(stmt) => write!(f, "namespace-stmt {:?}", stmt),
+            StmtType::PrefixStmt(stmt) => write!(f, "prefix-stmt {:?}", stmt),
+            StmtType::BelongsToStmt(stmt) => write!(f, "belongs-to-stmt {:?}", stmt),
+            StmtType::OrganizationStmt(stmt) => write!(f, "organization-stmt {:?}", stmt),
+            StmtType::ContactStmt(stmt) => write!(f, "contact-stmt {:?}", stmt),
+            StmtType::DescriptionStmt(stmt) => write!(f, "description-stmt {:?}", stmt),
+            StmtType::ReferenceStmt(stmt) => write!(f, "reference-stmt {:?}", stmt),
+            StmtType::UnitsStmt(stmt) => write!(f, "units-stmt {:?}", stmt),
+            StmtType::RevisionStmt(stmt) => write!(f, "revision-stmt {:?}", stmt),
+            StmtType::RevisionDateStmt(stmt) => write!(f, "revision-date-stmt {:?}", stmt),
+            StmtType::ExtensionStmt(stmt) => write!(f, "extension-stmt {:?}", stmt),
+            StmtType::ArgumentStmt(stmt) => write!(f, "argument-stmt {:?}", stmt),
+            StmtType::YinElementStmt(stmt) => write!(f, "yin-element-stmt {:?}", stmt),
+            StmtType::IdentityStmt(stmt) => write!(f, "identity-stmt {:?}", stmt),
+            StmtType::BaseStmt(stmt) => write!(f, "base-stmt {:?}", stmt),
+            StmtType::FeatureStmt(stmt) => write!(f, "feature-stmt {:?}", stmt),
+            StmtType::IfFeatureStmt(stmt) => write!(f, "if-feature-stmt {:?}", stmt),
+            StmtType::TypedefStmt(stmt) => write!(f, "typedef-stmt {:?}", stmt),
+            StmtType::TypeStmt(stmt) => write!(f, "type-stmt {:?}", stmt),
+            StmtType::RangeStmt(stmt) => write!(f, "range-stmt {:?}", stmt),
+            StmtType::FractionDigitsStmt(stmt) => write!(f, "fraction-digits-stmt {:?}", stmt),
+            StmtType::LengthStmt(stmt) => write!(f, "length-stmt {:?}", stmt),
+            StmtType::PatternStmt(stmt) => write!(f, "pattern-stmt {:?}", stmt),
+            StmtType::ModifierStmt(stmt) => write!(f, "modifier-stmt {:?}", stmt),
+            StmtType::DefaultStmt(stmt) => write!(f, "default-stmt {:?}", stmt),
+            StmtType::EnumStmt(stmt) => write!(f, "enum-stmt {:?}", stmt),
+            StmtType::PathStmt(stmt) => write!(f, "path-stmt {:?}", stmt),
+            StmtType::RequireInstanceStmt(stmt) => write!(f, "require-instance-stmt {:?}", stmt),
+            StmtType::BitStmt(stmt) => write!(f, "bit-stmt {:?}", stmt),
+            StmtType::PositionStmt(stmt) => write!(f, "position-stmt {:?}", stmt),
+            StmtType::StatusStmt(stmt) => write!(f, "status-stmt {:?}", stmt),
+            StmtType::ConfigStmt(stmt) => write!(f, "config-stmt {:?}", stmt),
+            StmtType::MandatoryStmt(stmt) => write!(f, "mandatory-stmt {:?}", stmt),
+            StmtType::PresenseStmt(stmt) => write!(f, "presense-stmt {:?}", stmt),
+            StmtType::OrderedByStmt(stmt) => write!(f, "ordered-by-stmt {:?}", stmt),
+            StmtType::MustStmt(stmt) => write!(f, "must-stmt {:?}", stmt),
+            StmtType::ErrorMessageStmt(stmt) => write!(f, "error-message-stmt {:?}", stmt),
+            StmtType::ErrorAppTagStmt(stmt) => write!(f, "error-app-tag-stmt {:?}", stmt),
+            StmtType::MinElementsStmt(stmt) => write!(f, "min-elements-stmt {:?}", stmt),
+            StmtType::MaxElementsStmt(stmt) => write!(f, "max-elements-stmt {:?}", stmt),
+            StmtType::ValueStmt(stmt) => write!(f, "value-stmt {:?}", stmt),
+            StmtType::GroupingStmt(stmt) => write!(f, "grouping-stmt {:?}", stmt),
+            StmtType::ContainerStmt(stmt) => write!(f, "container-stmt {:?}", stmt),
+            StmtType::LeafStmt(stmt) => write!(f, "leaf-stmt {:?}", stmt),
+            StmtType::LeafListStmt(stmt) => write!(f, "leaf-list-stmt {:?}", stmt),
+            StmtType::ListStmt(stmt) => write!(f, "list-stmt {:?}", stmt),
+            StmtType::KeyStmt(stmt) => write!(f, "key-stmt {:?}", stmt),
+            StmtType::UniqueStmt(stmt) => write!(f, "unique-stmt {:?}", stmt),
+            StmtType::ChoiceStmt(stmt) => write!(f, "choice-stmt {:?}", stmt),
+            StmtType::ShortCaseStmt(stmt) => write!(f, "short-case-stmt {:?}", stmt),
+            StmtType::CaseStmt(stmt) => write!(f, "case-stmt {:?}", stmt),
+            StmtType::AnydataStmt(stmt) => write!(f, "anydata-stmt {:?}", stmt),
+            StmtType::AnyxmlStmt(stmt) => write!(f, "anyxml-stmt {:?}", stmt),
+            StmtType::UsesStmt(stmt) => write!(f, "uses-stmt {:?}", stmt),
+            StmtType::RefineStmt(stmt) => write!(f, "refine-stmt {:?}", stmt),
+            StmtType::UsesAugmentStmt(stmt) => write!(f, "uses-augment-stmt {:?}", stmt),
+            StmtType::AugmentStmt(stmt) => write!(f, "augment-stmt {:?}", stmt),
+            StmtType::WhenStmt(stmt) => write!(f, "when-stmt {:?}", stmt),
+            StmtType::RpcStmt(stmt) => write!(f, "rpc-stmt {:?}", stmt),
+            StmtType::ActionStmt(stmt) => write!(f, "action-stmt {:?}", stmt),
+            StmtType::InputStmt(stmt) => write!(f, "input-stmt {:?}", stmt),
+            StmtType::OutputStmt(stmt) => write!(f, "output-stmt {:?}", stmt),
+            StmtType::NotificationStmt(stmt) => write!(f, "notification-stmt {:?}", stmt),
+            StmtType::DeviationStmt(stmt) => write!(f, "deviation-stmt {:?}", stmt),
+            StmtType::DeviationNotSupportedStmt(stmt) => write!(f, "deviation-not-supported-stmt {:?}", stmt),
+            StmtType::DeviateAddStmt(stmt) => write!(f, "deviate-add-stmt {:?}", stmt),
+            StmtType::DeviateDeleteStmt(stmt) => write!(f, "deviate-delete-stmt {:?}", stmt),
+            StmtType::DeviateReplaceStmt(stmt) => write!(f, "deviate-replace-stmt {:?}", stmt),
         }
     }
 }
@@ -490,11 +609,6 @@ impl MetaStmts {
   }
 }
 
-#[derive(Debug, Clone)]
-pub struct RevisionStmts {
-//    revision: Vec<RevisionStmt>
-}
-
 ///
 /// 7.1.2. The "yang-version" Statement.
 ///
@@ -704,6 +818,28 @@ impl Stmt for PrefixStmt {
 }
 
 ///
+///
+///
+#[derive(Debug, Clone)]
+pub struct BelongsToStmt {
+}
+
+impl Stmt for BelongsToStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "belongs-to"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
 /// 7.1.7. The "Organization" Statement.
 ///
 #[derive(Debug, Clone)]
@@ -822,4 +958,1404 @@ impl Stmt for ReferenceStmt {
         }
     }
 }
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct UnitsStmt {
+}
+
+impl Stmt for UnitsStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        ""
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+
+#[derive(Debug, Clone)]
+pub struct RevisionStmts {
+    revision: Vec<RevisionStmt>
+}
+
+///
+/// 7.1.9. The "revision" Statement.
+///
+#[derive(Debug, Clone)]
+pub struct RevisionStmt {
+    /// Revision date.
+    revision_date: String, //DateArgStr,
+
+    /// Description.
+    description: Option<DescriptionStmt>,
+
+    /// Reference.
+    reference: Option<ReferenceStmt>,
+}
+
+impl Stmt for RevisionStmt {
+    /// Arg type.
+    type Arg = String; //DateArgStr,
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "revision"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        let revision_date = RevisionStmt::parse_arg(parser)?;
+
+        let map: HashMap<&'static str, Repeat> = [
+            ("description", Repeat::new(Some(0), Some(1))),
+            ("reference", Repeat::new(Some(0), Some(1))),
+        ].iter().cloned().collect();
+
+        let mut stmts = parse_stmt_collection(parser, map)?;
+        let description = collect_opt_stmt!(stmts, DescriptionStmt)?;
+        let reference = collect_opt_stmt!(stmts, ReferenceStmt)?;
+
+        let token = parser.get_token()?;
+        if let Token::StatementEnd = token {
+            let stmt = RevisionStmt {
+                revision_date,
+                description,
+                reference,
+            };
+
+            Ok(StmtType::RevisionStmt(stmt))
+        } else {
+            Err(YangError::UnexpectedToken(parser.line()))
+        }
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct RevisionDateStmt {
+}
+
+impl Stmt for RevisionDateStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "revision-date"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct ExtensionStmt {
+}
+
+impl Stmt for ExtensionStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "extension"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct ArgumentStmt {
+}
+
+impl Stmt for ArgumentStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "argument"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct YinElementStmt {
+}
+
+impl Stmt for YinElementStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "yin-element"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct IdentityStmt {
+}
+
+impl Stmt for IdentityStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "identity"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct BaseStmt {
+}
+
+impl Stmt for BaseStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "base"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct FeatureStmt {
+}
+
+impl Stmt for FeatureStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "feature"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct IfFeatureStmt {
+}
+
+impl Stmt for IfFeatureStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "if-feature"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct TypedefStmt {
+}
+
+impl Stmt for TypedefStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "typedef"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct TypeStmt {
+}
+
+impl Stmt for TypeStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "type"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct RangeStmt {
+}
+
+impl Stmt for RangeStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "range"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct FractionDigitsStmt {
+}
+
+impl Stmt for FractionDigitsStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "fraction-digits"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct LengthStmt {
+}
+
+impl Stmt for LengthStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "length"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct PatternStmt {
+}
+
+impl Stmt for PatternStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "pattern"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct ModifierStmt {
+}
+
+impl Stmt for ModifierStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "modifier"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct DefaultStmt {
+}
+
+impl Stmt for DefaultStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "default"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct EnumStmt {
+}
+
+impl Stmt for EnumStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "enum"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct PathStmt {
+}
+
+impl Stmt for PathStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "path"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct RequireInstanceStmt {
+}
+
+impl Stmt for RequireInstanceStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "require-instance"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct BitStmt {
+}
+
+impl Stmt for BitStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "bit"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct PositionStmt {
+}
+
+impl Stmt for PositionStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "position"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct StatusStmt {
+}
+
+impl Stmt for StatusStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "status"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct ConfigStmt {
+}
+
+impl Stmt for ConfigStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "config"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct MandatoryStmt {
+}
+
+impl Stmt for MandatoryStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "mandatory"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct PresenseStmt {
+}
+
+impl Stmt for PresenseStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "presense"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct OrderedByStmt {
+}
+
+impl Stmt for OrderedByStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "ordered-by"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct MustStmt {
+}
+
+impl Stmt for MustStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "must"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct ErrorMessageStmt {
+}
+
+impl Stmt for ErrorMessageStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "error-message"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct ErrorAppTagStmt {
+}
+
+impl Stmt for ErrorAppTagStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "error-app-tag"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct MinElementsStmt {
+}
+
+impl Stmt for MinElementsStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "min-elements"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct MaxElementsStmt {
+}
+
+impl Stmt for MaxElementsStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "max-elements"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct ValueStmt {
+}
+
+impl Stmt for ValueStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "value"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct GroupingStmt {
+}
+
+impl Stmt for GroupingStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "grouping"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct ContainerStmt {
+}
+
+impl Stmt for ContainerStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "container"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct LeafStmt {
+}
+
+impl Stmt for LeafStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "leaf"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct LeafListStmt {
+}
+
+impl Stmt for LeafListStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "leaf-list"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct ListStmt {
+}
+
+impl Stmt for ListStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "list"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct KeyStmt {
+}
+
+impl Stmt for KeyStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "key"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct UniqueStmt {
+}
+
+impl Stmt for UniqueStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "unique"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct ChoiceStmt {
+}
+
+impl Stmt for ChoiceStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "choice"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct ShortCaseStmt {
+}
+
+impl Stmt for ShortCaseStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "short-case"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct CaseStmt {
+}
+
+impl Stmt for CaseStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "case"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct AnydataStmt {
+}
+
+impl Stmt for AnydataStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "anydata"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct AnyxmlStmt {
+}
+
+impl Stmt for AnyxmlStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "anyxml"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct UsesStmt {
+}
+
+impl Stmt for UsesStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "uses"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct RefineStmt {
+}
+
+impl Stmt for RefineStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "refine"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct UsesAugmentStmt {
+}
+
+impl Stmt for UsesAugmentStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "uses-augment"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct AugmentStmt {
+}
+
+impl Stmt for AugmentStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "augment"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct WhenStmt {
+}
+
+impl Stmt for WhenStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "when"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct RpcStmt {
+}
+
+impl Stmt for RpcStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "rpc"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct ActionStmt {
+}
+
+impl Stmt for ActionStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "action"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct InputStmt {
+}
+
+impl Stmt for InputStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "input"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct OutputStmt {
+}
+
+impl Stmt for OutputStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "output"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct NotificationStmt {
+}
+
+impl Stmt for NotificationStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "notification"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct DeviationStmt {
+}
+
+impl Stmt for DeviationStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "deviation"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct DeviationNotSupportedStmt {
+}
+
+impl Stmt for DeviationNotSupportedStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "deviation-not-supported"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct DeviateAddStmt {
+}
+
+impl Stmt for DeviateAddStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "deviate-add"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct DeviateDeleteStmt {
+}
+
+impl Stmt for DeviateDeleteStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "deviate-delete"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+///
+///
+///
+#[derive(Debug, Clone)]
+pub struct DeviateReplaceStmt {
+}
+
+impl Stmt for DeviateReplaceStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        "deviate-replace"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+
+
+/*
+#[derive(Debug, Clone)]
+pub struct Stmt {
+}
+
+impl Stmt for Stmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Return statement keyword in &str.
+    fn keyword() -> &'static str {
+        ""
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
+        Err(YangError::PlaceHolder)
+    }
+}
+*/
 
