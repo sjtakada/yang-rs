@@ -801,14 +801,12 @@ impl Stmt for ImportStmt {
             let reference = collect_opt_stmt!(stmts, ReferenceStmt)?;
 
             if let Token::BlockEnd = parser.get_token()? {
-                let stmt = ImportStmt {
+                Ok(StmtType::ImportStmt(ImportStmt {
                     identifier_arg,
                     prefix,
                     description,
                     reference,
-                };
-
-                Ok(StmtType::ImportStmt(stmt))
+                }))
             } else {
                 Err(YangError::UnexpectedToken(parser.line()))
             }
@@ -848,19 +846,20 @@ impl Stmt for IncludeStmt {
             ("reference", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
-        let mut stmts = parse_stmt_collection(parser, map)?;
-        let description = collect_opt_stmt!(stmts, DescriptionStmt)?;
-        let reference = collect_opt_stmt!(stmts, ReferenceStmt)?;
+        if let Token::BlockBegin = parser.get_token()? {
+            let mut stmts = parse_stmt_collection(parser, map)?;
+            let description = collect_opt_stmt!(stmts, DescriptionStmt)?;
+            let reference = collect_opt_stmt!(stmts, ReferenceStmt)?;
 
-        let token = parser.get_token()?;
-        if let Token::StatementEnd = token {
-            let stmt = IncludeStmt {
-                identifier_arg,
-                description,
-                reference,
-            };
-
-            Ok(StmtType::IncludeStmt(stmt))
+            if let Token::StatementEnd = parser.get_token()? {
+                Ok(StmtType::IncludeStmt(IncludeStmt {
+                    identifier_arg,
+                    description,
+                    reference,
+                }))
+            } else {
+                Err(YangError::UnexpectedToken(parser.line()))
+            }
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
