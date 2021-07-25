@@ -156,6 +156,27 @@ impl StmtArg for Url {
     }
 }
 
+// Yang Version String.
+#[derive(Debug, Clone)]
+pub struct YangVersionArg {
+    str: String,
+}
+
+impl StmtArg for YangVersionArg {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+
+        if str == "1.1" {
+            Ok(YangVersionArg { str })
+        } else {
+            Err(YangError::ArgumentParseError(format!("Invalid Yang Version {}", str)))
+        }
+    }
+
+    fn get_arg(&self) -> String {
+        self.str.clone()
+    }
+}
 
 // Collection of statements in HashMap.
 type StmtCollection = HashMap<String, Vec<StmtType>>;
@@ -590,6 +611,9 @@ impl Stmt for SubmoduleStmt {
     }
 }
 
+///
+/// TBD collection statemtns..
+///
 #[derive(Debug, Clone)]
 pub struct ModuleHeaderStmts {
     yang_version: YangVersionStmt,
@@ -618,36 +642,19 @@ impl ModuleHeaderStmts {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct LinkageStmts {
-    import: Vec<ImportStmt>,
-    include: Vec<IncludeStmt>,
-}
 
-impl LinkageStmts {
-    pub fn parse(parser: &mut Parser) -> Result<LinkageStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("import", Repeat::new(Some(0), None)),
-            ("include", Repeat::new(Some(0), None)),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_collection(parser, map)?;
-        let import = collect_vec_stmt!(stmts, ImportStmt)?;
-        let include = collect_vec_stmt!(stmts, IncludeStmt)?;
-
-        Ok(LinkageStmts {
-            import,
-            include,
-        })
-    }
-}
-
-
+///
+/// TBD collection statemtns..
+///
 pub struct SubmoduleHeaderStmts {
     yang_version: Box<YangVersionStmt>,
 //    belong_to: BelongToStmt,
 }
 
+
+///
+/// TBD collection statemtns..
+///
 #[derive(Debug, Clone)]
 pub struct MetaStmts {
     organization: Option<OrganizationStmt>,
@@ -681,16 +688,60 @@ impl MetaStmts {
 }
 
 ///
+/// TBD collection statemtns..
+///
+#[derive(Debug, Clone)]
+pub struct LinkageStmts {
+    import: Vec<ImportStmt>,
+    include: Vec<IncludeStmt>,
+}
+
+impl LinkageStmts {
+    pub fn parse(parser: &mut Parser) -> Result<LinkageStmts, YangError> {
+        let map: HashMap<&'static str, Repeat> = [
+            ("import", Repeat::new(Some(0), None)),
+            ("include", Repeat::new(Some(0), None)),
+        ].iter().cloned().collect();
+
+        let mut stmts = parse_stmt_collection(parser, map)?;
+        let import = collect_vec_stmt!(stmts, ImportStmt)?;
+        let include = collect_vec_stmt!(stmts, IncludeStmt)?;
+
+        Ok(LinkageStmts {
+            import,
+            include,
+        })
+    }
+}
+
+///
+/// TBD.
+///
+#[derive(Debug, Clone)]
+pub struct RevisionStmts {
+    revision: Vec<RevisionStmt>
+}
+
+///
+/// TBD: body-stmts
+///
+
+///
+/// data-def-stmt
+///
+
+
+///
 /// 7.1.2. The "yang-version" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct YangVersionStmt {
-    yang_version_arg: String,
+    yang_version_arg: YangVersionArg,
 }
 
 impl Stmt for YangVersionStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = YangVersionArg;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
@@ -699,17 +750,12 @@ impl Stmt for YangVersionStmt {
 
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let arg = YangVersionStmt::parse_arg(parser)?;
+        let yang_version_arg = YangVersionStmt::parse_arg(parser)?;
 
-        // TBD: check arg is "1.1"
-
-        let stmt = YangVersionStmt {
-            yang_version_arg: String::from("1.1"),
-        };
-
-        let token = parser.get_token()?;
-        if let Token::StatementEnd = token {
-            Ok(StmtType::YangVersionStmt(stmt))
+        if let Token::StatementEnd = parser.get_token()? {
+            Ok(StmtType::YangVersionStmt(YangVersionStmt {
+                yang_version_arg,
+            }))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
@@ -1081,12 +1127,6 @@ impl Stmt for UnitsStmt {
             Err(YangError::UnexpectedToken(parser.line()))
         }
     }
-}
-
-
-#[derive(Debug, Clone)]
-pub struct RevisionStmts {
-    revision: Vec<RevisionStmt>
 }
 
 ///
