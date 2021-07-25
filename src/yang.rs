@@ -516,29 +516,24 @@ impl Stmt for ModuleStmt {
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let identifier_arg = ModuleStmt::parse_arg(parser)?;
-        let token = parser.get_token()?;
-        if let Token::BlockBegin = token {
+
+        if let Token::BlockBegin = parser.get_token()? {
             let module_header = ModuleHeaderStmts::parse(parser)?;
             let linkage = LinkageStmts::parse(parser)?;
             let meta = MetaStmts::parse(parser)?;
             // revision-stmts
             // body-stmts
 
-            let stmt = ModuleStmt {
-                identifier_arg,
-                module_header,
-                linkage,
-                meta,
-            };
-
-            let token = parser.get_token()?;
-            if let Token::BlockEnd = token {
-                println!("*** blockend??");
+            if let Token::BlockEnd = parser.get_token()? {
+                Ok(StmtType::ModuleStmt(ModuleStmt {
+                    identifier_arg,
+                    module_header,
+                    linkage,
+                    meta,
+                } ))
             } else {
-                return Err(YangError::UnexpectedToken(parser.line()));
+                Err(YangError::UnexpectedToken(parser.line()))
             }
-
-            Ok(StmtType::ModuleStmt(stmt))
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
@@ -553,8 +548,8 @@ pub struct SubmoduleStmt {
     identifier_arg: Identifier,
 
 //    submodule_header: SubmoduleHeaderStmts,
-//    liknage: LinkageStmts,
-//    meta: MetaStmts,
+    linkage: LinkageStmts,
+    meta: MetaStmts,
 //    revision: RevisionStmts,
 //    body: BodyStmts,
 }
@@ -572,11 +567,26 @@ impl Stmt for SubmoduleStmt {
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let identifier_arg = SubmoduleStmt::parse_arg(parser)?;
 
-        let stmt = SubmoduleStmt {
-            identifier_arg,
-        };
+        if let Token::BlockBegin = parser.get_token()? {
+//            let submodule_header = SubmoduleHeaderStmts::parse(parser)?;
+            let linkage = LinkageStmts::parse(parser)?;
+            let meta = MetaStmts::parse(parser)?;
+            // revision-stmts
+            // body-stmts
 
-        Ok(StmtType::SubmoduleStmt(stmt))
+            if let Token::BlockEnd = parser.get_token()? {
+                Ok(StmtType::SubmoduleStmt(SubmoduleStmt {
+                    identifier_arg,
+//                    module_header,
+                    linkage,
+                    meta,
+                } ))
+            } else {
+                Err(YangError::UnexpectedToken(parser.line()))
+            }
+        } else {
+            Err(YangError::UnexpectedToken(parser.line()))
+        }
     }
 }
 
@@ -1049,6 +1059,7 @@ impl Stmt for ReferenceStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct UnitsStmt {
+    string: String,
 }
 
 impl Stmt for UnitsStmt {
@@ -1057,12 +1068,18 @@ impl Stmt for UnitsStmt {
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
-        ""
+        "units"
     }
 
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+        let string = UnitsStmt::parse_arg(parser)?;
+
+        if let Token::StatementEnd = parser.get_token()? {
+            Ok(StmtType::UnitsStmt(UnitsStmt { string }))
+        } else {
+            Err(YangError::UnexpectedToken(parser.line()))
+        }
     }
 }
 
