@@ -447,7 +447,6 @@ impl fmt::Debug for StmtType {
             StmtType::InputStmt(stmt) => write!(f, "input-stmt {:?}", stmt),
             StmtType::OutputStmt(stmt) => write!(f, "output-stmt {:?}", stmt),
             StmtType::NotificationStmt(stmt) => write!(f, "notification-stmt {:?}", stmt),
-
             StmtType::DeviationStmt(stmt) => write!(f, "deviation-stmt {:?}", stmt),
             StmtType::DeviationNotSupportedStmt(stmt) => write!(f, "deviation-not-supported-stmt {:?}", stmt),
             StmtType::DeviateAddStmt(stmt) => write!(f, "deviate-add-stmt {:?}", stmt),
@@ -739,16 +738,13 @@ impl Stmt for ImportStmt {
             ("reference", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
-        let token = parser.get_token()?;
-        if let Token::BlockBegin = token {
+        if let Token::BlockBegin = parser.get_token()? {
             let mut stmts = parse_stmt_collection(parser, map)?;
             let prefix = collect_a_stmt!(stmts, PrefixStmt)?;
             let description = collect_opt_stmt!(stmts, DescriptionStmt)?;
             let reference = collect_opt_stmt!(stmts, ReferenceStmt)?;
 
-            let token = parser.get_token()?;
-
-            if let Token::BlockEnd = token {
+            if let Token::BlockEnd = parser.get_token()? {
                 let stmt = ImportStmt {
                     identifier_arg,
                     prefix,
@@ -884,11 +880,16 @@ impl Stmt for PrefixStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct BelongsToStmt {
+    /// 
+    identifier_arg: Identifier,
+
+    /// Prefix statement.
+    prefix: PrefixStmt,
 }
 
 impl Stmt for BelongsToStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
@@ -897,7 +898,11 @@ impl Stmt for BelongsToStmt {
 
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+        let identifier_arg = BelongsToStmt::parse_arg(parser)?;
+
+        } else {
+            Err(YangError::UnexpectedToken(parser.line()))
+        }
     }
 }
 
