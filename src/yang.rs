@@ -16,35 +16,35 @@ use crate::collect_a_stmt;
 use crate::collect_vec_stmt;
 use crate::collect_opt_stmt;
 
-/// TBD
-///
-///   yang-string         = *yang-char
-///
-///   ;; any Unicode or ISO/IEC 10646 character, including tab, carriage
-///   ;; return, and line feed but excluding the other C0 control
-///   ;; characters, the surrogate blocks, and the noncharacters
-///   yang-char = %x09 / %x0A / %x0D / %x20-D7FF /
-///                               ; exclude surrogate blocks %xD800-DFFF
-///              %xE000-FDCF /    ; exclude noncharacters %xFDD0-FDEF
-///              %xFDF0-FFFD /    ; exclude noncharacters %xFFFE-FFFF
-///              %x10000-1FFFD /  ; exclude noncharacters %x1FFFE-1FFFF
-///              %x20000-2FFFD /  ; exclude noncharacters %x2FFFE-2FFFF
-///              %x30000-3FFFD /  ; exclude noncharacters %x3FFFE-3FFFF
-///              %x40000-4FFFD /  ; exclude noncharacters %x4FFFE-4FFFF
-///              %x50000-5FFFD /  ; exclude noncharacters %x5FFFE-5FFFF
-///              %x60000-6FFFD /  ; exclude noncharacters %x6FFFE-6FFFF
-///              %x70000-7FFFD /  ; exclude noncharacters %x7FFFE-7FFFF
-///              %x80000-8FFFD /  ; exclude noncharacters %x8FFFE-8FFFF
-///              %x90000-9FFFD /  ; exclude noncharacters %x9FFFE-9FFFF
-///              %xA0000-AFFFD /  ; exclude noncharacters %xAFFFE-AFFFF
-///              %xB0000-BFFFD /  ; exclude noncharacters %xBFFFE-BFFFF
-///              %xC0000-CFFFD /  ; exclude noncharacters %xCFFFE-CFFFF
-///              %xD0000-DFFFD /  ; exclude noncharacters %xDFFFE-DFFFF
-///              %xE0000-EFFFD /  ; exclude noncharacters %xEFFFE-EFFFF
-///              %xF0000-FFFFD /  ; exclude noncharacters %xFFFFE-FFFFF
-///              %x100000-10FFFD  ; exclude noncharacters %x10FFFE-10FFFF
-/// 
-/// YANG string, quoted or unquoted.
+// TBD
+//
+//   yang-string         = *yang-char
+//
+//   ;; any Unicode or ISO/IEC 10646 character, including tab, carriage
+//   ;; return, and line feed but excluding the other C0 control
+//   ;; characters, the surrogate blocks, and the noncharacters
+//   yang-char = %x09 / %x0A / %x0D / %x20-D7FF /
+//                               ; exclude surrogate blocks %xD800-DFFF
+//              %xE000-FDCF /    ; exclude noncharacters %xFDD0-FDEF
+//              %xFDF0-FFFD /    ; exclude noncharacters %xFFFE-FFFF
+//              %x10000-1FFFD /  ; exclude noncharacters %x1FFFE-1FFFF
+//              %x20000-2FFFD /  ; exclude noncharacters %x2FFFE-2FFFF
+//              %x30000-3FFFD /  ; exclude noncharacters %x3FFFE-3FFFF
+//              %x40000-4FFFD /  ; exclude noncharacters %x4FFFE-4FFFF
+//              %x50000-5FFFD /  ; exclude noncharacters %x5FFFE-5FFFF
+//              %x60000-6FFFD /  ; exclude noncharacters %x6FFFE-6FFFF
+//              %x70000-7FFFD /  ; exclude noncharacters %x7FFFE-7FFFF
+//              %x80000-8FFFD /  ; exclude noncharacters %x8FFFE-8FFFF
+//              %x90000-9FFFD /  ; exclude noncharacters %x9FFFE-9FFFF
+//              %xA0000-AFFFD /  ; exclude noncharacters %xAFFFE-AFFFF
+//              %xB0000-BFFFD /  ; exclude noncharacters %xBFFFE-BFFFF
+//              %xC0000-CFFFD /  ; exclude noncharacters %xCFFFE-CFFFF
+//              %xD0000-DFFFD /  ; exclude noncharacters %xDFFFE-DFFFF
+//              %xE0000-EFFFD /  ; exclude noncharacters %xEFFFE-EFFFF
+//              %xF0000-FFFFD /  ; exclude noncharacters %xFFFFE-FFFFF
+//              %x100000-10FFFD  ; exclude noncharacters %x10FFFE-10FFFF
+// 
+// YANG string, quoted or unquoted.
 fn parse_string(parser: &mut Parser) -> Result<String, YangError> {
     let token = parser.get_token()?;
     match token {
@@ -91,9 +91,9 @@ impl Repeat {
 }
 
 
-///
-/// Trait for statement arg.
-///
+//
+// Trait for statement arg.
+//
 pub trait StmtArg {
     /// Parse token and return StmtArg if it is valid.
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> where Self: Sized;
@@ -102,7 +102,7 @@ pub trait StmtArg {
     fn get_arg(&self) -> String;
 }
 
-/// Yang Identifier.
+// Yang Identifier.
 #[derive(Debug, Clone)]
 pub struct Identifier {
     str: String,
@@ -129,7 +129,7 @@ impl StmtArg for Identifier {
     }
 }
 
-/// Yang String.
+// Yang String.
 impl StmtArg for String {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         Ok(parse_string(parser)?)
@@ -140,7 +140,7 @@ impl StmtArg for String {
     }
 }
 
-/// URL string.
+// URL string.
 impl StmtArg for Url {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let s = parse_string(parser)?;
@@ -157,13 +157,13 @@ impl StmtArg for Url {
 }
 
 
-/// Collection of statements in HashMap.
+// Collection of statements in HashMap.
 type StmtCollection = HashMap<String, Vec<StmtType>>;
 
-/// Statement Parser callback type.
+// Statement Parser callback type.
 type StmtParserFn = fn(&mut Parser) -> Result<StmtType, YangError>;
 
-/// Statement Parser initialization.
+// Statement Parser initialization.
 lazy_static! {
     static ref STMT_PARSER: HashMap<&'static str, StmtParserFn> = {
         let mut m = HashMap::new();
@@ -174,23 +174,85 @@ lazy_static! {
         m.insert("import", ImportStmt::parse as StmtParserFn);
         m.insert("include", IncludeStmt::parse as StmtParserFn);
         m.insert("namespace", NamespaceStmt::parse as StmtParserFn);
+        m.insert("belongs-to", BelongsToStmt::parse as StmtParserFn);
         m.insert("prefix", PrefixStmt::parse as StmtParserFn);
         m.insert("organization", OrganizationStmt::parse as StmtParserFn);
         m.insert("contact", ContactStmt::parse as StmtParserFn);
         m.insert("description", DescriptionStmt::parse as StmtParserFn);
         m.insert("reference", ReferenceStmt::parse as StmtParserFn);
+        m.insert("units", UnitsStmt::parse as StmtParserFn);
+        m.insert("revision", RevisionStmt::parse as StmtParserFn);
+        m.insert("revision-date", RevisionDateStmt::parse as StmtParserFn);
+        m.insert("extension", ExtensionStmt::parse as StmtParserFn);
+        m.insert("argument", ArgumentStmt::parse as StmtParserFn);
+        m.insert("yin-element", YinElementStmt::parse as StmtParserFn);
+        m.insert("identity", IdentityStmt::parse as StmtParserFn);
+        m.insert("base", BaseStmt::parse as StmtParserFn);
+        m.insert("feature", FeatureStmt::parse as StmtParserFn);
+        m.insert("if-feature", IfFeatureStmt::parse as StmtParserFn);
+        m.insert("typedef", TypedefStmt::parse as StmtParserFn);
+        m.insert("type", TypeStmt::parse as StmtParserFn);
+        m.insert("range", RangeStmt::parse as StmtParserFn);
+        m.insert("fraction-digits", FractionDigitsStmt::parse as StmtParserFn);
+        m.insert("length", LengthStmt::parse as StmtParserFn);
+        m.insert("pattern", PatternStmt::parse as StmtParserFn);
+        m.insert("modifier", ModifierStmt::parse as StmtParserFn);
+        m.insert("default", DefaultStmt::parse as StmtParserFn);
+        m.insert("enum", EnumStmt::parse as StmtParserFn);
+        m.insert("path", PathStmt::parse as StmtParserFn);
+        m.insert("require-instance", RequireInstanceStmt::parse as StmtParserFn);
+        m.insert("bit", BitStmt::parse as StmtParserFn);
+        m.insert("position", PositionStmt::parse as StmtParserFn);
+        m.insert("status", StatusStmt::parse as StmtParserFn);
+        m.insert("config", ConfigStmt::parse as StmtParserFn);
+        m.insert("mandatory", MandatoryStmt::parse as StmtParserFn);
+        m.insert("presense", PresenseStmt::parse as StmtParserFn);
+        m.insert("ordered-by", OrderedByStmt::parse as StmtParserFn);
+        m.insert("must", MustStmt::parse as StmtParserFn);
+        m.insert("error-message", ErrorMessageStmt::parse as StmtParserFn);
+        m.insert("error-app-tag", ErrorAppTagStmt::parse as StmtParserFn);
+        m.insert("min-elements", MinElementsStmt::parse as StmtParserFn);
+        m.insert("max-elements", MaxElementsStmt::parse as StmtParserFn);
+        m.insert("value", ValueStmt::parse as StmtParserFn);
+        m.insert("grouping", GroupingStmt::parse as StmtParserFn);
+        m.insert("container", ContainerStmt::parse as StmtParserFn);
+        m.insert("leaf", LeafStmt::parse as StmtParserFn);
+        m.insert("leaf-list", LeafListStmt::parse as StmtParserFn);
+        m.insert("list", ListStmt::parse as StmtParserFn);
+        m.insert("key", KeyStmt::parse as StmtParserFn);
+        m.insert("unique", UniqueStmt::parse as StmtParserFn);
+        m.insert("choice", ChoiceStmt::parse as StmtParserFn);
+        m.insert("short-case", ShortCaseStmt::parse as StmtParserFn);
+        m.insert("case", CaseStmt::parse as StmtParserFn);
+        m.insert("anydata", AnydataStmt::parse as StmtParserFn);
+        m.insert("anyxml", AnyxmlStmt::parse as StmtParserFn);
+        m.insert("uses", UsesStmt::parse as StmtParserFn);
+        m.insert("refine", RefineStmt::parse as StmtParserFn);
+        m.insert("uses-augment", UsesAugmentStmt::parse as StmtParserFn);
+        m.insert("augment", AugmentStmt::parse as StmtParserFn);
+        m.insert("when", WhenStmt::parse as StmtParserFn);
+        m.insert("rpc", RpcStmt::parse as StmtParserFn);
+        m.insert("action", ActionStmt::parse as StmtParserFn);
+        m.insert("input", InputStmt::parse as StmtParserFn);
+        m.insert("output", OutputStmt::parse as StmtParserFn);
+        m.insert("notification", NotificationStmt::parse as StmtParserFn);
+        m.insert("deviation", DeviationStmt::parse as StmtParserFn);
+        m.insert("deviation-not-supported", DeviationNotSupportedStmt::parse as StmtParserFn);
+        m.insert("deviate-add", DeviateAddStmt::parse as StmtParserFn);
+        m.insert("deviate-delete", DeviateDeleteStmt::parse as StmtParserFn);
+        m.insert("deviata-replace", DeviateReplaceStmt::parse as StmtParserFn);
 
         m
     };
 }
 
-/// Parse a single statement.
+// Parse a single statement.
 fn call_stmt_parser(parser: &mut Parser, keyword: &str) -> Result<StmtType, YangError> {
     let f = STMT_PARSER.get(keyword).unwrap();
     f(parser)
 }
 
-/// Get a list of statements in any order.
+// Get a list of statements in any order.
 pub fn parse_stmt_collection(parser: &mut Parser, map: HashMap<&'static str, Repeat>) -> Result<StmtCollection, YangError> {
     let mut stmts: StmtCollection = HashMap::new();
 
@@ -237,7 +299,7 @@ println!("*** rep {:?}", rep);
     Ok(stmts)
 }
 
-/// Yang Statement
+// Yang Statement
 pub enum StmtType {
     ModuleStmt(ModuleStmt),
     SubmoduleStmt(SubmoduleStmt),
@@ -385,6 +447,7 @@ impl fmt::Debug for StmtType {
             StmtType::InputStmt(stmt) => write!(f, "input-stmt {:?}", stmt),
             StmtType::OutputStmt(stmt) => write!(f, "output-stmt {:?}", stmt),
             StmtType::NotificationStmt(stmt) => write!(f, "notification-stmt {:?}", stmt),
+
             StmtType::DeviationStmt(stmt) => write!(f, "deviation-stmt {:?}", stmt),
             StmtType::DeviationNotSupportedStmt(stmt) => write!(f, "deviation-not-supported-stmt {:?}", stmt),
             StmtType::DeviateAddStmt(stmt) => write!(f, "deviate-add-stmt {:?}", stmt),
@@ -395,9 +458,9 @@ impl fmt::Debug for StmtType {
 }
 
 
-///
-/// Trait for a single YANG statement.
-///
+//
+// Trait for a single YANG statement.
+//
 pub trait Stmt {
     /// Arg type.
     type Arg;
@@ -424,7 +487,6 @@ pub trait Stmts {
 ///
 /// 7.1. The "module" Statement.
 ///
-/// Yang "module" statement.
 #[derive(Debug, Clone)]
 pub struct ModuleStmt {
     /// Module identifier.
