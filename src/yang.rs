@@ -2461,6 +2461,20 @@ pub struct RevisionStmts {
     revision: Vec<RevisionStmt>
 }
 
+impl RevisionStmts {
+    pub fn parse(parser: &mut Parser) -> Result<RevisionStmts, YangError> {
+        let map: HashMap<&'static str, Repeat> = [
+            ("revision", Repeat::new(Some(0), None)),
+        ].iter().cloned().collect();
+
+        let mut stmts = parse_stmt_collection(parser, map)?;
+
+        Ok(RevisionStmts {
+            revision: collect_vec_stmt!(stmts, RevisionStmt)?,
+        })
+    }
+}
+
 //
 // TBD: body-stmts
 //
