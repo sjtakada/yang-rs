@@ -381,10 +381,11 @@ pub struct ModuleStmt {
     /// Linkage statements.
     linkage: LinkageStmts,
 
-    /// Meta Statements.
+    /// Meta statements.
     meta: MetaStmts,
 
-//    revision: RevisionStmts,
+    /// Revision statements.
+    revision: RevisionStmts,
 //    body: BodyStmts,
 }
 
@@ -405,8 +406,8 @@ impl Stmt for ModuleStmt {
             let module_header = ModuleHeaderStmts::parse(parser)?;
             let linkage = LinkageStmts::parse(parser)?;
             let meta = MetaStmts::parse(parser)?;
-            // revision-stmts
-            // body-stmts
+            let revision = RevisionStmts::parse(parser)?;
+            // let body = BodyStmts::parser(parser)?;
 
             if let Token::BlockEnd = parser.get_token()? {
                 Ok(StmtType::ModuleStmt(ModuleStmt {
@@ -414,6 +415,8 @@ impl Stmt for ModuleStmt {
                     module_header,
                     linkage,
                     meta,
+                    revision,
+                    // body,
                 } ))
             } else {
                 Err(YangError::UnexpectedToken(parser.line()))
@@ -429,12 +432,20 @@ impl Stmt for ModuleStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct SubmoduleStmt {
+    /// Submodule identifier.
     identifier_arg: Identifier,
 
+    /// Submodule header statements.
     submodule_header: SubmoduleHeaderStmts,
+
+    /// Linkage statements.
     linkage: LinkageStmts,
+
+    /// Meta statements.
     meta: MetaStmts,
-//    revision: RevisionStmts,
+
+    /// Revision statements.
+    revision: RevisionStmts,
 //    body: BodyStmts,
 }
 
@@ -455,8 +466,8 @@ impl Stmt for SubmoduleStmt {
             let submodule_header = SubmoduleHeaderStmts::parse(parser)?;
             let linkage = LinkageStmts::parse(parser)?;
             let meta = MetaStmts::parse(parser)?;
-            // revision-stmts
-            // body-stmts
+            let revision = RevisionStmts::parse(parser)?;
+            // let body = BodyStmts::parse(parser)?;
 
             if let Token::BlockEnd = parser.get_token()? {
                 Ok(StmtType::SubmoduleStmt(SubmoduleStmt {
@@ -464,6 +475,7 @@ impl Stmt for SubmoduleStmt {
                     submodule_header,
                     linkage,
                     meta,
+                    revision,
                 } ))
             } else {
                 Err(YangError::UnexpectedToken(parser.line()))
