@@ -7,6 +7,7 @@
 
 pub mod error;
 pub mod parser;
+pub mod arg;
 pub mod yang;
 
 #[macro_use]

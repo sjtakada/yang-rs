@@ -10,53 +10,12 @@ use url::Url;
 
 use super::error::*;
 use super::parser::*;
+use super::arg::*;
 
 #[macro_use]
 use crate::collect_a_stmt;
 use crate::collect_vec_stmt;
 use crate::collect_opt_stmt;
-
-// TBD
-//
-//   yang-string         = *yang-char
-//
-//   ;; any Unicode or ISO/IEC 10646 character, including tab, carriage
-//   ;; return, and line feed but excluding the other C0 control
-//   ;; characters, the surrogate blocks, and the noncharacters
-//   yang-char = %x09 / %x0A / %x0D / %x20-D7FF /
-//                               ; exclude surrogate blocks %xD800-DFFF
-//              %xE000-FDCF /    ; exclude noncharacters %xFDD0-FDEF
-//              %xFDF0-FFFD /    ; exclude noncharacters %xFFFE-FFFF
-//              %x10000-1FFFD /  ; exclude noncharacters %x1FFFE-1FFFF
-//              %x20000-2FFFD /  ; exclude noncharacters %x2FFFE-2FFFF
-//              %x30000-3FFFD /  ; exclude noncharacters %x3FFFE-3FFFF
-//              %x40000-4FFFD /  ; exclude noncharacters %x4FFFE-4FFFF
-//              %x50000-5FFFD /  ; exclude noncharacters %x5FFFE-5FFFF
-//              %x60000-6FFFD /  ; exclude noncharacters %x6FFFE-6FFFF
-//              %x70000-7FFFD /  ; exclude noncharacters %x7FFFE-7FFFF
-//              %x80000-8FFFD /  ; exclude noncharacters %x8FFFE-8FFFF
-//              %x90000-9FFFD /  ; exclude noncharacters %x9FFFE-9FFFF
-//              %xA0000-AFFFD /  ; exclude noncharacters %xAFFFE-AFFFF
-//              %xB0000-BFFFD /  ; exclude noncharacters %xBFFFE-BFFFF
-//              %xC0000-CFFFD /  ; exclude noncharacters %xCFFFE-CFFFF
-//              %xD0000-DFFFD /  ; exclude noncharacters %xDFFFE-DFFFF
-//              %xE0000-EFFFD /  ; exclude noncharacters %xEFFFE-EFFFF
-//              %xF0000-FFFFD /  ; exclude noncharacters %xFFFFE-FFFFF
-//              %x100000-10FFFD  ; exclude noncharacters %x10FFFE-10FFFF
-// 
-// YANG string, quoted or unquoted.
-fn parse_string(parser: &mut Parser) -> Result<String, YangError> {
-    let token = parser.get_token()?;
-    match token {
-        // Statement argument.
-        Token::Identifier(s) |
-        Token::QuotedString(s) => Ok(s),
-        // 
-        Token::EndOfInput => Err(YangError::UnexpectedEof),
-        // Unexpected Token.
-        _ => Err(YangError::UnexpectedToken(parser.line())),
-    }
-}
 
 #[derive(Clone, Debug)]
 pub struct Repeat {
@@ -87,94 +46,6 @@ impl Repeat {
         } else {
             false
         }
-    }
-}
-
-
-//
-// Trait for statement arg.
-//
-pub trait StmtArg {
-    /// Parse token and return StmtArg if it is valid.
-    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> where Self: Sized;
-
-    /// Get argment into string.
-    fn get_arg(&self) -> String;
-}
-
-// Yang Identifier.
-#[derive(Debug, Clone)]
-pub struct Identifier {
-    str: String,
-}
-
-impl StmtArg for Identifier {
-    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
-        let str = parse_string(parser)?;
-
-        if !str.starts_with(|c: char| c.is_alphabetic() || c == '_') {
-            return Err(YangError::InvalidIdentifier);
-        }
-
-        if str.len() > 1 {
-            if let Some(_) = &str[1..].find(|c: char| !c.is_alphabetic() && !c.is_digit(10) && c != '_' && c != '-' && c != '.') {
-                return Err(YangError::InvalidIdentifier);
-            }
-        }
-        Ok(Identifier { str })
-    }
-
-    fn get_arg(&self) -> String {
-        self.str.clone()
-    }
-}
-
-// Yang String.
-impl StmtArg for String {
-    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
-        Ok(parse_string(parser)?)
-    }
-
-    fn get_arg(&self) -> String {
-        self.clone()
-    }
-}
-
-// URL string.
-impl StmtArg for Url {
-    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
-        let s = parse_string(parser)?;
-
-        match Url::parse(&s) {
-            Ok(url) => Ok(url),
-            Err(err) => Err(YangError::ArgumentParseError(err.to_string())),
-        }
-    }
-
-    fn get_arg(&self) -> String {
-        self.to_string()
-    }
-}
-
-// Yang Version String.
-#[derive(Debug, Clone)]
-pub struct YangVersionArg {
-    str: String,
-}
-
-impl StmtArg for YangVersionArg {
-    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
-        let str = parse_string(parser)?;
-
-        if str == "1.1" {
-            Ok(YangVersionArg { str })
-        } else {
-            Err(YangError::ArgumentParseError(format!("Invalid Yang Version {}", str)))
-        }
-    }
-
-    fn get_arg(&self) -> String {
-        self.str.clone()
     }
 }
 
@@ -668,16 +539,13 @@ impl Stmt for ImportStmt {
 
         if let Token::BlockBegin = parser.get_token()? {
             let mut stmts = parse_stmt_collection(parser, map)?;
-            let prefix = collect_a_stmt!(stmts, PrefixStmt)?;
-            let description = collect_opt_stmt!(stmts, DescriptionStmt)?;
-            let reference = collect_opt_stmt!(stmts, ReferenceStmt)?;
 
             if let Token::BlockEnd = parser.get_token()? {
                 Ok(StmtType::ImportStmt(ImportStmt {
                     identifier_arg,
-                    prefix,
-                    description,
-                    reference,
+                    prefix: collect_a_stmt!(stmts, PrefixStmt)?,
+                    description: collect_opt_stmt!(stmts, DescriptionStmt)?,
+                    reference: collect_opt_stmt!(stmts, ReferenceStmt)?,
                 }))
             } else {
                 Err(YangError::UnexpectedToken(parser.line()))
@@ -720,14 +588,12 @@ impl Stmt for IncludeStmt {
 
         if let Token::BlockBegin = parser.get_token()? {
             let mut stmts = parse_stmt_collection(parser, map)?;
-            let description = collect_opt_stmt!(stmts, DescriptionStmt)?;
-            let reference = collect_opt_stmt!(stmts, ReferenceStmt)?;
 
             if let Token::StatementEnd = parser.get_token()? {
                 Ok(StmtType::IncludeStmt(IncludeStmt {
                     identifier_arg,
-                    description,
-                    reference,
+                    description: collect_opt_stmt!(stmts, DescriptionStmt)?,
+                    reference: collect_opt_stmt!(stmts, ReferenceStmt)?,
                 }))
             } else {
                 Err(YangError::UnexpectedToken(parser.line()))
@@ -831,12 +697,11 @@ impl Stmt for BelongsToStmt {
             ].iter().cloned().collect();
 
             let mut stmts = parse_stmt_collection(parser, map)?;
-            let prefix = collect_a_stmt!(stmts, PrefixStmt)?;
 
             if let Token::BlockEnd = parser.get_token()? {
                 Ok(StmtType::BelongsToStmt(BelongsToStmt {
                     identifier_arg,
-                    prefix,
+                    prefix: collect_a_stmt!(stmts, PrefixStmt)?,
                 }))
             } else {
                 Err(YangError::UnexpectedToken(parser.line()))
@@ -1026,15 +891,13 @@ impl Stmt for RevisionStmt {
         ].iter().cloned().collect();
 
         let mut stmts = parse_stmt_collection(parser, map)?;
-        let description = collect_opt_stmt!(stmts, DescriptionStmt)?;
-        let reference = collect_opt_stmt!(stmts, ReferenceStmt)?;
 
         let token = parser.get_token()?;
         if let Token::StatementEnd = token {
             let stmt = RevisionStmt {
                 revision_date,
-                description,
-                reference,
+                description: collect_opt_stmt!(stmts, DescriptionStmt)?,
+                reference: collect_opt_stmt!(stmts, ReferenceStmt)?,
             };
 
             Ok(StmtType::RevisionStmt(stmt))

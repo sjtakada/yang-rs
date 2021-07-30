@@ -250,7 +250,7 @@ impl Parser {
                 return Ok(Token::EndOfInput);
             }
 
-            let (token, pos) = self.get_single_token()?;
+            let (token, _pos) = self.get_single_token()?;
             match token {
                 Token::Whitespace(_) |
                 Token::Comment(_) => {}
