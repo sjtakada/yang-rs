@@ -77,7 +77,7 @@ impl StmtArg for Identifier {
         }
 
         if str.len() > 1 {
-            if let Some(_) = &str[1..].find(|c: char| !c.is_alphabetic() && !c.is_digit(10) && c != '_' && c != '-' && c != '.') {
+            if let Some(_) = &str[1..].find(|c: char| !c.is_alphabetic() && !c.is_ascii_digit() && c != '_' && c != '-' && c != '.') {
                 return Err(YangError::InvalidIdentifier);
             }
         }
@@ -130,6 +130,40 @@ impl StmtArg for YangVersionArg {
             Ok(YangVersionArg { str })
         } else {
             Err(YangError::ArgumentParseError(format!("Invalid Yang Version {}", str)))
+        }
+    }
+
+    fn get_arg(&self) -> String {
+        self.str.clone()
+    }
+}
+
+// Date arg. 
+#[derive(Debug, Clone)]
+pub struct DateArg {
+    str: String,
+}
+
+impl StmtArg for DateArg {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+
+        if str.chars().count() == 10 {
+            if let Some(_) = &str[0..4].find(|c: char| !c.is_ascii_digit()) {
+                Err(YangError::ArgumentParseError("date-arg".to_string()))
+            } else if str.chars().nth(4).unwrap() != '-' {
+                Err(YangError::ArgumentParseError("date-arg".to_string()))
+            } else if let Some(_) = &str[5..7].find(|c: char| !c.is_ascii_digit()) {
+                Err(YangError::ArgumentParseError("date-arg".to_string()))
+            } else if str.chars().nth(7).unwrap() != '-' {
+                Err(YangError::ArgumentParseError("date-arg".to_string()))
+            } else if let Some(_) = &str[8..10].find(|c: char| !c.is_ascii_digit()) {
+                Err(YangError::ArgumentParseError("date-arg".to_string()))
+            } else {
+                Ok(DateArg { str })
+            }
+        } else {
+            Err(YangError::ArgumentParseError("date-arg".to_string()))
         }
     }
 

@@ -863,7 +863,7 @@ impl Stmt for UnitsStmt {
 #[derive(Debug, Clone)]
 pub struct RevisionStmt {
     /// Revision date.
-    revision_date: String, //DateArgStr,
+    revision_date: DateArg,
 
     /// Description.
     description: Option<DescriptionStmt>,
@@ -874,7 +874,7 @@ pub struct RevisionStmt {
 
 impl Stmt for RevisionStmt {
     /// Arg type.
-    type Arg = String; //DateArgStr,
+    type Arg = DateArg;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
