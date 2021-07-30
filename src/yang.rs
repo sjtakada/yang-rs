@@ -477,7 +477,6 @@ impl fmt::Debug for StmtType {
     }
 }
 
-
 //
 // Trait for a single YANG statement.
 //
@@ -497,13 +496,6 @@ pub trait Stmt {
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError>;
 }
 
-/*
-/// YANG Statements trait for a collection of statements.
-pub trait Stmts {
-
-}
-*/
-
 ///
 /// 7.1. The "module" Statement.
 ///
@@ -512,13 +504,13 @@ pub struct ModuleStmt {
     /// Module identifier.
     identifier_arg: Identifier,
 
-    ///
+    /// Module header statements.
     module_header: ModuleHeaderStmts,
 
-    ///
+    /// Linkage statements.
     linkage: LinkageStmts,
 
-    ///
+    /// Meta Statements.
     meta: MetaStmts,
 
 //    revision: RevisionStmts,
@@ -568,7 +560,7 @@ impl Stmt for ModuleStmt {
 pub struct SubmoduleStmt {
     identifier_arg: Identifier,
 
-//    submodule_header: SubmoduleHeaderStmts,
+    submodule_header: SubmoduleHeaderStmts,
     linkage: LinkageStmts,
     meta: MetaStmts,
 //    revision: RevisionStmts,
@@ -589,7 +581,7 @@ impl Stmt for SubmoduleStmt {
         let identifier_arg = SubmoduleStmt::parse_arg(parser)?;
 
         if let Token::BlockBegin = parser.get_token()? {
-//            let submodule_header = SubmoduleHeaderStmts::parse(parser)?;
+            let submodule_header = SubmoduleHeaderStmts::parse(parser)?;
             let linkage = LinkageStmts::parse(parser)?;
             let meta = MetaStmts::parse(parser)?;
             // revision-stmts
@@ -598,7 +590,7 @@ impl Stmt for SubmoduleStmt {
             if let Token::BlockEnd = parser.get_token()? {
                 Ok(StmtType::SubmoduleStmt(SubmoduleStmt {
                     identifier_arg,
-//                    module_header,
+                    submodule_header,
                     linkage,
                     meta,
                 } ))
@@ -610,126 +602,6 @@ impl Stmt for SubmoduleStmt {
         }
     }
 }
-
-///
-/// TBD collection statemtns..
-///
-#[derive(Debug, Clone)]
-pub struct ModuleHeaderStmts {
-    yang_version: YangVersionStmt,
-    namespace: NamespaceStmt,
-    prefix: PrefixStmt,
-}
-
-impl ModuleHeaderStmts {
-    pub fn parse(parser: &mut Parser) -> Result<ModuleHeaderStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("yang-version", Repeat::new(Some(1), Some(1))),
-            ("namespace", Repeat::new(Some(1), Some(1))),
-            ("prefix", Repeat::new(Some(1), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_collection(parser, map)?;
-        let yang_version = collect_a_stmt!(stmts, YangVersionStmt)?;
-        let namespace = collect_a_stmt!(stmts, NamespaceStmt)?;
-        let prefix = collect_a_stmt!(stmts, PrefixStmt)?;
-
-        Ok(ModuleHeaderStmts {
-            yang_version,
-            namespace,
-            prefix,
-        })
-    }
-}
-
-
-///
-/// TBD collection statemtns..
-///
-pub struct SubmoduleHeaderStmts {
-    yang_version: Box<YangVersionStmt>,
-//    belong_to: BelongToStmt,
-}
-
-
-///
-/// TBD collection statemtns..
-///
-#[derive(Debug, Clone)]
-pub struct MetaStmts {
-    organization: Option<OrganizationStmt>,
-    contact: Option<ContactStmt>,
-    description: Option<DescriptionStmt>,
-    reference: Option<ReferenceStmt>,
-}
-
-impl MetaStmts {
-    pub fn parse(parser: &mut Parser) -> Result<MetaStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("organization", Repeat::new(Some(0), None)),
-            ("contact", Repeat::new(Some(0), None)),
-            ("description", Repeat::new(Some(0), None)),
-            ("reference", Repeat::new(Some(0), None)),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_collection(parser, map)?;
-        let organization = collect_opt_stmt!(stmts, OrganizationStmt)?;
-        let contact = collect_opt_stmt!(stmts, ContactStmt)?;
-        let description = collect_opt_stmt!(stmts, DescriptionStmt)?;
-        let reference = collect_opt_stmt!(stmts, ReferenceStmt)?;
-
-        Ok(MetaStmts {
-            organization,
-            contact,
-            description,
-            reference,
-        })
-  }
-}
-
-///
-/// TBD collection statemtns..
-///
-#[derive(Debug, Clone)]
-pub struct LinkageStmts {
-    import: Vec<ImportStmt>,
-    include: Vec<IncludeStmt>,
-}
-
-impl LinkageStmts {
-    pub fn parse(parser: &mut Parser) -> Result<LinkageStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("import", Repeat::new(Some(0), None)),
-            ("include", Repeat::new(Some(0), None)),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_collection(parser, map)?;
-        let import = collect_vec_stmt!(stmts, ImportStmt)?;
-        let include = collect_vec_stmt!(stmts, IncludeStmt)?;
-
-        Ok(LinkageStmts {
-            import,
-            include,
-        })
-    }
-}
-
-///
-/// TBD.
-///
-#[derive(Debug, Clone)]
-pub struct RevisionStmts {
-    revision: Vec<RevisionStmt>
-}
-
-///
-/// TBD: body-stmts
-///
-
-///
-/// data-def-stmt
-///
-
 
 ///
 /// 7.1.2. The "yang-version" Statement.
@@ -2469,6 +2341,135 @@ impl Stmt for DeviateReplaceStmt {
         Err(YangError::PlaceHolder)
     }
 }
+
+
+///
+/// Module Header Statements.
+///
+#[derive(Debug, Clone)]
+pub struct ModuleHeaderStmts {
+    yang_version: YangVersionStmt,
+    namespace: NamespaceStmt,
+    prefix: PrefixStmt,
+}
+
+impl ModuleHeaderStmts {
+    pub fn parse(parser: &mut Parser) -> Result<ModuleHeaderStmts, YangError> {
+        let map: HashMap<&'static str, Repeat> = [
+            ("yang-version", Repeat::new(Some(1), Some(1))),
+            ("namespace", Repeat::new(Some(1), Some(1))),
+            ("prefix", Repeat::new(Some(1), Some(1))),
+        ].iter().cloned().collect();
+
+        let mut stmts = parse_stmt_collection(parser, map)?;
+
+        Ok(ModuleHeaderStmts {
+            yang_version: collect_a_stmt!(stmts, YangVersionStmt)?,
+            namespace: collect_a_stmt!(stmts, NamespaceStmt)?,
+            prefix: collect_a_stmt!(stmts, PrefixStmt)?,
+        })
+    }
+}
+
+
+///
+/// Submodule Header Statements.
+///
+#[derive(Debug, Clone)]
+pub struct SubmoduleHeaderStmts {
+    yang_version: YangVersionStmt,
+    belongs_to: BelongsToStmt,
+}
+
+impl SubmoduleHeaderStmts {
+    pub fn parse(parser: &mut Parser) -> Result<SubmoduleHeaderStmts, YangError> {
+        let map: HashMap<&'static str, Repeat> = [
+            ("yang-version", Repeat::new(Some(1), Some(1))),
+            ("belongs-to", Repeat::new(Some(1), Some(1))),
+        ].iter().cloned().collect();
+
+        let mut stmts = parse_stmt_collection(parser, map)?;
+
+        Ok(SubmoduleHeaderStmts {
+            yang_version: collect_a_stmt!(stmts, YangVersionStmt)?,
+            belongs_to: collect_a_stmt!(stmts, BelongsToStmt)?,
+        })
+    }
+}
+
+///
+/// Meta Statements.
+///
+#[derive(Debug, Clone)]
+pub struct MetaStmts {
+    organization: Option<OrganizationStmt>,
+    contact: Option<ContactStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+}
+
+impl MetaStmts {
+    pub fn parse(parser: &mut Parser) -> Result<MetaStmts, YangError> {
+        let map: HashMap<&'static str, Repeat> = [
+            ("organization", Repeat::new(Some(0), None)),
+            ("contact", Repeat::new(Some(0), None)),
+            ("description", Repeat::new(Some(0), None)),
+            ("reference", Repeat::new(Some(0), None)),
+        ].iter().cloned().collect();
+
+        let mut stmts = parse_stmt_collection(parser, map)?;
+
+        Ok(MetaStmts {
+            organization: collect_opt_stmt!(stmts, OrganizationStmt)?,
+            contact: collect_opt_stmt!(stmts, ContactStmt)?,
+            description: collect_opt_stmt!(stmts, DescriptionStmt)?,
+            reference: collect_opt_stmt!(stmts, ReferenceStmt)?,
+        })
+  }
+}
+
+///
+/// Linkage Statements.
+///
+#[derive(Debug, Clone)]
+pub struct LinkageStmts {
+    import: Vec<ImportStmt>,
+    include: Vec<IncludeStmt>,
+}
+
+impl LinkageStmts {
+    pub fn parse(parser: &mut Parser) -> Result<LinkageStmts, YangError> {
+        let map: HashMap<&'static str, Repeat> = [
+            ("import", Repeat::new(Some(0), None)),
+            ("include", Repeat::new(Some(0), None)),
+        ].iter().cloned().collect();
+
+        let mut stmts = parse_stmt_collection(parser, map)?;
+
+        Ok(LinkageStmts {
+            import: collect_vec_stmt!(stmts, ImportStmt)?,
+            include: collect_vec_stmt!(stmts, IncludeStmt)?,
+        })
+    }
+}
+
+///
+/// Revision Statements.
+///
+#[derive(Debug, Clone)]
+pub struct RevisionStmts {
+    revision: Vec<RevisionStmt>
+}
+
+//
+// TBD: body-stmts
+//
+
+//
+// data-def-stmt
+//
+
+
 
 
 /*
