@@ -183,7 +183,6 @@ println!("*** parse_stmts {:?}", token);
         };
 
         if !rep.validate(n) {
-println!("*** rep {:?}", rep);
             return Err(YangError::StatementMismatch(k));
         }
     }
@@ -897,22 +896,26 @@ impl Stmt for RevisionStmt {
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let revision_date = RevisionStmt::parse_arg(parser)?;
 
-        let map: HashMap<&'static str, Repeat> = [
-            ("description", Repeat::new(Some(0), Some(1))),
-            ("reference", Repeat::new(Some(0), Some(1))),
-        ].iter().cloned().collect();
+        if let Token::BlockBegin = parser.get_token()? {
+            let map: HashMap<&'static str, Repeat> = [
+                ("description", Repeat::new(Some(0), Some(1))),
+                ("reference", Repeat::new(Some(0), Some(1))),
+            ].iter().cloned().collect();
 
-        let mut stmts = parse_stmt_collection(parser, map)?;
+            let mut stmts = parse_stmt_collection(parser, map)?;
 
-        let token = parser.get_token()?;
-        if let Token::StatementEnd = token {
-            let stmt = RevisionStmt {
-                revision_date,
-                description: collect_opt_stmt!(stmts, DescriptionStmt)?,
-                reference: collect_opt_stmt!(stmts, ReferenceStmt)?,
-            };
+            let token = parser.get_token()?;
+            if let Token::BlockEnd = token {
+                let stmt = RevisionStmt {
+                    revision_date,
+                    description: collect_opt_stmt!(stmts, DescriptionStmt)?,
+                    reference: collect_opt_stmt!(stmts, ReferenceStmt)?,
+                };
 
-            Ok(StmtType::RevisionStmt(stmt))
+                Ok(StmtType::RevisionStmt(stmt))
+            } else {
+                Err(YangError::UnexpectedToken(parser.line()))
+            }
         } else {
             Err(YangError::UnexpectedToken(parser.line()))
         }
