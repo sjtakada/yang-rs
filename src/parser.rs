@@ -14,7 +14,7 @@ use std::io::ErrorKind;
 use std::path::Path;
 
 use super::error::*;
-use super::yang::*;
+use super::stmt::*;
 
 #[macro_use]
 use crate::collect_a_stmt;
@@ -164,7 +164,7 @@ pub struct Parser {
     column: Cell<usize>,
 
     /// Saved token.
-    saved: Cell<Option<(Token, usize)>>,
+    saved: Cell<Option<Token>>,
 }
 
 impl Parser {
@@ -221,36 +221,36 @@ impl Parser {
     }
 
     /// Save token to saved.
-    pub fn save_token(&mut self, token: Token, pos: usize) {
-        self.saved.replace(Some((token, pos)));
+    pub fn save_token(&mut self, token: Token) {
+        self.saved.replace(Some(token));
     }
 
     /// Load token from saved.
-    pub fn load_token(&mut self) -> Option<(Token, usize)> {
+    pub fn load_token(&mut self) -> Option<Token> {
         self.saved.replace(None)
     }
 
     /// Get a token except whitespace and comment.
-    pub fn get_token(&mut self) -> Result<(Token, usize), YangError> {
+    pub fn get_token(&mut self) -> Result<Token, YangError> {
         let mut st = String::new();
         let mut concat_str = false;
 
-        if let Some((token, pos)) = self.load_token() {
-            return Ok((token, pos));
+        if let Some(token) = self.load_token() {
+            return Ok(token)
         }
 
         loop {
             if self.input_len() == 0 {
                 if st.len() > 0 {
-                    return Ok((Token::QuotedString(st), self.pos()));
+                    return Ok(Token::QuotedString(st));
                 } else if concat_str {
                     return Err(YangError::UnexpectedEof);
                 }
 
-                return Ok((Token::EndOfInput, self.pos()));
+                return Ok(Token::EndOfInput);
             }
 
-            let (token, pos) = self.get_single_token()?;
+            let (token, _pos) = self.get_single_token()?;
             match token {
                 Token::Whitespace(_) |
                 Token::Comment(_) => {}
@@ -275,11 +275,11 @@ impl Parser {
                     }
 
                     if st.len() > 0 {
-                        self.save_token(token, pos);
-                        return Ok((Token::QuotedString(st), self.pos()));
+                        self.save_token(token);
+                        return Ok(Token::QuotedString(st));
                     }
 
-                    return Ok((token, pos));
+                    return Ok(token);
                 }
             }
         }
@@ -460,13 +460,13 @@ mod tests {
         let s = "module { }";
         let mut parser = Parser::new(s.to_string());
 
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::Identifier("module".to_string()));
         
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::BlockBegin);
         
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::BlockEnd);
     }
 
@@ -475,13 +475,13 @@ mod tests {
         let s = "module; /* comment */ statement";
         let mut parser = Parser::new(s.to_string());
 
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::Identifier("module".to_string()));
 
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::StatementEnd);
 
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::Identifier("statement".to_string()));
     }
 
@@ -491,10 +491,10 @@ mod tests {
 ";
         let mut parser = Parser::new(s.to_string());
 
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::Identifier("module".to_string()));
 
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
     }
 
@@ -503,10 +503,10 @@ mod tests {
         let s = "/* comment // */ module";
         let mut parser = Parser::new(s.to_string());
         
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::Identifier("module".to_string()));
 
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
     }
 
@@ -515,7 +515,7 @@ mod tests {
         let s = "// /* comment */ module";
         let mut parser = Parser::new(s.to_string());
 
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
     }
 
@@ -524,10 +524,10 @@ mod tests {
         let s = r#" "string" "#;
         let mut parser = Parser::new(s.to_string());
         
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::QuotedString(String::from("string".to_string())));
 
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
     }
 
@@ -536,10 +536,10 @@ mod tests {
         let s = r#" '"string"' "#;
         let mut parser = Parser::new(s.to_string());
         
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::QuotedString(String::from(r#""string""#.to_string())));
 
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
     }
 
@@ -548,16 +548,16 @@ mod tests {
         let s = r#" "Hello" + "World" { }"#;
         let mut parser = Parser::new(s.to_string());
 
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::QuotedString(String::from(r#"HelloWorld"#.to_string())));
 
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::BlockBegin);
 
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::BlockEnd);
 
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
     }
 
@@ -568,10 +568,10 @@ mod tests {
 
         let mut parser = Parser::new(s.to_string());
         
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::QuotedString(String::from("string1\n string2 ".to_string())));
 
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
     }
 
@@ -582,10 +582,10 @@ mod tests {
 
         let mut parser = Parser::new(s.to_string());
         
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::QuotedString(String::from("string1\nstring2".to_string())));
 
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
     }
 
@@ -599,10 +599,10 @@ mod tests {
 
         let mut parser = Parser::new(s.to_string());
         
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::QuotedString(String::from("string1\n\n string2\n\nstring3	string4".to_string())));
 
-        let (token, _) = parser.get_token().unwrap();
+        let token = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
     }
 }
