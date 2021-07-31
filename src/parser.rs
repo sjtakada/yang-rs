@@ -14,7 +14,7 @@ use std::io::ErrorKind;
 use std::path::Path;
 
 use super::error::*;
-use super::yang::*;
+use super::stmt::*;
 
 #[macro_use]
 use crate::collect_a_stmt;

@@ -8,7 +8,7 @@
 pub mod error;
 pub mod parser;
 pub mod arg;
-pub mod yang;
+pub mod stmt;
 
 #[macro_use]
 extern crate lazy_static;

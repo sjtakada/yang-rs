@@ -3,8 +3,8 @@
 //  Copyright (C) 2021 Toshiaki Takada
 //
 
-use super::parser::*;
 use quick_error::*;
+use super::parser::*;
 
 quick_error! {
     #[derive(Debug)]
