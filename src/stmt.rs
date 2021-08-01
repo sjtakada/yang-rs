@@ -359,20 +359,30 @@ pub trait Stmt {
     /// Arg type.
     type Arg;
 
-    /// Constructor Parameter.
-    type CtorParams;
+    /// Sub Statements.
+    type SubStmts;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str;
 
-    /// Return true if statement body is required.
-    fn body_required() -> bool {
+    /// Return true if this statement has sub-statements.
+    fn has_substmts() -> bool {
         false
     }
 
-    /// Return true if statement body is optional.
-    fn body_optional() -> bool {
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
         false
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        panic!();
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        panic!();
     }
 
     /// Parse a statement arg.
@@ -380,33 +390,37 @@ pub trait Stmt {
         Self::Arg::parse_arg(parser)
     }
 
-    /// Constructor with tuple of params. Panic if it is not defined.
-    fn ctor_with_params(params: Self::CtorParams) -> StmtType where Self: Sized {
-        panic!();
-    }
-
-    /// Constructor with a single arg. Panic if it is not defined.
-    fn ctor_with_arg(params: Self::Arg) -> StmtType where Self: Sized {
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
         panic!();
     }
 
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError>  where Self::Arg: StmtArg, Self: Sized {
-        if Self::body_required() {
+        let arg = Self::Arg::parse_arg(parser)?;
 
-        } else if Self::body_optional() {
+        if Self::has_substmts() {
+            if let Token::BlockBegin = parser.get_token()? {
+                let substmts = Self::parse_substmts(parser)?;
 
-        } else {
-            let arg = Self::Arg::parse_arg(parser)?;
-
-            if let Token::StatementEnd = parser.get_token()? {
-                return Ok(Self::ctor_with_arg(arg))
+                if let Token::BlockEnd = parser.get_token()? {
+                    Ok(Self::new_with_substmts(arg, substmts))
+                } else {
+                    Err(YangError::UnexpectedToken(parser.line()))
+                }
             } else {
-                return Err(YangError::UnexpectedToken(parser.line()))
+                // TBD
+                Err(YangError::UnexpectedToken(parser.line()))
+            }
+        } else if Self::opt_substmts() {
+            Err(YangError::PlaceHolder)
+        } else {
+            if let Token::StatementEnd = parser.get_token()? {
+                Ok(Self::new_with_arg(arg))
+            } else {
+                Err(YangError::UnexpectedToken(parser.line()))
             }
         }
-
-        Err(YangError::PlaceHolder)
     }
 }
 
@@ -437,7 +451,7 @@ impl Stmt for ModuleStmt {
     type Arg = Identifier;
 
     /// Constructor Parameter.
-    type CtorParams = (Identifier, ModuleHeaderStmts, LinkageStmts, MetaStmts, RevisionStmts);
+    type SubStmts = (ModuleHeaderStmts, LinkageStmts, MetaStmts, RevisionStmts);
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
@@ -500,7 +514,7 @@ impl Stmt for SubmoduleStmt {
     type Arg = Identifier;
 
     /// Constructor Parameter.
-    type CtorParams = (Identifier, SubmoduleHeaderStmts, LinkageStmts, MetaStmts, RevisionStmts);
+    type SubStmts = (SubmoduleHeaderStmts, LinkageStmts, MetaStmts, RevisionStmts);
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
@@ -548,24 +562,18 @@ impl Stmt for YangVersionStmt {
     type Arg = YangVersionArg;
 
     /// Constructor Parameter.
-    type CtorParams = Self::Arg;
+    type SubStmts = Self::Arg;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "yang-version"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let yang_version_arg = YangVersionStmt::parse_arg(parser)?;
-
-        if let Token::StatementEnd = parser.get_token()? {
-            Ok(StmtType::YangVersionStmt(YangVersionStmt {
-                yang_version_arg,
-            }))
-        } else {
-            Err(YangError::UnexpectedToken(parser.line()))
-        }
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::YangVersionStmt(YangVersionStmt {
+            yang_version_arg: arg
+        })
     }
 }
 
@@ -586,17 +594,30 @@ impl Stmt for ImportStmt {
     type Arg = Identifier;
 
     /// Constructor Parameter.
-    type CtorParams = Self::Arg;
+    type SubStmts = (PrefixStmt, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "import"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let identifier_arg = ImportStmt::parse_arg(parser)?;
+    /// Return true if this statement has substatements.
+    fn has_substmts() -> bool {
+        true
+    }
 
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::ImportStmt(ImportStmt {
+            identifier_arg: arg,
+            prefix: substmts.0,
+            description: substmts.1,
+            reference: substmts.2,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
         let map: HashMap<&'static str, Repeat> = [
             ("prefix", Repeat::new(Some(1), Some(1))),
 //            ("revision-date", Repeat::new(Some(1), Some(1))),
@@ -604,22 +625,11 @@ impl Stmt for ImportStmt {
             ("reference", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
-        if let Token::BlockBegin = parser.get_token()? {
-            let mut stmts = parse_stmt_collection(parser, map)?;
+        let mut stmts = parse_stmt_collection(parser, map)?;
 
-            if let Token::BlockEnd = parser.get_token()? {
-                Ok(StmtType::ImportStmt(ImportStmt {
-                    identifier_arg,
-                    prefix: collect_a_stmt!(stmts, PrefixStmt)?,
-                    description: collect_opt_stmt!(stmts, DescriptionStmt)?,
-                    reference: collect_opt_stmt!(stmts, ReferenceStmt)?,
-                }))
-            } else {
-                Err(YangError::UnexpectedToken(parser.line()))
-            }
-        } else {
-            Err(YangError::UnexpectedToken(parser.line()))
-        }
+        Ok((collect_a_stmt!(stmts, PrefixStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?))
     }
 }
 
@@ -639,7 +649,7 @@ impl Stmt for IncludeStmt {
     type Arg = Identifier;
 
     /// Constructor Parameter.
-    type CtorParams = Self::Arg;
+    type SubStmts = (Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
@@ -687,26 +697,16 @@ impl Stmt for NamespaceStmt {
     type Arg = Url;
 
     /// Constructor Parameter.
-    type CtorParams = Self::Arg;
+    type SubStmts = Self::Arg;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "namespace"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let uri_str = NamespaceStmt::parse_arg(parser)?;
-
-        if let Token::StatementEnd = parser.get_token()? {
-            Ok(StmtType::NamespaceStmt(
-                NamespaceStmt {
-                    uri_str,
-                }
-            ))
-        } else {
-            Err(YangError::UnexpectedToken(parser.line()))
-        }
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::NamespaceStmt(NamespaceStmt { uri_str: arg })
     }
 }
 
@@ -723,22 +723,16 @@ impl Stmt for PrefixStmt {
     type Arg = Identifier;
 
     /// Constructor Parameter.
-    type CtorParams = Self::Arg;
+    type SubStmts = Self::Arg;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "prefix"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let prefix_arg_str = PrefixStmt::parse_arg(parser)?;
-
-        if let Token::StatementEnd = parser.get_token()? {
-            Ok(StmtType::PrefixStmt(PrefixStmt { prefix_arg_str }))
-        } else {
-            Err(YangError::UnexpectedToken(parser.line()))
-        }
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::PrefixStmt(PrefixStmt { prefix_arg_str: arg })
     }
 }
 
@@ -759,7 +753,7 @@ impl Stmt for BelongsToStmt {
     type Arg = Identifier;
 
     /// Constructor Parameter.
-    type CtorParams = Self::Arg;
+    type SubStmts = Self::Arg;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
@@ -804,22 +798,16 @@ impl Stmt for OrganizationStmt {
     type Arg = String;
 
     /// Constructor Parameter.
-    type CtorParams = Self::Arg;
+    type SubStmts = Self::Arg;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "organization"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let string = OrganizationStmt::parse_arg(parser)?;
-
-        if let Token::StatementEnd = parser.get_token()? {
-            Ok(StmtType::OrganizationStmt(OrganizationStmt { string }))
-        } else {
-            Err(YangError::UnexpectedToken(parser.line()))
-        }
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::OrganizationStmt(OrganizationStmt { string: arg })
     }
 }
 
@@ -836,22 +824,16 @@ impl Stmt for ContactStmt {
     type Arg = String;
 
     /// Constructor Parameter.
-    type CtorParams = Self::Arg;
+    type SubStmts = Self::Arg;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "contact"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let string = ContactStmt::parse_arg(parser)?;
-
-        if let Token::StatementEnd = parser.get_token()? {
-            Ok(StmtType::ContactStmt(ContactStmt { string }))
-        } else {
-            Err(YangError::UnexpectedToken(parser.line()))
-        }
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::ContactStmt(ContactStmt { string: arg })
     }
 }
 
@@ -868,22 +850,16 @@ impl Stmt for DescriptionStmt {
     type Arg = String;
 
     /// Constructor Parameter.
-    type CtorParams = Self::Arg;
+    type SubStmts = Self::Arg;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "description"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let string = DescriptionStmt::parse_arg(parser)?;
-
-        if let Token::StatementEnd = parser.get_token()? {
-            Ok(StmtType::DescriptionStmt(DescriptionStmt { string }))
-        } else {
-            Err(YangError::UnexpectedToken(parser.line()))
-        }
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::DescriptionStmt(DescriptionStmt { string: arg })
     }
 }
 
@@ -900,22 +876,16 @@ impl Stmt for ReferenceStmt {
     type Arg = String;
 
     /// Constructor Parameter.
-    type CtorParams = Self::Arg;
+    type SubStmts = Self::Arg;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "reference"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let string = ReferenceStmt::parse_arg(parser)?;
-
-        if let Token::StatementEnd = parser.get_token()? {
-            Ok(StmtType::ReferenceStmt(ReferenceStmt { string }))
-        } else {
-            Err(YangError::UnexpectedToken(parser.line()))
-        }
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::ReferenceStmt(ReferenceStmt { string: arg })
     }
 }
 
@@ -932,22 +902,16 @@ impl Stmt for UnitsStmt {
     type Arg = String;
 
     /// Constructor Parameter.
-    type CtorParams = Self::Arg;
+    type SubStmts = Self::Arg;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "units"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let string = UnitsStmt::parse_arg(parser)?;
-
-        if let Token::StatementEnd = parser.get_token()? {
-            Ok(StmtType::UnitsStmt(UnitsStmt { string }))
-        } else {
-            Err(YangError::UnexpectedToken(parser.line()))
-        }
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::UnitsStmt(UnitsStmt { string: arg })
     }
 }
 
@@ -971,7 +935,7 @@ impl Stmt for RevisionStmt {
     type Arg = DateArg;
 
     /// Constructor Parameter.
-    type CtorParams = Self::Arg;
+    type SubStmts = Self::Arg;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
