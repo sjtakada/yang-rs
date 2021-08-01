@@ -376,12 +376,12 @@ pub trait Stmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+    fn new_with_substmts(_arg: Self::Arg, _substmts: Self::SubStmts) -> StmtType where Self: Sized {
         panic!();
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+    fn new_with_arg(_arg: Self::Arg) -> StmtType where Self: Sized {
         panic!();
     }
 
@@ -391,7 +391,7 @@ pub trait Stmt {
     }
 
     /// Parse substatements.
-    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+    fn parse_substmts(_parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
         panic!();
     }
 
@@ -409,11 +409,26 @@ pub trait Stmt {
                     Err(YangError::UnexpectedToken(parser.line()))
                 }
             } else {
-                // TBD
                 Err(YangError::UnexpectedToken(parser.line()))
             }
         } else if Self::opt_substmts() {
-            Err(YangError::PlaceHolder)
+            match parser.get_token()? {
+                Token::StatementEnd => {
+                    Ok(Self::new_with_arg(arg))
+                }
+                Token::BlockBegin => {
+                    let substmts = Self::parse_substmts(parser)?;
+
+                    if let Token::BlockEnd = parser.get_token()? {
+                        Ok(Self::new_with_substmts(arg, substmts))
+                    } else {
+                        Err(YangError::UnexpectedToken(parser.line()))
+                    }
+                }
+                _ => {
+                    Err(YangError::UnexpectedToken(parser.line()))
+                }
+            }
         } else {
             if let Token::StatementEnd = parser.get_token()? {
                 Ok(Self::new_with_arg(arg))
@@ -653,34 +668,44 @@ impl Stmt for IncludeStmt {
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
-        "incluse"
+        "include"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let identifier_arg = IncludeStmt::parse_arg(parser)?;
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
 
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::IncludeStmt(IncludeStmt {
+            identifier_arg: arg,
+            description: None,
+            reference: None,
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::IncludeStmt(IncludeStmt {
+            identifier_arg: arg,
+            description: substmts.0,
+            reference: substmts.1,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
         let map: HashMap<&'static str, Repeat> = [
 //            ("revision-date", Repeat::new(Some(1), Some(1))),
             ("description", Repeat::new(Some(0), Some(1))),
             ("reference", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
-        if let Token::BlockBegin = parser.get_token()? {
-            let mut stmts = parse_stmt_collection(parser, map)?;
+        let mut stmts = parse_stmt_collection(parser, map)?;
 
-            if let Token::StatementEnd = parser.get_token()? {
-                Ok(StmtType::IncludeStmt(IncludeStmt {
-                    identifier_arg,
-                    description: collect_opt_stmt!(stmts, DescriptionStmt)?,
-                    reference: collect_opt_stmt!(stmts, ReferenceStmt)?,
-                }))
-            } else {
-                Err(YangError::UnexpectedToken(parser.line()))
-            }
-        } else {
-            Err(YangError::UnexpectedToken(parser.line()))
-        }
+        Ok((collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?))
     }
 }
 
