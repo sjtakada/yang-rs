@@ -380,26 +380,18 @@ pub trait Stmt {
         Self::Arg::parse_arg(parser)
     }
 
-    ///
-//    fn wrap(self: Self) -> StmtType;
-
-    /// 
-    fn ctor_with_params(params: Self::CtorParams) -> Self where Self: Sized {
+    /// Constructor with tuple of params. Panic if it is not defined.
+    fn ctor_with_params(params: Self::CtorParams) -> StmtType where Self: Sized {
         panic!();
     }
 
-    /// 
-    fn ctor_with_arg(params: Self::Arg) -> Self where Self: Sized {
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn ctor_with_arg(params: Self::Arg) -> StmtType where Self: Sized {
         panic!();
     }
-
-//    fn parse_x(parser: &mut Parser) -> Result<Self, YangError>  where Self::Arg: StmtArg, Self: Sized {
-//        return Ok(Self::new())
-//    }
 
     /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError>  where Self::Arg: StmtArg {
-/*
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError>  where Self::Arg: StmtArg, Self: Sized {
         if Self::body_required() {
 
         } else if Self::body_optional() {
@@ -408,12 +400,11 @@ pub trait Stmt {
             let arg = Self::Arg::parse_arg(parser)?;
 
             if let Token::StatementEnd = parser.get_token()? {
-                return Ok(Self::wrap(Self { arg }))
+                return Ok(Self::ctor_with_arg(arg))
             } else {
                 return Err(YangError::UnexpectedToken(parser.line()))
             }
         }
-*/
 
         Err(YangError::PlaceHolder)
     }
