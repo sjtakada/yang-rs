@@ -36,7 +36,7 @@ pub fn parse_file(filename: &str) -> std::io::Result<()> {
 //    parser.init_stmt_parsers();
 
     match parser.parse_yang() {
-        Ok(yang) => {
+        Ok(_yang) => {
 //            println!("{:?}", yang)
         }
         Err(err) => {
