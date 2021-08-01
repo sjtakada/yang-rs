@@ -74,6 +74,7 @@ lazy_static! {
         m.insert("reference", ReferenceStmt::parse as StmtParserFn);
         m.insert("units", UnitsStmt::parse as StmtParserFn);
         m.insert("revision", RevisionStmt::parse as StmtParserFn);
+/*
         m.insert("revision-date", RevisionDateStmt::parse as StmtParserFn);
         m.insert("extension", ExtensionStmt::parse as StmtParserFn);
         m.insert("argument", ArgumentStmt::parse as StmtParserFn);
@@ -133,7 +134,7 @@ lazy_static! {
         m.insert("deviate-add", DeviateAddStmt::parse as StmtParserFn);
         m.insert("deviate-delete", DeviateDeleteStmt::parse as StmtParserFn);
         m.insert("deviata-replace", DeviateReplaceStmt::parse as StmtParserFn);
-
+*/
         m
     };
 }
@@ -206,6 +207,7 @@ pub enum StmtType {
     ReferenceStmt(ReferenceStmt),
     UnitsStmt(UnitsStmt),
     RevisionStmt(RevisionStmt),
+/*
     RevisionDateStmt(RevisionDateStmt),
     ExtensionStmt(ExtensionStmt),
     ArgumentStmt(ArgumentStmt),
@@ -265,6 +267,7 @@ pub enum StmtType {
     DeviateAddStmt(DeviateAddStmt),
     DeviateDeleteStmt(DeviateDeleteStmt),
     DeviateReplaceStmt(DeviateReplaceStmt),
+*/
 }
 
 impl fmt::Debug for StmtType {
@@ -284,6 +287,7 @@ impl fmt::Debug for StmtType {
             StmtType::ReferenceStmt(stmt) => write!(f, "reference-stmt {:?}", stmt),
             StmtType::UnitsStmt(stmt) => write!(f, "units-stmt {:?}", stmt),
             StmtType::RevisionStmt(stmt) => write!(f, "revision-stmt {:?}", stmt),
+/*
             StmtType::RevisionDateStmt(stmt) => write!(f, "revision-date-stmt {:?}", stmt),
             StmtType::ExtensionStmt(stmt) => write!(f, "extension-stmt {:?}", stmt),
             StmtType::ArgumentStmt(stmt) => write!(f, "argument-stmt {:?}", stmt),
@@ -343,6 +347,7 @@ impl fmt::Debug for StmtType {
             StmtType::DeviateAddStmt(stmt) => write!(f, "deviate-add-stmt {:?}", stmt),
             StmtType::DeviateDeleteStmt(stmt) => write!(f, "deviate-delete-stmt {:?}", stmt),
             StmtType::DeviateReplaceStmt(stmt) => write!(f, "deviate-replace-stmt {:?}", stmt),
+*/
         }
     }
 }
@@ -357,13 +362,50 @@ pub trait Stmt {
     /// Return statement keyword in &str.
     fn keyword() -> &'static str;
 
+    /// Return true if statement body is required.
+    fn body_required() -> bool {
+        false
+    }
+
+    /// Return true if statement body is optional.
+    fn body_optional() -> bool {
+        false
+    }
+
     /// Parse a statement arg.
     fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> where Self::Arg: StmtArg {
         Self::Arg::parse_arg(parser)
     }
 
+    ///
+//    fn wrap(self: Self) -> StmtType;
+
+//    fn construct(params()) -> Self where Self: Sized;
+
+//    fn parse_x(parser: &mut Parser) -> Result<Self, YangError>  where Self::Arg: StmtArg, Self: Sized {
+//        return Ok(Self::new())
+//    }
+
     /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError>;
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError>  where Self::Arg: StmtArg {
+/*
+        if Self::body_required() {
+
+        } else if Self::body_optional() {
+
+        } else {
+            let arg = Self::Arg::parse_arg(parser)?;
+
+            if let Token::StatementEnd = parser.get_token()? {
+                return Ok(Self::wrap(Self { arg }))
+            } else {
+                return Err(YangError::UnexpectedToken(parser.line()))
+            }
+        }
+*/
+
+        Err(YangError::PlaceHolder)
+    }
 }
 
 ///
@@ -921,6 +963,8 @@ impl Stmt for RevisionStmt {
         }
     }
 }
+
+/*  XXXX TBD
 
 ///
 ///
@@ -2219,6 +2263,8 @@ impl Stmt for DeviateReplaceStmt {
         Err(YangError::PlaceHolder)
     }
 }
+
+TBD */
 
 
 ///
