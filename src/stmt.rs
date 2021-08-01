@@ -465,7 +465,7 @@ impl Stmt for ModuleStmt {
     /// Arg type.
     type Arg = Identifier;
 
-    /// Constructor Parameter.
+    /// Sub Statements.
     type SubStmts = (ModuleHeaderStmts, LinkageStmts, MetaStmts, RevisionStmts);
 
     /// Return statement keyword in &str.
@@ -528,7 +528,7 @@ impl Stmt for SubmoduleStmt {
     /// Arg type.
     type Arg = Identifier;
 
-    /// Constructor Parameter.
+    /// Sub Statements.
     type SubStmts = (SubmoduleHeaderStmts, LinkageStmts, MetaStmts, RevisionStmts);
 
     /// Return statement keyword in &str.
@@ -576,7 +576,7 @@ impl Stmt for YangVersionStmt {
     /// Arg type.
     type Arg = YangVersionArg;
 
-    /// Constructor Parameter.
+    /// Sub Statements.
     type SubStmts = Self::Arg;
 
     /// Return statement keyword in &str.
@@ -608,7 +608,7 @@ impl Stmt for ImportStmt {
     /// Arg type.
     type Arg = Identifier;
 
-    /// Constructor Parameter.
+    /// Sub Statements.
     type SubStmts = (PrefixStmt, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
@@ -663,7 +663,7 @@ impl Stmt for IncludeStmt {
     /// Arg type.
     type Arg = Identifier;
 
-    /// Constructor Parameter.
+    /// Sub Statements.
     type SubStmts = (Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
@@ -721,7 +721,7 @@ impl Stmt for NamespaceStmt {
     /// Arg type.
     type Arg = Url;
 
-    /// Constructor Parameter.
+    /// Sub Statements.
     type SubStmts = Self::Arg;
 
     /// Return statement keyword in &str.
@@ -747,7 +747,7 @@ impl Stmt for PrefixStmt {
     /// Arg type.
     type Arg = Identifier;
 
-    /// Constructor Parameter.
+    /// Sub Statements.
     type SubStmts = Self::Arg;
 
     /// Return statement keyword in &str.
@@ -777,36 +777,36 @@ impl Stmt for BelongsToStmt {
     /// Arg type.
     type Arg = Identifier;
 
-    /// Constructor Parameter.
-    type SubStmts = Self::Arg;
+    /// Sub Statements.
+    type SubStmts = (PrefixStmt,);
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "belongs-to"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let identifier_arg = BelongsToStmt::parse_arg(parser)?;
+    /// Return true if this statement has substatements.
+    fn has_substmts() -> bool {
+        true
+    }
 
-        if let Token::BlockBegin = parser.get_token()? {
-            let map: HashMap<&'static str, Repeat> = [
-                ("prefix", Repeat::new(Some(1), Some(1))),
-            ].iter().cloned().collect();
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::BelongsToStmt(BelongsToStmt {
+            identifier_arg: arg,
+            prefix: substmts.0,
+        })
+    }
 
-            let mut stmts = parse_stmt_collection(parser, map)?;
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let map: HashMap<&'static str, Repeat> = [
+            ("prefix", Repeat::new(Some(1), Some(1))),
+        ].iter().cloned().collect();
 
-            if let Token::BlockEnd = parser.get_token()? {
-                Ok(StmtType::BelongsToStmt(BelongsToStmt {
-                    identifier_arg,
-                    prefix: collect_a_stmt!(stmts, PrefixStmt)?,
-                }))
-            } else {
-                Err(YangError::UnexpectedToken(parser.line()))
-            }
-        } else {
-            Err(YangError::UnexpectedToken(parser.line()))
-        }
+        let mut stmts = parse_stmt_collection(parser, map)?;
+
+        Ok((collect_a_stmt!(stmts, PrefixStmt)?,))
     }
 }
 
@@ -822,7 +822,7 @@ impl Stmt for OrganizationStmt {
     /// Arg type.
     type Arg = String;
 
-    /// Constructor Parameter.
+    /// Sub Statements.
     type SubStmts = Self::Arg;
 
     /// Return statement keyword in &str.
@@ -848,7 +848,7 @@ impl Stmt for ContactStmt {
     /// Arg type.
     type Arg = String;
 
-    /// Constructor Parameter.
+    /// Sub Statements.
     type SubStmts = Self::Arg;
 
     /// Return statement keyword in &str.
@@ -874,7 +874,7 @@ impl Stmt for DescriptionStmt {
     /// Arg type.
     type Arg = String;
 
-    /// Constructor Parameter.
+    /// Sub Statements.
     type SubStmts = Self::Arg;
 
     /// Return statement keyword in &str.
@@ -900,7 +900,7 @@ impl Stmt for ReferenceStmt {
     /// Arg type.
     type Arg = String;
 
-    /// Constructor Parameter.
+    /// Sub Statements.
     type SubStmts = Self::Arg;
 
     /// Return statement keyword in &str.
@@ -926,7 +926,7 @@ impl Stmt for UnitsStmt {
     /// Arg type.
     type Arg = String;
 
-    /// Constructor Parameter.
+    /// Sub Statements.
     type SubStmts = Self::Arg;
 
     /// Return statement keyword in &str.
@@ -959,14 +959,51 @@ impl Stmt for RevisionStmt {
     /// Arg type.
     type Arg = DateArg;
 
-    /// Constructor Parameter.
-    type SubStmts = Self::Arg;
+    /// Sub Statements.
+    type SubStmts = (Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "revision"
     }
 
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::RevisionStmt(RevisionStmt {
+            revision_date: arg,
+            description: None,
+            reference: None,
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::RevisionStmt(RevisionStmt {
+            revision_date: arg,
+            description: substmts.0,
+            reference: substmts.1,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let map: HashMap<&'static str, Repeat> = [
+            ("description", Repeat::new(Some(0), Some(1))),
+            ("reference", Repeat::new(Some(0), Some(1))),
+        ].iter().cloned().collect();
+
+        let mut stmts = parse_stmt_collection(parser, map)?;
+        
+        Ok((collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?))
+    }
+
+/*
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
         let revision_date = RevisionStmt::parse_arg(parser)?;
@@ -995,6 +1032,7 @@ impl Stmt for RevisionStmt {
             Err(YangError::UnexpectedToken(parser.line()))
         }
     }
+*/
 }
 
 /*  XXXX TBD

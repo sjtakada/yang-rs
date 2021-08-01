@@ -4,7 +4,7 @@
 //
 
 use quick_error::*;
-use super::parser::*;
+//use super::parser::*;
 
 quick_error! {
     #[derive(Debug)]
