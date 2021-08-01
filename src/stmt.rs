@@ -359,6 +359,9 @@ pub trait Stmt {
     /// Arg type.
     type Arg;
 
+    /// Constructor Parameter.
+    type CtorParams;
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str;
 
@@ -380,7 +383,15 @@ pub trait Stmt {
     ///
 //    fn wrap(self: Self) -> StmtType;
 
-//    fn construct(params()) -> Self where Self: Sized;
+    /// 
+    fn ctor_with_params(params: Self::CtorParams) -> Self where Self: Sized {
+        panic!();
+    }
+
+    /// 
+    fn ctor_with_arg(params: Self::Arg) -> Self where Self: Sized {
+        panic!();
+    }
 
 //    fn parse_x(parser: &mut Parser) -> Result<Self, YangError>  where Self::Arg: StmtArg, Self: Sized {
 //        return Ok(Self::new())
@@ -433,6 +444,9 @@ pub struct ModuleStmt {
 impl Stmt for ModuleStmt {
     /// Arg type.
     type Arg = Identifier;
+
+    /// Constructor Parameter.
+    type CtorParams = (Identifier, ModuleHeaderStmts, LinkageStmts, MetaStmts, RevisionStmts);
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
@@ -494,6 +508,9 @@ impl Stmt for SubmoduleStmt {
     /// Arg type.
     type Arg = Identifier;
 
+    /// Constructor Parameter.
+    type CtorParams = (Identifier, SubmoduleHeaderStmts, LinkageStmts, MetaStmts, RevisionStmts);
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "submodule"
@@ -539,6 +556,9 @@ impl Stmt for YangVersionStmt {
     /// Arg type.
     type Arg = YangVersionArg;
 
+    /// Constructor Parameter.
+    type CtorParams = Self::Arg;
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "yang-version"
@@ -573,6 +593,9 @@ pub struct ImportStmt {
 impl Stmt for ImportStmt {
     /// Arg type.
     type Arg = Identifier;
+
+    /// Constructor Parameter.
+    type CtorParams = Self::Arg;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
@@ -624,6 +647,9 @@ impl Stmt for IncludeStmt {
     /// Arg type.
     type Arg = Identifier;
 
+    /// Constructor Parameter.
+    type CtorParams = Self::Arg;
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "incluse"
@@ -669,6 +695,9 @@ impl Stmt for NamespaceStmt {
     /// Arg type.
     type Arg = Url;
 
+    /// Constructor Parameter.
+    type CtorParams = Self::Arg;
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "namespace"
@@ -702,6 +731,9 @@ impl Stmt for PrefixStmt {
     /// Arg type.
     type Arg = Identifier;
 
+    /// Constructor Parameter.
+    type CtorParams = Self::Arg;
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "prefix"
@@ -734,6 +766,9 @@ pub struct BelongsToStmt {
 impl Stmt for BelongsToStmt {
     /// Arg type.
     type Arg = Identifier;
+
+    /// Constructor Parameter.
+    type CtorParams = Self::Arg;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
@@ -777,6 +812,9 @@ impl Stmt for OrganizationStmt {
     /// Arg type.
     type Arg = String;
 
+    /// Constructor Parameter.
+    type CtorParams = Self::Arg;
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "organization"
@@ -805,6 +843,9 @@ pub struct ContactStmt {
 impl Stmt for ContactStmt {
     /// Arg type.
     type Arg = String;
+
+    /// Constructor Parameter.
+    type CtorParams = Self::Arg;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
@@ -835,6 +876,9 @@ impl Stmt for DescriptionStmt {
     /// Arg type.
     type Arg = String;
 
+    /// Constructor Parameter.
+    type CtorParams = Self::Arg;
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "description"
@@ -864,6 +908,9 @@ impl Stmt for ReferenceStmt {
     /// Arg type.
     type Arg = String;
 
+    /// Constructor Parameter.
+    type CtorParams = Self::Arg;
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "reference"
@@ -892,6 +939,9 @@ pub struct UnitsStmt {
 impl Stmt for UnitsStmt {
     /// Arg type.
     type Arg = String;
+
+    /// Constructor Parameter.
+    type CtorParams = Self::Arg;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
@@ -928,6 +978,9 @@ pub struct RevisionStmt {
 impl Stmt for RevisionStmt {
     /// Arg type.
     type Arg = DateArg;
+
+    /// Constructor Parameter.
+    type CtorParams = Self::Arg;
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
