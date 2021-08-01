@@ -385,7 +385,7 @@ pub trait Stmt {
         panic!();
     }
 
-    /// Parse a statement arg.
+    // Parse a statement arg.
     fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> where Self::Arg: StmtArg {
         Self::Arg::parse_arg(parser)
     }
@@ -473,32 +473,31 @@ impl Stmt for ModuleStmt {
         "module"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let identifier_arg = ModuleStmt::parse_arg(parser)?;
+    /// Return true if this statement has substatements.
+    fn has_substmts() -> bool {
+        true
+    }
 
-        if let Token::BlockBegin = parser.get_token()? {
-            let module_header = ModuleHeaderStmts::parse(parser)?;
-            let linkage = LinkageStmts::parse(parser)?;
-            let meta = MetaStmts::parse(parser)?;
-            let revision = RevisionStmts::parse(parser)?;
-            // let body = BodyStmts::parser(parser)?;
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::ModuleStmt(ModuleStmt {
+            identifier_arg: arg,
+            module_header: substmts.0,
+            linkage: substmts.1,
+            meta: substmts.2,
+            revision: substmts.3,
+//            body: substmts.4,
+        })
+    }
 
-            if let Token::BlockEnd = parser.get_token()? {
-                Ok(StmtType::ModuleStmt(ModuleStmt {
-                    identifier_arg,
-                    module_header,
-                    linkage,
-                    meta,
-                    revision,
-                    // body,
-                } ))
-            } else {
-                Err(YangError::UnexpectedToken(parser.line()))
-            }
-        } else {
-            Err(YangError::UnexpectedToken(parser.line()))
-        }
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let module_header = ModuleHeaderStmts::parse(parser)?;
+        let linkage = LinkageStmts::parse(parser)?;
+        let meta = MetaStmts::parse(parser)?;
+        let revision = RevisionStmts::parse(parser)?;
+
+        Ok((module_header, linkage, meta, revision))
     }
 }
 
@@ -1002,37 +1001,6 @@ impl Stmt for RevisionStmt {
         Ok((collect_opt_stmt!(stmts, DescriptionStmt)?,
             collect_opt_stmt!(stmts, ReferenceStmt)?))
     }
-
-/*
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        let revision_date = RevisionStmt::parse_arg(parser)?;
-
-        if let Token::BlockBegin = parser.get_token()? {
-            let map: HashMap<&'static str, Repeat> = [
-                ("description", Repeat::new(Some(0), Some(1))),
-                ("reference", Repeat::new(Some(0), Some(1))),
-            ].iter().cloned().collect();
-
-            let mut stmts = parse_stmt_collection(parser, map)?;
-
-            let token = parser.get_token()?;
-            if let Token::BlockEnd = token {
-                let stmt = RevisionStmt {
-                    revision_date,
-                    description: collect_opt_stmt!(stmts, DescriptionStmt)?,
-                    reference: collect_opt_stmt!(stmts, ReferenceStmt)?,
-                };
-
-                Ok(StmtType::RevisionStmt(stmt))
-            } else {
-                Err(YangError::UnexpectedToken(parser.line()))
-            }
-        } else {
-            Err(YangError::UnexpectedToken(parser.line()))
-        }
-    }
-*/
 }
 
 /*  XXXX TBD
@@ -2477,28 +2445,3 @@ impl RevisionStmts {
 //
 // data-def-stmt
 //
-
-
-
-
-/*
-#[derive(Debug, Clone)]
-pub struct Stmt {
-}
-
-impl Stmt for Stmt {
-    /// Arg type.
-    type Arg = String;
-
-    /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
-        ""
-    }
-
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
-    }
-}
-*/
-
