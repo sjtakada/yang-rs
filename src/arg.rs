@@ -89,6 +89,12 @@ impl StmtArg for Identifier {
     }
 }
 
+// Prefix.
+pub type Prefix = Identifier;
+
+
+
+
 // Yang String.
 impl StmtArg for String {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
@@ -169,6 +175,69 @@ impl StmtArg for DateArg {
 
     fn get_arg(&self) -> String {
         self.str.clone()
+    }
+}
+
+// Yin Element arg. 
+#[derive(Debug, Clone)]
+pub struct YinElementArg {
+    arg: bool,
+}
+
+impl StmtArg for YinElementArg {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        if str == "true" {
+            Ok(YinElementArg { arg: true })
+        } else if str == "false" {
+            Ok(YinElementArg { arg: false })
+        } else {
+            Err(YangError::ArgumentParseError("yin-element-arg".to_string()))
+        }
+    }
+
+    fn get_arg(&self) -> String {
+        if self.arg {
+            "true".to_string()
+        } else {
+            "false".to_string()
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Status {
+    Current,
+    Obsolete,
+    Deprecated,
+}
+
+// Status arg.
+#[derive(Debug, Clone)]
+pub struct StatusArg {
+    arg: Status,
+}
+
+impl StmtArg for StatusArg {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        if str == "current" {
+            Ok(StatusArg { arg: Status::Current })
+        } else if str == "obsolete" {
+            Ok(StatusArg { arg: Status::Obsolete })
+        } else if str == "deprecated" {
+            Ok(StatusArg { arg: Status::Deprecated })
+        } else {
+            Err(YangError::ArgumentParseError("status-arg".to_string()))
+        }
+    }
+
+    fn get_arg(&self) -> String {
+        match self.arg {
+            Status::Current => "current".to_string(),
+            Status::Obsolete => "obsolete".to_string(),
+            Status::Deprecated => "deprecated".to_string(),
+        }
     }
 }
 
