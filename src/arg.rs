@@ -3,6 +3,7 @@
 //  Copyright (C) 2021 Toshiaki Takada
 //
 
+use std::fmt;
 use url::Url;
 
 use super::error::*;
@@ -63,25 +64,48 @@ pub trait StmtArg {
 }
 
 // Yang Identifier.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Identifier {
     str: String,
+}
+
+impl fmt::Display for Identifier {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.str)
+    }
+}
+
+impl Identifier {
+    pub fn from(str: &str) -> Identifier {
+        Identifier {
+            str: String::from(str),
+        }
+    }
+
+    pub fn validate(str: &str) -> bool {
+        if !str.starts_with(|c: char| c.is_alphabetic() || c == '_') {
+            false
+        } else if str.len() > 1 {
+            if let Some(_) = &str[1..].find(|c: char| !c.is_alphabetic() && !c.is_ascii_digit() && c != '_' && c != '-' && c != '.') {
+                false
+            } else {
+                true
+            }
+        } else {
+            true
+        }
+    }
 }
 
 impl StmtArg for Identifier {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
-        if !str.starts_with(|c: char| c.is_alphabetic() || c == '_') {
-            return Err(YangError::InvalidIdentifier);
+        if !Identifier::validate(&str) {
+            Err(YangError::InvalidIdentifier)
+        } else {
+            Ok(Identifier { str })
         }
-
-        if str.len() > 1 {
-            if let Some(_) = &str[1..].find(|c: char| !c.is_alphabetic() && !c.is_ascii_digit() && c != '_' && c != '-' && c != '.') {
-                return Err(YangError::InvalidIdentifier);
-            }
-        }
-        Ok(Identifier { str })
     }
 
     fn get_arg(&self) -> String {
@@ -93,7 +117,45 @@ impl StmtArg for Identifier {
 pub type Prefix = Identifier;
 
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct IdentifierRef {
+    prefix: Option<Prefix>,
+    identifier: Identifier,
+}
 
+impl StmtArg for IdentifierRef {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        match str.find(":") {
+            Some(p) => {
+                let prefix_str = &str[..p];
+                let identifier_str = &str[p+1..];
+
+                if Identifier::validate(&prefix_str) && Identifier::validate(&identifier_str) {
+                    Ok(IdentifierRef {
+                        prefix: Some(Identifier::from(prefix_str)),
+                        identifier: Identifier::from(identifier_str) })
+                } else {
+                    Err(YangError::InvalidIdentifier)
+                }
+            }
+            None => {
+                if Identifier::validate(&str) {
+                    Ok(IdentifierRef { prefix: None, identifier: Identifier::from(&str) })
+                } else {
+                    Err(YangError::InvalidIdentifier)
+                }
+            }
+        }
+    }
+
+    fn get_arg(&self) -> String {
+        match &self.prefix {
+            Some(prefix) => format!("{}:{}", prefix, self.identifier),
+            None => self.identifier.to_string(),
+        }
+    }
+}
 
 // Yang String.
 impl StmtArg for String {
@@ -241,3 +303,86 @@ impl StmtArg for StatusArg {
     }
 }
 
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    pub fn test_arg_identifier() {
+        let s = " hello-world ";
+        let mut parser = Parser::new(s.to_string());
+
+        match Identifier::parse_arg(&mut parser) {
+            Ok(arg) => assert_eq!(arg, Identifier { str: String::from("hello-world") }),
+            Err(_) => assert!(false),
+        }
+
+        let s = " _123.IdEnT.456-789_ ";
+        let mut parser = Parser::new(s.to_string());
+
+        match Identifier::parse_arg(&mut parser) {
+            Ok(arg) => assert_eq!(arg, Identifier { str: String::from("_123.IdEnT.456-789_") }),
+            Err(_) => assert!(false),
+        }
+
+        let s = " 123 ";
+        let mut parser = Parser::new(s.to_string());
+
+        match Identifier::parse_arg(&mut parser) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err.to_string(), "Invalid identifier"),
+        }
+
+        let s = " 123$ ";
+        let mut parser = Parser::new(s.to_string());
+
+        match Identifier::parse_arg(&mut parser) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err.to_string(), "Invalid identifier"),
+        }
+    }
+
+    #[test]
+    pub fn test_arg_identifier_ref() {
+        let s = " prefix:hello-world ";
+        let mut parser = Parser::new(s.to_string());
+
+        match IdentifierRef::parse_arg(&mut parser) {
+            Ok(arg) => assert_eq!(arg.get_arg(), "prefix:hello-world"),
+            Err(_) => assert!(false),
+        }
+
+        let s = " _prefix_:_123.IdEnT.456-789_ ";
+        let mut parser = Parser::new(s.to_string());
+
+        match IdentifierRef::parse_arg(&mut parser) {
+            Ok(arg) => assert_eq!(arg.get_arg(), "_prefix_:_123.IdEnT.456-789_"),
+            Err(_) => assert!(false),
+        }
+
+        let s = " 123:456 ";
+        let mut parser = Parser::new(s.to_string());
+
+        match IdentifierRef::parse_arg(&mut parser) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err.to_string(), "Invalid identifier"),
+        }
+
+        let s = " _123:_456 ";
+        let mut parser = Parser::new(s.to_string());
+
+        match IdentifierRef::parse_arg(&mut parser) {
+            Ok(arg) => assert_eq!(arg.get_arg(), "_123:_456"),
+            Err(_) => assert!(false),
+        }
+
+        let s = " _123: ";
+        let mut parser = Parser::new(s.to_string());
+
+        match IdentifierRef::parse_arg(&mut parser) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err.to_string(), "Invalid identifier"),
+        }
+    }
+}
