@@ -9,6 +9,10 @@ use url::Url;
 use super::error::*;
 use super::parser::*;
 
+// Aliases.
+pub type Prefix = Identifier;
+pub type NodeIdentifier = IdentifierRef;
+
 // TBD
 //
 //   yang-string         = *yang-char
@@ -112,10 +116,6 @@ impl StmtArg for Identifier {
         self.str.clone()
     }
 }
-
-// Prefix.
-pub type Prefix = Identifier;
-
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct IdentifierRef {
@@ -385,4 +385,40 @@ mod tests {
             Err(err) => assert_eq!(err.to_string(), "Invalid identifier"),
         }
     }
+
+    #[test]
+    pub fn test_arg_date_arg() {
+        let s = " 2021-08-01 ";
+        let mut parser = Parser::new(s.to_string());
+
+        match DateArg::parse_arg(&mut parser) {
+            Ok(arg) => assert_eq!(arg.get_arg(), "2021-08-01"),
+            Err(_) => assert!(false),
+        }
+
+        let s = " 2021-8-1 ";
+        let mut parser = Parser::new(s.to_string());
+
+        match DateArg::parse_arg(&mut parser) {
+            Ok(arg) => assert!(false),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: date-arg"),
+        }
+
+        let s = " 08-01-2021 ";
+        let mut parser = Parser::new(s.to_string());
+
+        match DateArg::parse_arg(&mut parser) {
+            Ok(arg) => assert!(false),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: date-arg"),
+        }
+
+        let s = " 2021-08-0x ";
+        let mut parser = Parser::new(s.to_string());
+
+        match DateArg::parse_arg(&mut parser) {
+            Ok(arg) => assert!(false),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: date-arg"),
+        }
+    }
 }
+

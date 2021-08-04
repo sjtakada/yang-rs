@@ -13,6 +13,7 @@ use std::io::Error;
 use std::io::ErrorKind;
 use std::path::Path;
 
+use super::core::*;
 use super::error::*;
 use super::stmt::*;
 

@@ -5,6 +5,7 @@
 //   Copyright (C) 2021 Toshiaki Takada
 //
 
+pub mod core;
 pub mod error;
 pub mod parser;
 pub mod arg;
@@ -12,7 +13,6 @@ pub mod stmt;
 
 #[macro_use]
 extern crate lazy_static;
-
 
 #[macro_export]
 macro_rules! collect_a_stmt {
