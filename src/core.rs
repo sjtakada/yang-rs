@@ -318,3 +318,158 @@ impl fmt::Debug for StmtType {
         }
     }
 }
+
+// String helper utilities.
+
+pub fn is_integer_value(s: &str) -> bool {
+    if s.starts_with("-") {
+        is_non_negative_integer_value(&s[1..])
+    } else {
+        is_non_negative_integer_value(s)
+    }
+}
+
+pub fn is_non_negative_integer_value(s: &str) -> bool {
+    s == "0" || is_positive_integer_value(s)
+}
+
+pub fn is_positive_integer_value(s: &str) -> bool {
+    let mut chars = s.chars();
+    let c = chars.next().unwrap();
+
+    if c != '0' && c.is_ascii_digit() {
+        chars.all(|c: char| c.is_ascii_digit())
+    } else {
+        false
+    }
+}
+
+fn is_zero_integer_value(s: &str) -> bool {
+    s.chars().all(|c: char| c.is_ascii_digit())
+}
+
+pub fn is_decimal_value(s: &str) -> bool {
+    if let Some(p) = s.find('.') {
+        let is = &s[..p];
+        let fs = &s[p + 1..];
+
+        if is_integer_value(is) && fs.len() > 0 {
+            is_zero_integer_value(fs)
+        } else {
+            false
+        }
+    } else {
+        false
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    pub fn test_integer_value() {
+        let s = "0123456789";
+        assert_eq!(is_integer_value(&s), false);
+
+        let s = "0";
+        assert_eq!(is_integer_value(&s), true);
+
+        let s = "1234567890";
+        assert_eq!(is_integer_value(&s), true);
+
+        let s = "abc";
+        assert_eq!(is_integer_value(&s), false);
+
+        let s = "-1";
+        assert_eq!(is_integer_value(&s), true);
+
+        let s = "3.14159265";
+        assert_eq!(is_integer_value(&s), false);
+    }
+
+    #[test]
+    pub fn test_non_negative_integer_value() {
+        let s = "0123456789";
+        assert_eq!(is_non_negative_integer_value(&s), false);
+
+        let s = "0";
+        assert_eq!(is_non_negative_integer_value(&s), true);
+
+        let s = "1234567890";
+        assert_eq!(is_non_negative_integer_value(&s), true);
+
+        let s = "abc";
+        assert_eq!(is_non_negative_integer_value(&s), false);
+
+        let s = "-1";
+        assert_eq!(is_non_negative_integer_value(&s), false);
+
+        let s = "3.14159265";
+        assert_eq!(is_non_negative_integer_value(&s), false);
+    }
+
+    #[test]
+    pub fn test_positive_integer_value() {
+        let s = "0123456789";
+        assert_eq!(is_positive_integer_value(&s), false);
+
+        let s = "0";
+        assert_eq!(is_positive_integer_value(&s), false);
+
+        let s = "1234567890";
+        assert_eq!(is_positive_integer_value(&s), true);
+
+        let s = "abc";
+        assert_eq!(is_positive_integer_value(&s), false);
+
+        let s = "-1";
+        assert_eq!(is_positive_integer_value(&s), false);
+
+        let s = "3.14159265";
+        assert_eq!(is_positive_integer_value(&s), false);
+    }
+
+    #[test]
+    pub fn test_zero_integer_value() {
+        let s = "0123456789";
+        assert_eq!(is_zero_integer_value(&s), true);
+
+        let s = "0";
+        assert_eq!(is_zero_integer_value(&s), true);
+
+        let s = "1234567890";
+        assert_eq!(is_zero_integer_value(&s), true);
+
+        let s = "abc";
+        assert_eq!(is_zero_integer_value(&s), false);
+
+        let s = "-1";
+        assert_eq!(is_zero_integer_value(&s), false);
+
+        let s = "3.14159265";
+        assert_eq!(is_zero_integer_value(&s), false);
+    }
+
+    #[test]
+    pub fn test_decimal_value() {
+        let s = "0123456789";
+        assert_eq!(is_decimal_value(&s), false);
+
+        let s = "0";
+        assert_eq!(is_decimal_value(&s), false);
+
+        let s = "1234567890";
+        assert_eq!(is_decimal_value(&s), false);
+
+        let s = "abc";
+        assert_eq!(is_decimal_value(&s), false);
+
+        let s = "-1.0";
+        assert_eq!(is_decimal_value(&s), true);
+
+        let s = "3.14159265";
+        assert_eq!(is_decimal_value(&s), true);
+    }
+}
