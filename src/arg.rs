@@ -4,6 +4,7 @@
 //
 
 use std::fmt;
+use std::str::FromStr;
 use url::Url;
 
 use super::core::*;
@@ -506,6 +507,32 @@ pub enum RangeBoundary {
     Decimal(f64),
 }
 
+impl FromStr for RangeBoundary {
+    type Err = YangError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let rb = s.trim();
+
+        if rb == "min" {
+            Ok(RangeBoundary::Min)
+        } else if rb == "max" {
+            Ok(RangeBoundary::Max)
+        } else if is_decimal_value(rb) {
+            match s.parse::<f64>() {
+                Ok(num) => Ok(RangeBoundary::Decimal(num)),
+                Err(_) => Err(YangError::ArgumentParseError("range-arg".to_string())),
+            }
+        } else if is_integer_value(rb) {
+            match s.parse::<i64>() {
+                Ok(num) => Ok(RangeBoundary::Integer(num)),
+                Err(_) => Err(YangError::ArgumentParseError("range-arg".to_string())),
+            }
+        } else {
+            Err(YangError::ArgumentParseError("range-arg".to_string()))
+        }
+    }
+}
+
 pub type Range = (RangeBoundary, Option<RangeBoundary>);
 
 pub struct RangeArg {
@@ -524,14 +551,14 @@ impl StmtArg for RangeArg {
             let srb;
             let erb;
 
-            let rb: Vec<_> = str.split("..").collect();
+            let rb: Vec<_> = r.split("..").collect();
 
             if rb.len() == 1 {
-                srb = parse_range_boundary(rb[0])?;
+                srb = RangeBoundary::from_str(rb[0])?;
                 erb = None;
             } else if rb.len() == 2 {
-                srb = parse_range_boundary(rb[0])?;
-                erb = Some(parse_range_boundary(rb[1])?);
+                srb = RangeBoundary::from_str(rb[0])?;
+                erb = Some(RangeBoundary::from_str(rb[1])?);
             } else {
                 return Err(YangError::ArgumentParseError("range-arg".to_string()));
             }
