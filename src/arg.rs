@@ -5,6 +5,7 @@
 
 use std::fmt;
 use std::str::FromStr;
+use std::string::ToString;
 use url::Url;
 
 use super::core::*;
@@ -62,14 +63,8 @@ fn parse_string(parser: &mut Parser) -> Result<String, YangError> {
 // Trait for statement arg.
 //
 pub trait StmtArg {
-    /// Arg value type.
-    type Value;
-
     /// Parse token and return StmtArg if it is valid.
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> where Self: Sized;
-
-    /// Get argment into string.
-    fn get_arg(&self) -> Self::Value;
 }
 
 // Yang Identifier.
@@ -107,8 +102,6 @@ impl Identifier {
 }
 
 impl StmtArg for Identifier {
-    type Value = String;
-
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
@@ -118,21 +111,33 @@ impl StmtArg for Identifier {
             Ok(Identifier { str })
         }
     }
-
-    fn get_arg(&self) -> String {
-        self.str.clone()
-    }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct IdentifierRef {
     prefix: Option<Prefix>,
     identifier: Identifier,
 }
 
-impl StmtArg for IdentifierRef {
-    type Value = String;
+impl fmt::Debug for IdentifierRef {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self.prefix {
+            Some(prefix) => write!(f, "{}:{}", prefix, self.identifier),
+            None => write!(f, "{}", self.identifier),
+        }
+    }
+}
 
+impl ToString for IdentifierRef {
+    fn to_string(&self) -> String {
+        match &self.prefix {
+            Some(prefix) => format!("{}:{}", prefix, self.identifier),
+            None => format!("{}", self.identifier),
+        }
+    }
+}
+
+impl StmtArg for IdentifierRef {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         match str.find(":") {
@@ -157,32 +162,17 @@ impl StmtArg for IdentifierRef {
             }
         }
     }
-
-    fn get_arg(&self) -> String {
-        match &self.prefix {
-            Some(prefix) => format!("{}:{}", prefix, self.identifier),
-            None => self.identifier.to_string(),
-        }
-    }
 }
 
 // Yang String.
 impl StmtArg for String {
-    type Value = String;
-
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         Ok(parse_string(parser)?)
-    }
-
-    fn get_arg(&self) -> String {
-        self.clone()
     }
 }
 
 // URL string.
 impl StmtArg for Url {
-    type Value = Url;
-
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let s = parse_string(parser)?;
 
@@ -190,10 +180,6 @@ impl StmtArg for Url {
             Ok(url) => Ok(url),
             Err(err) => Err(YangError::ArgumentParseError(err.to_string())),
         }
-    }
-
-    fn get_arg(&self) -> Url {
-        self.clone()
     }
 }
 
@@ -204,8 +190,6 @@ pub struct YangVersionArg {
 }
 
 impl StmtArg for YangVersionArg {
-    type Value = String;
-
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
@@ -215,10 +199,6 @@ impl StmtArg for YangVersionArg {
             Err(YangError::ArgumentParseError(format!("Invalid Yang Version {}", str)))
         }
     }
-
-    fn get_arg(&self) -> String {
-        self.str.clone()
-    }
 }
 
 // Date arg. 
@@ -227,9 +207,13 @@ pub struct DateArg {
     str: String,
 }
 
-impl StmtArg for DateArg {
-    type Value = String;
+impl ToString for DateArg {
+    fn to_string(&self) -> String {
+        self.str.clone()
+    }
+}
 
+impl StmtArg for DateArg {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
@@ -251,10 +235,6 @@ impl StmtArg for DateArg {
             Err(YangError::ArgumentParseError("date-arg".to_string()))
         }
     }
-
-    fn get_arg(&self) -> String {
-        self.str.clone()
-    }
 }
 
 // Yin Element arg. 
@@ -264,8 +244,6 @@ pub struct YinElementArg {
 }
 
 impl StmtArg for YinElementArg {
-    type Value = bool;
-
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         if str == "true" {
@@ -276,31 +254,34 @@ impl StmtArg for YinElementArg {
             Err(YangError::ArgumentParseError("yin-element-arg".to_string()))
         }
     }
-
-    fn get_arg(&self) -> bool {
-        self.arg
-    }
 }
 
-// Fraction Digits arg.
+/// Fraction Digits arg.
 #[derive(Debug, Clone)]
 pub struct FractionDigitsArg {
     digits: u8,
 }
 
-impl StmtArg for FractionDigitsArg {
-    type Value = u8;
+impl FractionDigitsArg {
+    /// Return fraction digits in unsigned integer.
+    fn digits(&self) -> u8 {
+        self.digits
+    }
+}
 
+impl ToString for FractionDigitsArg {
+    fn to_string(&self) -> String {
+        format!("{}", self.digits)
+    }
+}
+
+impl StmtArg for FractionDigitsArg {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         match str.parse::<u8>() {
             Ok(num) if num >= 1 && num <= 18 => Ok(FractionDigitsArg { digits: num }),
             _ => Err(YangError::ArgumentParseError("fraction-digits-arg".to_string()))
         }
-    }
-
-    fn get_arg(&self) -> u8 {
-        self.digits
     }
 }
 
@@ -319,8 +300,6 @@ pub struct StatusArg {
 }
 
 impl StmtArg for StatusArg {
-    type Value = Status;
-
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         if str == "current" {
@@ -333,10 +312,6 @@ impl StmtArg for StatusArg {
             Err(YangError::ArgumentParseError("status-arg".to_string()))
         }
     }
-
-    fn get_arg(&self) -> Status {
-        self.arg
-    }
 }
 
 // Config Arg.
@@ -346,8 +321,6 @@ pub struct ConfigArg {
 }
 
 impl StmtArg for ConfigArg {
-    type Value = bool;
-
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         if str == "true" {
@@ -358,10 +331,6 @@ impl StmtArg for ConfigArg {
             Err(YangError::ArgumentParseError("config-arg".to_string()))
         }
     }
-
-    fn get_arg(&self) -> bool {
-        self.arg
-    }
 }
 
 // Mandatory Arg.
@@ -371,8 +340,6 @@ pub struct MandatoryArg {
 }
 
 impl StmtArg for MandatoryArg {
-    type Value = bool;
-
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         if str == "true" {
@@ -382,10 +349,6 @@ impl StmtArg for MandatoryArg {
         } else {
             Err(YangError::ArgumentParseError("mandatory-arg".to_string()))
         }
-    }
-
-    fn get_arg(&self) -> bool {
-        self.arg
     }
 }
 
@@ -402,8 +365,6 @@ pub struct OrderedByArg {
 }
 
 impl StmtArg for OrderedByArg {
-    type Value = OrderedBy;
-
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         if str == "user" {
@@ -414,63 +375,62 @@ impl StmtArg for OrderedByArg {
             Err(YangError::ArgumentParseError("ordered-by-arg".to_string()))
         }
     }
-
-    fn get_arg(&self) -> OrderedBy {
-        self.arg
-    }
 }
 
 // Min Value arg.
 #[derive(Debug, Clone)]
 pub struct MinValueArg {
-    val: String,
+    val: u64,
 }
 
 impl StmtArg for MinValueArg {
-    type Value = String;
-
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         if is_non_negative_integer_value(&str) {
-            Ok(MinValueArg { val: str })
+            match str.parse::<u64>() {
+                Ok(num) => Ok(MinValueArg { val: num }),
+                Err(_) => Err(YangError::ArgumentParseError("min-value-arg".to_string()))
+            }
         } else {
             Err(YangError::ArgumentParseError("min-value-arg".to_string()))
         }
     }
+}
 
-    fn get_arg(&self) -> String {
-        self.val.clone()
+#[derive(Clone)]
+pub enum MaxValue {
+    Unbounded,
+    Value(u64),
+}
+
+impl fmt::Debug for MaxValue {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self {
+            MaxValue::Unbounded => write!(f, "unbounded"),
+            MaxValue::Value(num) => write!(f, "{}", num),
+        }
     }
 }
 
 // Max Value arg.
 #[derive(Debug, Clone)]
 pub struct MaxValueArg {
-    unbounded: bool,
-
-    val: String,
+    val: MaxValue,
 }
 
 impl StmtArg for MaxValueArg {
-    type Value = String;
-
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
         if str == "unbounded" {
-            Ok(MaxValueArg { unbounded: true, val: String::new() })
+            Ok(MaxValueArg { val: MaxValue::Unbounded })
         } else if is_positive_integer_value(&str) {
-            Ok(MaxValueArg { unbounded: false, val: str })
+            match str.parse::<u64>() {
+                Ok(num) => Ok(MaxValueArg { val: MaxValue::Value(num) }),
+                Err(_) => Err(YangError::ArgumentParseError("max-value-arg".to_string()))
+            }
         } else {
             Err(YangError::ArgumentParseError("max-value-arg".to_string()))
-        }
-    }
-
-    fn get_arg(&self) -> String {
-        if self.unbounded {
-            "unbounded".to_string()
-        } else {
-            self.val.clone()
         }
     }
 }
@@ -482,8 +442,6 @@ pub struct IntegerValue {
 }
 
 impl StmtArg for IntegerValue {
-    type Value = String;
-
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         if is_integer_value(&str) {
@@ -491,10 +449,6 @@ impl StmtArg for IntegerValue {
         } else {
             Err(YangError::ArgumentParseError("integer-value".to_string()))
         }
-    }
-
-    fn get_arg(&self) -> String {
-        self.val.clone()
     }
 }
 
@@ -540,8 +494,6 @@ pub struct RangeArg {
 }
 
 impl StmtArg for RangeArg {
-    type Value = Vec<Range>;
-
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         let rp: Vec<_> = str.split('|').collect();
@@ -567,10 +519,6 @@ impl StmtArg for RangeArg {
         }
 
         Ok(RangeArg { ranges: v })
-    }
-
-    fn get_arg(&self) -> Vec<Range> {
-        self.ranges.clone()
     }
 }
 
@@ -619,7 +567,7 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match IdentifierRef::parse_arg(&mut parser) {
-            Ok(arg) => assert_eq!(arg.get_arg(), "prefix:hello-world"),
+            Ok(arg) => assert_eq!(arg.to_string(), "prefix:hello-world"),
             Err(_) => assert!(false),
         }
 
@@ -627,7 +575,7 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match IdentifierRef::parse_arg(&mut parser) {
-            Ok(arg) => assert_eq!(arg.get_arg(), "_prefix_:_123.IdEnT.456-789_"),
+            Ok(arg) => assert_eq!(arg.to_string(), "_prefix_:_123.IdEnT.456-789_"),
             Err(_) => assert!(false),
         }
 
@@ -643,7 +591,7 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match IdentifierRef::parse_arg(&mut parser) {
-            Ok(arg) => assert_eq!(arg.get_arg(), "_123:_456"),
+            Ok(arg) => assert_eq!(arg.to_string(), "_123:_456"),
             Err(_) => assert!(false),
         }
 
@@ -662,7 +610,7 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match DateArg::parse_arg(&mut parser) {
-            Ok(arg) => assert_eq!(arg.get_arg(), "2021-08-01"),
+            Ok(arg) => assert_eq!(arg.to_string(), "2021-08-01"),
             Err(_) => assert!(false),
         }
 
@@ -697,7 +645,7 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match FractionDigitsArg::parse_arg(&mut parser) {
-            Ok(arg) => assert_eq!(arg.get_arg(), 18),
+            Ok(arg) => assert_eq!(arg.digits(), 18),
             Err(_) => assert!(false),
         }
 
