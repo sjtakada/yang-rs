@@ -6,6 +6,7 @@
 use std::fmt;
 use url::Url;
 
+use super::core::*;
 use super::error::*;
 use super::parser::*;
 
@@ -300,6 +301,133 @@ impl StmtArg for StatusArg {
             Status::Obsolete => "obsolete".to_string(),
             Status::Deprecated => "deprecated".to_string(),
         }
+    }
+}
+
+// Config Arg.
+#[derive(Debug, Clone)]
+pub struct ConfigArg {
+    arg: bool,
+}
+
+impl StmtArg for ConfigArg {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        if str == "true" {
+            Ok(ConfigArg { arg: true })
+        } else if str == "false" {
+            Ok(ConfigArg { arg: false })
+        } else {
+            Err(YangError::ArgumentParseError("config-arg".to_string()))
+        }
+    }
+
+    fn get_arg(&self) -> String {
+        if self.arg {
+            "true".to_string()
+        } else {
+            "false".to_string()
+        }
+    }
+}
+
+// Mandatory Arg.
+#[derive(Debug, Clone)]
+pub struct MandatoryArg {
+    arg: bool,
+}
+
+impl StmtArg for MandatoryArg {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        if str == "true" {
+            Ok(MandatoryArg { arg: true })
+        } else if str == "false" {
+            Ok(MandatoryArg { arg: false })
+        } else {
+            Err(YangError::ArgumentParseError("mandatory-arg".to_string()))
+        }
+    }
+
+    fn get_arg(&self) -> String {
+        if self.arg {
+            "true".to_string()
+        } else {
+            "false".to_string()
+        }
+    }
+}
+
+
+// Min Value arg.
+#[derive(Debug, Clone)]
+pub struct MinValueArg {
+    val: String,
+}
+
+impl StmtArg for MinValueArg {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        if is_non_negative_integer_value(&str) {
+            Ok(MinValueArg { val: str })
+        } else {
+            Err(YangError::ArgumentParseError("min-value-arg".to_string()))
+        }
+    }
+
+    fn get_arg(&self) -> String {
+        self.val.clone()
+    }
+}
+
+// Max Value arg.
+#[derive(Debug, Clone)]
+pub struct MaxValueArg {
+    unbounded: bool,
+
+    val: String,
+}
+
+impl StmtArg for MaxValueArg {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+
+        if str == "unbounded" {
+            Ok(MaxValueArg { unbounded: true, val: String::new() })
+        } else if is_positive_integer_value(&str) {
+            Ok(MaxValueArg { unbounded: false, val: str })
+        } else {
+            Err(YangError::ArgumentParseError("max-value-arg".to_string()))
+        }
+    }
+
+    fn get_arg(&self) -> String {
+        if self.unbounded {
+            "unbounded".to_string()
+        } else {
+            self.val.clone()
+        }
+    }
+}
+
+// Integer Value str.
+#[derive(Debug, Clone)]
+pub struct IntegerValue {
+    val: String,
+}
+
+impl StmtArg for IntegerValue {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        if is_integer_value(&str) {
+            Ok(IntegerValue { val: str })
+        } else {
+            Err(YangError::ArgumentParseError("integer-value".to_string()))
+        }
+    }
+
+    fn get_arg(&self) -> String {
+        self.val.clone()
     }
 }
 

@@ -1447,25 +1447,31 @@ impl Stmt for ErrorAppTagStmt {
     }
 }
 
+*/
+
 ///
 ///
 ///
 #[derive(Debug, Clone)]
 pub struct MinElementsStmt {
+    min_value_arg: MinValueArg,
 }
 
 impl Stmt for MinElementsStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = MinValueArg;
+
+    /// Sub Statements.
+    type SubStmts = ();
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "min-elements"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::MinElementsStmt(MinElementsStmt { min_value_arg: arg })
     }
 }
 
@@ -1474,20 +1480,24 @@ impl Stmt for MinElementsStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct MaxElementsStmt {
+    max_value_arg: MaxValueArg,
 }
 
 impl Stmt for MaxElementsStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = MaxValueArg;
+
+    /// Sub Statements.
+    type SubStmts = ();
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "max-elements"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::MaxElementsStmt(MaxElementsStmt { max_value_arg: arg })
     }
 }
 
@@ -1496,22 +1506,29 @@ impl Stmt for MaxElementsStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct ValueStmt {
+    arg: IntegerValue,
 }
 
 impl Stmt for ValueStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = IntegerValue;
+
+    /// Sub Statements.
+    type SubStmts = ();
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "value"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::ValueStmt(ValueStmt { arg })
     }
 }
+
+
+/*
 
 ///
 ///
