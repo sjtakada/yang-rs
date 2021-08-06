@@ -8,6 +8,7 @@ use std::collections::HashMap;
 
 use super::error::*;
 use super::parser::*;
+use super::arg::*;
 use super::stmt::*;
 
 // Statement Parser initialization.
@@ -41,7 +42,9 @@ lazy_static! {
         m.insert("typedef", TypedefStmt::parse as StmtParserFn);
         m.insert("type", TypeStmt::parse as StmtParserFn);
         m.insert("range", RangeStmt::parse as StmtParserFn);
+*/
         m.insert("fraction-digits", FractionDigitsStmt::parse as StmtParserFn);
+/*
         m.insert("length", LengthStmt::parse as StmtParserFn);
         m.insert("pattern", PatternStmt::parse as StmtParserFn);
         m.insert("modifier", ModifierStmt::parse as StmtParserFn);
@@ -182,7 +185,9 @@ pub enum StmtType {
     TypedefStmt(TypedefStmt),
     TypeStmt(TypeStmt),
     RangeStmt(RangeStmt),
+*/
     FractionDigitsStmt(FractionDigitsStmt),
+/*
     LengthStmt(LengthStmt),
     PatternStmt(PatternStmt),
     ModifierStmt(ModifierStmt),
@@ -264,7 +269,9 @@ impl fmt::Debug for StmtType {
             StmtType::TypedefStmt(stmt) => write!(f, "typedef-stmt {:?}", stmt),
             StmtType::TypeStmt(stmt) => write!(f, "type-stmt {:?}", stmt),
             StmtType::RangeStmt(stmt) => write!(f, "range-stmt {:?}", stmt),
+*/
             StmtType::FractionDigitsStmt(stmt) => write!(f, "fraction-digits-stmt {:?}", stmt),
+/*
             StmtType::LengthStmt(stmt) => write!(f, "length-stmt {:?}", stmt),
             StmtType::PatternStmt(stmt) => write!(f, "pattern-stmt {:?}", stmt),
             StmtType::ModifierStmt(stmt) => write!(f, "modifier-stmt {:?}", stmt),
@@ -362,6 +369,27 @@ pub fn is_decimal_value(s: &str) -> bool {
     }
 }
 
+pub fn parse_range_boundary(s: &str) -> Result<RangeBoundary, YangError> {
+    let rb = s.trim();
+
+    if s == "min" {
+        Ok(RangeBoundary::Min)
+    } else if s == "max" {
+        Ok(RangeBoundary::Max)
+    } else if is_decimal_value(s) {
+        match s.parse::<f64>() {
+            Ok(num) => Ok(RangeBoundary::Decimal(num)),
+            Err(_) => Err(YangError::ArgumentParseError("range-arg".to_string())),
+        }
+    } else if is_integer_value(s) {
+        match s.parse::<i64>() {
+            Ok(num) => Ok(RangeBoundary::Integer(num)),
+            Err(_) => Err(YangError::ArgumentParseError("range-arg".to_string())),
+        }
+    } else {
+        Err(YangError::ArgumentParseError("range-arg".to_string()))
+    }
+}
 
 #[cfg(test)]
 mod tests {

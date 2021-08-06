@@ -497,6 +497,55 @@ impl StmtArg for IntegerValue {
     }
 }
 
+// Ranges.
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum RangeBoundary {
+    Min,
+    Max,
+    Integer(i64),
+    Decimal(f64),
+}
+
+pub type Range = (RangeBoundary, Option<RangeBoundary>);
+
+pub struct RangeArg {
+    ranges: Vec<Range>,
+}
+
+impl StmtArg for RangeArg {
+    type Value = Vec<Range>;
+
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        let rp: Vec<_> = str.split('|').collect();
+        let mut v = Vec::new();
+
+        for r in rp {
+            let srb;
+            let erb;
+
+            let rb: Vec<_> = str.split("..").collect();
+
+            if rb.len() == 1 {
+                srb = parse_range_boundary(rb[0])?;
+                erb = None;
+            } else if rb.len() == 2 {
+                srb = parse_range_boundary(rb[0])?;
+                erb = Some(parse_range_boundary(rb[1])?);
+            } else {
+                return Err(YangError::ArgumentParseError("range-arg".to_string()));
+            }
+
+            v.push((srb, erb));
+        }
+
+        Ok(RangeArg { ranges: v })
+    }
+
+    fn get_arg(&self) -> Vec<Range> {
+        self.ranges.clone()
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -594,7 +643,7 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match DateArg::parse_arg(&mut parser) {
-            Ok(arg) => assert!(false),
+            Ok(_) => assert!(false),
             Err(err) => assert_eq!(err.to_string(), "Argument parse error: date-arg"),
         }
 
@@ -602,7 +651,7 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match DateArg::parse_arg(&mut parser) {
-            Ok(arg) => assert!(false),
+            Ok(_) => assert!(false),
             Err(err) => assert_eq!(err.to_string(), "Argument parse error: date-arg"),
         }
 

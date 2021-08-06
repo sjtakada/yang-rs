@@ -1039,27 +1039,37 @@ impl Stmt for RangeStmt {
     }
 }
 
+*/
+
 ///
 ///
 ///
 #[derive(Debug, Clone)]
 pub struct FractionDigitsStmt {
+    fraction_digits_arg: FractionDigitsArg,
 }
 
 impl Stmt for FractionDigitsStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = FractionDigitsArg;
+
+    /// Sub Statements.
+    type SubStmts = ();
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "fraction-digits"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::FractionDigitsStmt(FractionDigitsStmt {
+            fraction_digits_arg: arg,
+        })
     }
 }
+
+/*
 
 ///
 ///
