@@ -281,6 +281,29 @@ impl StmtArg for YinElementArg {
     }
 }
 
+// Fraction Digits arg.
+#[derive(Debug, Clone)]
+pub struct FractionDigitsArg {
+    digits: u8,
+}
+
+impl StmtArg for FractionDigitsArg {
+    type Value = u8;
+
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        match str.parse::<u8>() {
+            Ok(num) if num >= 1 && num <= 18 => Ok(FractionDigitsArg { digits: num }),
+            _ => Err(YangError::ArgumentParseError("fraction-digits-arg".to_string()))
+        }
+    }
+
+    fn get_arg(&self) -> u8 {
+        self.digits
+    }
+}
+
+
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Status {
     Current,
@@ -587,8 +610,35 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match DateArg::parse_arg(&mut parser) {
-            Ok(arg) => assert!(false),
+            Ok(_) => assert!(false),
             Err(err) => assert_eq!(err.to_string(), "Argument parse error: date-arg"),
+        }
+    }
+
+    #[test]
+    pub fn test_arg_fraction_digits() {
+        let s = "18";
+        let mut parser = Parser::new(s.to_string());
+
+        match FractionDigitsArg::parse_arg(&mut parser) {
+            Ok(arg) => assert_eq!(arg.get_arg(), 18),
+            Err(_) => assert!(false),
+        }
+
+        let s = "0";
+        let mut parser = Parser::new(s.to_string());
+
+        match FractionDigitsArg::parse_arg(&mut parser) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: fraction-digits-arg"),
+        }
+
+        let s = "19";
+        let mut parser = Parser::new(s.to_string());
+
+        match FractionDigitsArg::parse_arg(&mut parser) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: fraction-digits-arg"),
         }
     }
 }

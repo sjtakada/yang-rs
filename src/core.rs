@@ -57,11 +57,9 @@ lazy_static! {
         m.insert("mandatory", MandatoryStmt::parse as StmtParserFn);
         m.insert("presense", PresenseStmt::parse as StmtParserFn);
         m.insert("ordered-by", OrderedByStmt::parse as StmtParserFn);
-/*
         m.insert("must", MustStmt::parse as StmtParserFn);
         m.insert("error-message", ErrorMessageStmt::parse as StmtParserFn);
         m.insert("error-app-tag", ErrorAppTagStmt::parse as StmtParserFn);
-*/
         m.insert("min-elements", MinElementsStmt::parse as StmtParserFn);
         m.insert("max-elements", MaxElementsStmt::parse as StmtParserFn);
         m.insert("value", ValueStmt::parse as StmtParserFn);
@@ -200,11 +198,9 @@ pub enum StmtType {
     MandatoryStmt(MandatoryStmt),
     PresenseStmt(PresenseStmt),
     OrderedByStmt(OrderedByStmt),
-/*
     MustStmt(MustStmt),
     ErrorMessageStmt(ErrorMessageStmt),
     ErrorAppTagStmt(ErrorAppTagStmt),
-*/
     MinElementsStmt(MinElementsStmt),
     MaxElementsStmt(MaxElementsStmt),
     ValueStmt(ValueStmt),
@@ -284,11 +280,9 @@ impl fmt::Debug for StmtType {
             StmtType::MandatoryStmt(stmt) => write!(f, "mandatory-stmt {:?}", stmt),
             StmtType::PresenseStmt(stmt) => write!(f, "presense-stmt {:?}", stmt),
             StmtType::OrderedByStmt(stmt) => write!(f, "ordered-by-stmt {:?}", stmt),
-/*
             StmtType::MustStmt(stmt) => write!(f, "must-stmt {:?}", stmt),
             StmtType::ErrorMessageStmt(stmt) => write!(f, "error-message-stmt {:?}", stmt),
             StmtType::ErrorAppTagStmt(stmt) => write!(f, "error-app-tag-stmt {:?}", stmt),
-*/
             StmtType::MinElementsStmt(stmt) => write!(f, "min-elements-stmt {:?}", stmt),
             StmtType::MaxElementsStmt(stmt) => write!(f, "max-elements-stmt {:?}", stmt),
             StmtType::ValueStmt(stmt) => write!(f, "value-stmt {:?}", stmt),
