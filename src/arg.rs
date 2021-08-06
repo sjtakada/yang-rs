@@ -107,6 +107,9 @@ impl StmtArg for Identifier {
     }
 }
 
+///
+/// IdentifierRef.
+///
 #[derive(Clone, PartialEq)]
 pub struct IdentifierRef {
     prefix: Option<Prefix>,
@@ -168,7 +171,9 @@ impl StmtArg for Url {
     }
 }
 
-// Yang Version String.
+///
+/// The "yang-version-arg".
+///
 #[derive(Debug, Clone)]
 pub struct YangVersionArg {
     str: String,
@@ -186,7 +191,9 @@ impl StmtArg for YangVersionArg {
     }
 }
 
-// Date arg. 
+///
+/// Date arg. 
+///
 #[derive(Debug, Clone)]
 pub struct DateArg {
     str: String,
@@ -222,7 +229,9 @@ impl StmtArg for DateArg {
     }
 }
 
-// Yin Element arg. 
+///
+/// Yin Element arg. 
+///
 #[derive(Debug, Clone)]
 pub struct YinElementArg {
     arg: bool,
@@ -241,7 +250,9 @@ impl StmtArg for YinElementArg {
     }
 }
 
+///
 /// Fraction Digits arg.
+///
 #[derive(Debug, Clone)]
 pub struct FractionDigitsArg {
     digits: u8,
@@ -278,7 +289,9 @@ pub enum Status {
     Deprecated,
 }
 
-// Status arg.
+///
+/// Status arg.
+///
 #[derive(Debug, Clone)]
 pub struct StatusArg {
     arg: Status,
@@ -299,7 +312,9 @@ impl StmtArg for StatusArg {
     }
 }
 
-// Config Arg.
+///
+/// Config Arg.
+///
 #[derive(Debug, Clone)]
 pub struct ConfigArg {
     arg: bool,
@@ -318,7 +333,9 @@ impl StmtArg for ConfigArg {
     }
 }
 
-// Mandatory Arg.
+///
+/// Mandatory Arg.
+///
 #[derive(Debug, Clone)]
 pub struct MandatoryArg {
     arg: bool,
@@ -343,7 +360,9 @@ pub enum OrderedBy {
     System,
 }
 
-// Ordered-By arg.
+///
+/// Ordered-By arg.
+///
 #[derive(Debug, Clone)]
 pub struct OrderedByArg {
     arg: OrderedBy,
@@ -362,7 +381,9 @@ impl StmtArg for OrderedByArg {
     }
 }
 
-// Min Value arg.
+///
+/// Min Value arg.
+///
 #[derive(Debug, Clone)]
 pub struct MinValueArg {
     val: u64,
@@ -397,7 +418,9 @@ impl fmt::Debug for MaxValue {
     }
 }
 
-// Max Value arg.
+///
+/// Max Value arg.
+///
 #[derive(Debug, Clone)]
 pub struct MaxValueArg {
     val: MaxValue,
@@ -420,7 +443,9 @@ impl StmtArg for MaxValueArg {
     }
 }
 
-// Integer Value str.
+///
+/// Integer Value str.
+///
 #[derive(Debug, Clone)]
 pub struct IntegerValue {
     val: String,
@@ -437,7 +462,9 @@ impl StmtArg for IntegerValue {
     }
 }
 
-// Ranges.
+///
+/// Ranges.
+///
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum RangeBoundary {
     Min,

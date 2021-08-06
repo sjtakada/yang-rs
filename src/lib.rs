@@ -1,15 +1,9 @@
 //
 // YANG - Yet Another Next Generation
-//   Following RFC7950
+//   The parser and libraries supporting RFC7950.
 //
 //   Copyright (C) 2021 Toshiaki Takada
 //
-
-///
-/// YANG parser and library.
-/// Conformed to RFC7950 "The YANG 1.1 Data Modeling Language".
-///
-///
 
 pub mod core;
 pub mod error;
