@@ -61,11 +61,14 @@ fn parse_string(parser: &mut Parser) -> Result<String, YangError> {
 // Trait for statement arg.
 //
 pub trait StmtArg {
+    /// Arg value type.
+    type Value;
+
     /// Parse token and return StmtArg if it is valid.
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> where Self: Sized;
 
     /// Get argment into string.
-    fn get_arg(&self) -> String;
+    fn get_arg(&self) -> Self::Value;
 }
 
 // Yang Identifier.
@@ -103,6 +106,8 @@ impl Identifier {
 }
 
 impl StmtArg for Identifier {
+    type Value = String;
+
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
@@ -125,6 +130,8 @@ pub struct IdentifierRef {
 }
 
 impl StmtArg for IdentifierRef {
+    type Value = String;
+
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         match str.find(":") {
@@ -160,6 +167,8 @@ impl StmtArg for IdentifierRef {
 
 // Yang String.
 impl StmtArg for String {
+    type Value = String;
+
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         Ok(parse_string(parser)?)
     }
@@ -171,6 +180,8 @@ impl StmtArg for String {
 
 // URL string.
 impl StmtArg for Url {
+    type Value = Url;
+
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let s = parse_string(parser)?;
 
@@ -180,8 +191,8 @@ impl StmtArg for Url {
         }
     }
 
-    fn get_arg(&self) -> String {
-        self.to_string()
+    fn get_arg(&self) -> Url {
+        self.clone()
     }
 }
 
@@ -192,6 +203,8 @@ pub struct YangVersionArg {
 }
 
 impl StmtArg for YangVersionArg {
+    type Value = String;
+
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
@@ -214,6 +227,8 @@ pub struct DateArg {
 }
 
 impl StmtArg for DateArg {
+    type Value = String;
+
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
@@ -248,6 +263,8 @@ pub struct YinElementArg {
 }
 
 impl StmtArg for YinElementArg {
+    type Value = bool;
+
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         if str == "true" {
@@ -259,16 +276,12 @@ impl StmtArg for YinElementArg {
         }
     }
 
-    fn get_arg(&self) -> String {
-        if self.arg {
-            "true".to_string()
-        } else {
-            "false".to_string()
-        }
+    fn get_arg(&self) -> bool {
+        self.arg
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Status {
     Current,
     Obsolete,
@@ -282,6 +295,8 @@ pub struct StatusArg {
 }
 
 impl StmtArg for StatusArg {
+    type Value = Status;
+
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         if str == "current" {
@@ -295,12 +310,8 @@ impl StmtArg for StatusArg {
         }
     }
 
-    fn get_arg(&self) -> String {
-        match self.arg {
-            Status::Current => "current".to_string(),
-            Status::Obsolete => "obsolete".to_string(),
-            Status::Deprecated => "deprecated".to_string(),
-        }
+    fn get_arg(&self) -> Status {
+        self.arg
     }
 }
 
@@ -311,6 +322,8 @@ pub struct ConfigArg {
 }
 
 impl StmtArg for ConfigArg {
+    type Value = bool;
+
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         if str == "true" {
@@ -322,12 +335,8 @@ impl StmtArg for ConfigArg {
         }
     }
 
-    fn get_arg(&self) -> String {
-        if self.arg {
-            "true".to_string()
-        } else {
-            "false".to_string()
-        }
+    fn get_arg(&self) -> bool {
+        self.arg
     }
 }
 
@@ -338,6 +347,8 @@ pub struct MandatoryArg {
 }
 
 impl StmtArg for MandatoryArg {
+    type Value = bool;
+
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         if str == "true" {
@@ -349,15 +360,10 @@ impl StmtArg for MandatoryArg {
         }
     }
 
-    fn get_arg(&self) -> String {
-        if self.arg {
-            "true".to_string()
-        } else {
-            "false".to_string()
-        }
+    fn get_arg(&self) -> bool {
+        self.arg
     }
 }
-
 
 // Min Value arg.
 #[derive(Debug, Clone)]
@@ -366,6 +372,8 @@ pub struct MinValueArg {
 }
 
 impl StmtArg for MinValueArg {
+    type Value = String;
+
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         if is_non_negative_integer_value(&str) {
@@ -389,6 +397,8 @@ pub struct MaxValueArg {
 }
 
 impl StmtArg for MaxValueArg {
+    type Value = String;
+
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
@@ -417,6 +427,8 @@ pub struct IntegerValue {
 }
 
 impl StmtArg for IntegerValue {
+    type Value = String;
+
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         if is_integer_value(&str) {
