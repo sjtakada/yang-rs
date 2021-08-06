@@ -463,11 +463,11 @@ impl Stmt for PrefixStmt {
 }
 
 ///
-///
+/// 7.2.2. The "belongs-to" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct BelongsToStmt {
-    /// 
+    /// Identifier.
     identifier_arg: Identifier,
 
     /// Prefix statement.
@@ -564,7 +564,7 @@ impl Stmt for ContactStmt {
 }
 
 ///
-/// 7.21.3. "The "description" Statement.
+/// 7.21.3. The "description" Statement.
 /// 
 #[derive(Debug, Clone)]
 pub struct DescriptionStmt {
@@ -590,7 +590,7 @@ impl Stmt for DescriptionStmt {
 }
 
 ///
-/// 7.21.4. "The "reference" Statement.
+/// 7.21.4. The "reference" Statement.
 /// 
 #[derive(Debug, Clone)]
 pub struct ReferenceStmt {
@@ -616,7 +616,7 @@ impl Stmt for ReferenceStmt {
 }
 
 ///
-///
+/// 7.3.3. The "units" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct UnitsStmt {
@@ -706,7 +706,7 @@ impl Stmt for RevisionStmt {
 }
 
 ///
-///
+/// The "revision-date" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct RevisionDateStmt {
@@ -732,7 +732,7 @@ impl Stmt for RevisionDateStmt {
 }
 
 ///
-///
+/// 7.19. The "extension" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ExtensionStmt {
@@ -801,7 +801,7 @@ impl Stmt for ExtensionStmt {
 }
 
 ///
-///
+/// 7.19.2. The "argument" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ArgumentStmt {
@@ -855,7 +855,7 @@ impl Stmt for ArgumentStmt {
 }
 
 ///
-///
+/// 7.19.2.2. The "yin-element" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct YinElementStmt {
@@ -1042,7 +1042,7 @@ impl Stmt for RangeStmt {
 */
 
 ///
-///
+/// 9.3.4. The "fraction-digits" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct FractionDigitsStmt {
@@ -1273,7 +1273,7 @@ impl Stmt for PositionStmt {
 
 
 ///
-///
+/// 7.21.2. The "status" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct StatusStmt {
@@ -1302,7 +1302,7 @@ impl Stmt for StatusStmt {
 
 
 ///
-///
+/// 7.21.1. The "config" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ConfigStmt {
@@ -1330,7 +1330,7 @@ impl Stmt for ConfigStmt {
 }
 
 ///
-///
+/// The "mandatory" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct MandatoryStmt {
@@ -1358,14 +1358,14 @@ impl Stmt for MandatoryStmt {
 }
 
 ///
-///
+/// 7.5.5. The "presence" Statement.
 ///
 #[derive(Debug, Clone)]
-pub struct PresenseStmt {
+pub struct PresenceStmt {
     str: String,
 }
 
-impl Stmt for PresenseStmt {
+impl Stmt for PresenceStmt {
     /// Arg type.
     type Arg = String;
 
@@ -1379,14 +1379,14 @@ impl Stmt for PresenseStmt {
 
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::PresenseStmt(PresenseStmt {
+        StmtType::PresenceStmt(PresenceStmt {
             str: arg,
         })
     }
 }
 
 ///
-///
+/// 7.7.7. The "ordered-by" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct OrderedByStmt {
@@ -1414,7 +1414,7 @@ impl Stmt for OrderedByStmt {
 }
 
 ///
-///
+/// 7.5.3. The "must" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct MustStmt {
@@ -1483,7 +1483,7 @@ impl Stmt for MustStmt {
 }
 
 ///
-///
+/// 7.5.4.1. The "error-message" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ErrorMessageStmt {
@@ -1511,7 +1511,7 @@ impl Stmt for ErrorMessageStmt {
 }
 
 ///
-///
+/// 7.5.4.2. The "error-app-tag" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ErrorAppTagStmt {
@@ -1539,7 +1539,7 @@ impl Stmt for ErrorAppTagStmt {
 }
 
 ///
-///
+/// 7.7.5. The "min-elements" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct MinElementsStmt {
@@ -1565,7 +1565,7 @@ impl Stmt for MinElementsStmt {
 }
 
 ///
-///
+/// 7.7.6. The "max-elements" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct MaxElementsStmt {
@@ -1591,7 +1591,7 @@ impl Stmt for MaxElementsStmt {
 }
 
 ///
-///
+/// 9.6.4.2. The "value" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ValueStmt {

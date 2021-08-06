@@ -59,15 +59,17 @@ fn parse_string(parser: &mut Parser) -> Result<String, YangError> {
 }
 
 
-//
-// Trait for statement arg.
-//
+///
+/// Trait for statement arg.
+///
 pub trait StmtArg {
     /// Parse token and return StmtArg if it is valid.
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> where Self: Sized;
 }
 
-// Yang Identifier.
+///
+/// Yang Identifier.
+///
 #[derive(Debug, Clone, PartialEq)]
 pub struct Identifier {
     str: String,

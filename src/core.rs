@@ -57,7 +57,7 @@ lazy_static! {
         m.insert("status", StatusStmt::parse as StmtParserFn);
         m.insert("config", ConfigStmt::parse as StmtParserFn);
         m.insert("mandatory", MandatoryStmt::parse as StmtParserFn);
-        m.insert("presense", PresenseStmt::parse as StmtParserFn);
+        m.insert("presence", PresenceStmt::parse as StmtParserFn);
         m.insert("ordered-by", OrderedByStmt::parse as StmtParserFn);
         m.insert("must", MustStmt::parse as StmtParserFn);
         m.insert("error-message", ErrorMessageStmt::parse as StmtParserFn);
@@ -200,7 +200,7 @@ pub enum StmtType {
     StatusStmt(StatusStmt),
     ConfigStmt(ConfigStmt),
     MandatoryStmt(MandatoryStmt),
-    PresenseStmt(PresenseStmt),
+    PresenceStmt(PresenceStmt),
     OrderedByStmt(OrderedByStmt),
     MustStmt(MustStmt),
     ErrorMessageStmt(ErrorMessageStmt),
@@ -284,7 +284,7 @@ impl fmt::Debug for StmtType {
             StmtType::StatusStmt(stmt) => write!(f, "status-stmt {:?}", stmt),
             StmtType::ConfigStmt(stmt) => write!(f, "config-stmt {:?}", stmt),
             StmtType::MandatoryStmt(stmt) => write!(f, "mandatory-stmt {:?}", stmt),
-            StmtType::PresenseStmt(stmt) => write!(f, "presense-stmt {:?}", stmt),
+            StmtType::PresenceStmt(stmt) => write!(f, "presence-stmt {:?}", stmt),
             StmtType::OrderedByStmt(stmt) => write!(f, "ordered-by-stmt {:?}", stmt),
             StmtType::MustStmt(stmt) => write!(f, "must-stmt {:?}", stmt),
             StmtType::ErrorMessageStmt(stmt) => write!(f, "error-message-stmt {:?}", stmt),
