@@ -79,24 +79,20 @@ impl fmt::Display for Identifier {
     }
 }
 
-impl Identifier {
-    pub fn from(str: &str) -> Identifier {
-        Identifier {
-            str: String::from(str),
-        }
-    }
+impl FromStr for Identifier {
+    type Err = YangError;
 
-    pub fn validate(str: &str) -> bool {
-        if !str.starts_with(|c: char| c.is_alphabetic() || c == '_') {
-            false
-        } else if str.len() > 1 {
-            if let Some(_) = &str[1..].find(|c: char| !c.is_alphabetic() && !c.is_ascii_digit() && c != '_' && c != '-' && c != '.') {
-                false
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if !s.starts_with(|c: char| c.is_alphabetic() || c == '_') {
+            Err(YangError::ArgumentParseError("identifier".to_string()))
+        } else if s.len() > 1 {
+            if let Some(_) = &s[1..].find(|c: char| !c.is_alphabetic() && !c.is_ascii_digit() && c != '_' && c != '-' && c != '.') {
+                Err(YangError::ArgumentParseError("identifier".to_string()))
             } else {
-                true
+                Ok(Identifier { str: s.to_string() })
             }
         } else {
-            true
+            Ok(Identifier { str: s.to_string() })
         }
     }
 }
@@ -105,11 +101,7 @@ impl StmtArg for Identifier {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
-        if !Identifier::validate(&str) {
-            Err(YangError::InvalidIdentifier)
-        } else {
-            Ok(Identifier { str })
-        }
+        Identifier::from_str(&str)
     }
 }
 
@@ -142,23 +134,14 @@ impl StmtArg for IdentifierRef {
         let str = parse_string(parser)?;
         match str.find(":") {
             Some(p) => {
-                let prefix_str = &str[..p];
-                let identifier_str = &str[p+1..];
+                let prefix = Identifier::from_str(&str[..p])?;
+                let identifier = Identifier::from_str(&str[p + 1..])?;
 
-                if Identifier::validate(&prefix_str) && Identifier::validate(&identifier_str) {
-                    Ok(IdentifierRef {
-                        prefix: Some(Identifier::from(prefix_str)),
-                        identifier: Identifier::from(identifier_str) })
-                } else {
-                    Err(YangError::InvalidIdentifier)
-                }
+                Ok(IdentifierRef { prefix: Some(prefix), identifier})
             }
             None => {
-                if Identifier::validate(&str) {
-                    Ok(IdentifierRef { prefix: None, identifier: Identifier::from(&str) })
-                } else {
-                    Err(YangError::InvalidIdentifier)
-                }
+                let identifier = Identifier::from_str(&str)?;
+                Ok(IdentifierRef { prefix: None, identifier })
             }
         }
     }
