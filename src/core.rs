@@ -369,28 +369,6 @@ pub fn is_decimal_value(s: &str) -> bool {
     }
 }
 
-pub fn parse_range_boundary(s: &str) -> Result<RangeBoundary, YangError> {
-    let rb = s.trim();
-
-    if s == "min" {
-        Ok(RangeBoundary::Min)
-    } else if s == "max" {
-        Ok(RangeBoundary::Max)
-    } else if is_decimal_value(s) {
-        match s.parse::<f64>() {
-            Ok(num) => Ok(RangeBoundary::Decimal(num)),
-            Err(_) => Err(YangError::ArgumentParseError("range-arg".to_string())),
-        }
-    } else if is_integer_value(s) {
-        match s.parse::<i64>() {
-            Ok(num) => Ok(RangeBoundary::Integer(num)),
-            Err(_) => Err(YangError::ArgumentParseError("range-arg".to_string())),
-        }
-    } else {
-        Err(YangError::ArgumentParseError("range-arg".to_string()))
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
