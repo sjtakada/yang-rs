@@ -1291,27 +1291,31 @@ impl Stmt for StatusStmt {
 }
 
 
-/* TBD
-
 ///
 ///
 ///
 #[derive(Debug, Clone)]
 pub struct ConfigStmt {
+    config_arg: ConfigArg,
 }
 
 impl Stmt for ConfigStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = ConfigArg;
+
+    /// Sub Statements.
+    type SubStmts = ();
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "config"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::ConfigStmt(ConfigStmt {
+            config_arg: arg
+        })
     }
 }
 
@@ -1320,20 +1324,26 @@ impl Stmt for ConfigStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct MandatoryStmt {
+    mandatory_arg: MandatoryArg,
 }
 
 impl Stmt for MandatoryStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = MandatoryArg;
+
+    /// Sub Statements.
+    type SubStmts = ();
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "mandatory"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::MandatoryStmt(MandatoryStmt {
+            mandatory_arg: arg
+        })
     }
 }
 
@@ -1342,20 +1352,26 @@ impl Stmt for MandatoryStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct PresenseStmt {
+    str: String,
 }
 
 impl Stmt for PresenseStmt {
     /// Arg type.
     type Arg = String;
 
+    /// Sub Statements.
+    type SubStmts = ();
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "presense"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::PresenseStmt(PresenseStmt {
+            str: arg,
+        })
     }
 }
 
@@ -1364,22 +1380,31 @@ impl Stmt for PresenseStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct OrderedByStmt {
+    ordered_by_arg: OrderedByArg,
 }
 
 impl Stmt for OrderedByStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = OrderedByArg;
+
+    /// Sub Statements.
+    type SubStmts = ();
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "ordered-by"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::OrderedByStmt(OrderedByStmt {
+            ordered_by_arg: arg,
+        })
     }
 }
+
+/* TBD
+
 
 ///
 ///

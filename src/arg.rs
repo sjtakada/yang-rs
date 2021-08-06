@@ -365,6 +365,37 @@ impl StmtArg for MandatoryArg {
     }
 }
 
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum OrderedBy {
+    User,
+    System,
+}
+
+// Ordered-By arg.
+#[derive(Debug, Clone)]
+pub struct OrderedByArg {
+    arg: OrderedBy,
+}
+
+impl StmtArg for OrderedByArg {
+    type Value = OrderedBy;
+
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        if str == "user" {
+            Ok(OrderedByArg { arg: OrderedBy::User })
+        } else if str == "system" {
+            Ok(OrderedByArg { arg: OrderedBy::System })
+        } else {
+            Err(YangError::ArgumentParseError("ordered-by-arg".to_string()))
+        }
+    }
+
+    fn get_arg(&self) -> OrderedBy {
+        self.arg
+    }
+}
+
 // Min Value arg.
 #[derive(Debug, Clone)]
 pub struct MinValueArg {
