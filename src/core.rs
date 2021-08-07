@@ -40,8 +40,8 @@ lazy_static! {
         m.insert("if-feature", IfFeatureStmt::parse as StmtParserFn);
         m.insert("typedef", TypedefStmt::parse as StmtParserFn);
         m.insert("type", TypeStmt::parse as StmtParserFn);
-        m.insert("range", RangeStmt::parse as StmtParserFn);
 */
+        m.insert("range", RangeStmt::parse as StmtParserFn);
         m.insert("fraction-digits", FractionDigitsStmt::parse as StmtParserFn);
 /*
         m.insert("length", LengthStmt::parse as StmtParserFn);
@@ -183,8 +183,8 @@ pub enum StmtType {
     IfFeatureStmt(IfFeatureStmt),
     TypedefStmt(TypedefStmt),
     TypeStmt(TypeStmt),
-    RangeStmt(RangeStmt),
 */
+    RangeStmt(RangeStmt),
     FractionDigitsStmt(FractionDigitsStmt),
 /*
     LengthStmt(LengthStmt),
@@ -267,8 +267,8 @@ impl fmt::Debug for StmtType {
             StmtType::IfFeatureStmt(stmt) => write!(f, "if-feature-stmt {:?}", stmt),
             StmtType::TypedefStmt(stmt) => write!(f, "typedef-stmt {:?}", stmt),
             StmtType::TypeStmt(stmt) => write!(f, "type-stmt {:?}", stmt),
-            StmtType::RangeStmt(stmt) => write!(f, "range-stmt {:?}", stmt),
 */
+            StmtType::RangeStmt(stmt) => write!(f, "range-stmt {:?}", stmt),
             StmtType::FractionDigitsStmt(stmt) => write!(f, "fraction-digits-stmt {:?}", stmt),
 /*
             StmtType::LengthStmt(stmt) => write!(f, "length-stmt {:?}", stmt),

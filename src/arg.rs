@@ -462,9 +462,6 @@ impl StmtArg for IntegerValue {
     }
 }
 
-///
-/// Ranges.
-///
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum RangeBoundary {
     Min,
@@ -484,12 +481,12 @@ impl FromStr for RangeBoundary {
         } else if rb == "max" {
             Ok(RangeBoundary::Max)
         } else if is_decimal_value(rb) {
-            match s.parse::<f64>() {
+            match rb.parse::<f64>() {
                 Ok(num) => Ok(RangeBoundary::Decimal(num)),
                 Err(_) => Err(YangError::ArgumentParseError("range-arg".to_string())),
             }
         } else if is_integer_value(rb) {
-            match s.parse::<i64>() {
+            match rb.parse::<i64>() {
                 Ok(num) => Ok(RangeBoundary::Integer(num)),
                 Err(_) => Err(YangError::ArgumentParseError("range-arg".to_string())),
             }
@@ -499,38 +496,121 @@ impl FromStr for RangeBoundary {
     }
 }
 
-pub type Range = (RangeBoundary, Option<RangeBoundary>);
+pub type RangePart = (RangeBoundary, Option<RangeBoundary>);
 
+///
+/// The "range-arg".
+///
+#[derive(Debug, Clone, PartialEq)]
 pub struct RangeArg {
-    ranges: Vec<Range>,
+    parts: Vec<RangePart>,
 }
 
 impl StmtArg for RangeArg {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
-        let rp: Vec<_> = str.split('|').collect();
+        let parts: Vec<_> = str.split('|').collect();
         let mut v = Vec::new();
 
-        for r in rp {
-            let srb;
-            let erb;
+        for p in parts {
+            let lower;
+            let upper;
 
-            let rb: Vec<_> = r.split("..").collect();
+            let bounds: Vec<_> = p.split("..").collect();
+            if bounds.len() == 1 {
+                if bounds[0] == "" {
+                    return Err(YangError::ArgumentParseError("range-arg".to_string()));
+                }
 
-            if rb.len() == 1 {
-                srb = RangeBoundary::from_str(rb[0])?;
-                erb = None;
-            } else if rb.len() == 2 {
-                srb = RangeBoundary::from_str(rb[0])?;
-                erb = Some(RangeBoundary::from_str(rb[1])?);
+                lower = RangeBoundary::from_str(bounds[0])?;
+                upper = None;
+            } else if bounds.len() == 2 {
+                if bounds[0] == "" || bounds[1] == "" {
+                    return Err(YangError::ArgumentParseError("range-arg".to_string()));
+                }
+                lower = RangeBoundary::from_str(bounds[0])?;
+                upper = Some(RangeBoundary::from_str(bounds[1])?);
             } else {
                 return Err(YangError::ArgumentParseError("range-arg".to_string()));
             }
 
-            v.push((srb, erb));
+            v.push((lower, upper));
         }
 
-        Ok(RangeArg { ranges: v })
+        Ok(RangeArg { parts: v })
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum LengthBoundary {
+    Min,
+    Max,
+    Integer(u64),
+}
+
+impl FromStr for LengthBoundary {
+    type Err = YangError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let lb = s.trim();
+
+        if lb == "min" {
+            Ok(LengthBoundary::Min)
+        } else if lb == "max" {
+            Ok(LengthBoundary::Max)
+        } else if is_integer_value(lb) {
+            match lb.parse::<u64>() {
+                Ok(num) => Ok(LengthBoundary::Integer(num)),
+                Err(_) => Err(YangError::ArgumentParseError("length-arg".to_string())),
+            }
+        } else {
+            Err(YangError::ArgumentParseError("length-arg".to_string()))
+        }
+    }
+}
+
+pub type LengthPart = (LengthBoundary, Option<LengthBoundary>);
+
+///
+/// The "length-arg".
+///
+#[derive(Debug, Clone, PartialEq)]
+pub struct LengthArg {
+    parts: Vec<LengthPart>,
+}
+
+impl StmtArg for LengthArg {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        let parts: Vec<_> = str.split('|').collect();
+        let mut v = Vec::new();
+
+        for p in parts {
+            let lower;
+            let upper;
+
+            let bounds: Vec<_> = p.split("..").collect();
+            if bounds.len() == 1 {
+                if bounds[0] == "" {
+                    return Err(YangError::ArgumentParseError("length-arg".to_string()));
+                }
+
+                lower = LengthBoundary::from_str(bounds[0])?;
+                upper = None;
+            } else if bounds.len() == 2 {
+                if bounds[0] == "" || bounds[1] == "" {
+                    return Err(YangError::ArgumentParseError("length-arg".to_string()));
+                }
+                lower = LengthBoundary::from_str(bounds[0])?;
+                upper = Some(LengthBoundary::from_str(bounds[1])?);
+            } else {
+                return Err(YangError::ArgumentParseError("length-arg".to_string()));
+            }
+
+            v.push((lower, upper));
+        }
+
+        Ok(LengthArg { parts: v })
     }
 }
 
@@ -539,13 +619,13 @@ mod tests {
     use super::*;
 
     #[test]
-    pub fn test_arg_identifier() {
+    pub fn test_identifier() {
         let s = " hello-world ";
         let mut parser = Parser::new(s.to_string());
 
         match Identifier::parse_arg(&mut parser) {
             Ok(arg) => assert_eq!(arg, Identifier { str: String::from("hello-world") }),
-            Err(_) => assert!(false),
+            Err(err) => panic!("{:?}", err.to_string()),
         }
 
         let s = " _123.IdEnT.456-789_ ";
@@ -553,7 +633,7 @@ mod tests {
 
         match Identifier::parse_arg(&mut parser) {
             Ok(arg) => assert_eq!(arg, Identifier { str: String::from("_123.IdEnT.456-789_") }),
-            Err(_) => assert!(false),
+            Err(err) => panic!("{:?}", err.to_string()),
         }
 
         let s = " 123 ";
@@ -561,7 +641,7 @@ mod tests {
 
         match Identifier::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Invalid identifier"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: identifier"),
         }
 
         let s = " 123$ ";
@@ -569,18 +649,18 @@ mod tests {
 
         match Identifier::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Invalid identifier"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: identifier"),
         }
     }
 
     #[test]
-    pub fn test_arg_identifier_ref() {
+    pub fn test_identifier_ref() {
         let s = " prefix:hello-world ";
         let mut parser = Parser::new(s.to_string());
 
         match IdentifierRef::parse_arg(&mut parser) {
             Ok(arg) => assert_eq!(arg.to_string(), "prefix:hello-world"),
-            Err(_) => assert!(false),
+            Err(err) => panic!("{:?}", err.to_string()),
         }
 
         let s = " _prefix_:_123.IdEnT.456-789_ ";
@@ -588,7 +668,7 @@ mod tests {
 
         match IdentifierRef::parse_arg(&mut parser) {
             Ok(arg) => assert_eq!(arg.to_string(), "_prefix_:_123.IdEnT.456-789_"),
-            Err(_) => assert!(false),
+            Err(err) => panic!("{:?}", err.to_string()),
         }
 
         let s = " 123:456 ";
@@ -596,7 +676,7 @@ mod tests {
 
         match IdentifierRef::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Invalid identifier"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: identifier"),
         }
 
         let s = " _123:_456 ";
@@ -604,7 +684,7 @@ mod tests {
 
         match IdentifierRef::parse_arg(&mut parser) {
             Ok(arg) => assert_eq!(arg.to_string(), "_123:_456"),
-            Err(_) => assert!(false),
+            Err(err) => panic!("{:?}", err.to_string()),
         }
 
         let s = " _123: ";
@@ -612,18 +692,18 @@ mod tests {
 
         match IdentifierRef::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Invalid identifier"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: identifier"),
         }
     }
 
     #[test]
-    pub fn test_arg_date_arg() {
+    pub fn test_date_arg() {
         let s = " 2021-08-01 ";
         let mut parser = Parser::new(s.to_string());
 
         match DateArg::parse_arg(&mut parser) {
             Ok(arg) => assert_eq!(arg.to_string(), "2021-08-01"),
-            Err(_) => assert!(false),
+            Err(err) => panic!("{:?}", err.to_string()),
         }
 
         let s = " 2021-8-1 ";
@@ -652,13 +732,13 @@ mod tests {
     }
 
     #[test]
-    pub fn test_arg_fraction_digits() {
+    pub fn test_fraction_digits_arg() {
         let s = "18";
         let mut parser = Parser::new(s.to_string());
 
         match FractionDigitsArg::parse_arg(&mut parser) {
             Ok(arg) => assert_eq!(arg.digits(), 18),
-            Err(_) => assert!(false),
+            Err(err) => panic!("{:?}", err.to_string()),
         }
 
         let s = "0";
@@ -675,6 +755,90 @@ mod tests {
         match FractionDigitsArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
             Err(err) => assert_eq!(err.to_string(), "Argument parse error: fraction-digits-arg"),
+        }
+    }
+
+    #[test]
+    pub fn test_range_arg() {
+        let s = r#""1..10""#;
+        let mut parser = Parser::new(s.to_string());
+
+        match RangeArg::parse_arg(&mut parser) {
+            Ok(arg) => assert_eq!(arg, RangeArg { parts: vec![(RangeBoundary::Integer(1), Some(RangeBoundary::Integer(10)))]}),
+            Err(err) => panic!("{:?}", err.to_string()),
+        }
+
+        let s = r#""1 .. 10 | 21..30""#;
+        let mut parser = Parser::new(s.to_string());
+
+        match RangeArg::parse_arg(&mut parser) {
+            Ok(arg) => assert_eq!(arg, RangeArg { parts: vec![(RangeBoundary::Integer(1), Some(RangeBoundary::Integer(10))),
+                                                               (RangeBoundary::Integer(21), Some(RangeBoundary::Integer(30))),
+            ]}),
+            Err(err) => panic!("{:?}", err.to_string()),
+        }
+
+        let s = r#""min..max""#;
+        let mut parser = Parser::new(s.to_string());
+
+        match RangeArg::parse_arg(&mut parser) {
+            Ok(arg) => assert_eq!(arg, RangeArg { parts: vec![(RangeBoundary::Min, Some(RangeBoundary::Max)),
+            ]}),
+            Err(err) => panic!("{:?}", err.to_string()),
+        }
+
+        let s = r#""min..""#;
+        let mut parser = Parser::new(s.to_string());
+
+        match RangeArg::parse_arg(&mut parser) {
+            Ok(arg) => assert!(false),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: range-arg"),
+        }
+
+        let s = r#""1.01 .. 1.99""#;
+        let mut parser = Parser::new(s.to_string());
+
+        match RangeArg::parse_arg(&mut parser) {
+            Ok(arg) => assert_eq!(arg, RangeArg { parts: vec![(RangeBoundary::Decimal(1.01), Some(RangeBoundary::Decimal(1.99)))]}),
+            Err(err) => panic!("{:?}", err.to_string()),
+        }
+    }
+
+    #[test]
+    pub fn test_length_arg() {
+        let s = r#""1..10""#;
+        let mut parser = Parser::new(s.to_string());
+
+        match LengthArg::parse_arg(&mut parser) {
+            Ok(arg) => assert_eq!(arg, LengthArg { parts: vec![(LengthBoundary::Integer(1), Some(LengthBoundary::Integer(10)))]}),
+            Err(err) => panic!("{:?}", err.to_string()),
+        }
+
+        let s = r#""1 .. 10 | 21..30""#;
+        let mut parser = Parser::new(s.to_string());
+
+        match LengthArg::parse_arg(&mut parser) {
+            Ok(arg) => assert_eq!(arg, LengthArg { parts: vec![(LengthBoundary::Integer(1), Some(LengthBoundary::Integer(10))),
+                                                               (LengthBoundary::Integer(21), Some(LengthBoundary::Integer(30))),
+            ]}),
+            Err(err) => panic!("{:?}", err.to_string()),
+        }
+
+        let s = r#""min..max""#;
+        let mut parser = Parser::new(s.to_string());
+
+        match LengthArg::parse_arg(&mut parser) {
+            Ok(arg) => assert_eq!(arg, LengthArg { parts: vec![(LengthBoundary::Min, Some(LengthBoundary::Max)),
+            ]}),
+            Err(err) => panic!("{:?}", err.to_string()),
+        }
+
+        let s = r#""min..""#;
+        let mut parser = Parser::new(s.to_string());
+
+        match LengthArg::parse_arg(&mut parser) {
+            Ok(arg) => assert!(false),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: length-arg"),
         }
     }
 }
