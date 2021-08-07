@@ -2355,7 +2355,7 @@ impl MetaStmts {
             description: collect_opt_stmt!(stmts, DescriptionStmt)?,
             reference: collect_opt_stmt!(stmts, ReferenceStmt)?,
         })
-  }
+    }
 }
 
 ///
@@ -2410,7 +2410,7 @@ impl RevisionStmts {
 ///
 #[derive(Debug, Clone)]
 pub struct NumericalRestrictions {
-    range: Option<RangeStmt>
+    range: Option<RangeStmt>,
 }
 
 impl NumericalRestrictions {
@@ -2427,10 +2427,27 @@ impl NumericalRestrictions {
     }
 }
 
-//
-// TBD: body-stmts
-//
+///
+/// Decimal64 Specification
+///
+#[derive(Debug, Clone)]
+pub struct Decimal64Specification {
+    fraction_digits: FractionDigitsStmt,
+    range: Option<RangeStmt>,
+}
 
-//
-// data-def-stmt
-//
+impl Decimal64Specification {
+    pub fn parse(parser: &mut Parser) -> Result<Decimal64Specification, YangError> {
+        let map: HashMap<&'static str, Repeat> = [
+            ("fraction-digits", Repeat::new(Some(1), Some(1))),
+            ("range", Repeat::new(Some(0), Some(1))),
+        ].iter().cloned().collect();
+
+        let mut stmts = parse_stmt_collection(parser, map)?;
+
+        Ok(Decimal64Specification {
+            fraction_digits: collect_a_stmt!(stmts, FractionDigitsStmt)?,
+            range: collect_opt_stmt!(stmts, RangeStmt)?,
+        })
+    }
+}
