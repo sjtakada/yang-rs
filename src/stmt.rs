@@ -2405,6 +2405,28 @@ impl RevisionStmts {
     }
 }
 
+///
+/// Numerical Restrictions
+///
+#[derive(Debug, Clone)]
+pub struct NumericalRestrictions {
+    range: Option<RangeStmt>
+}
+
+impl NumericalRestrictions {
+    pub fn parse(parser: &mut Parser) -> Result<NumericalRestrictions, YangError> {
+        let map: HashMap<&'static str, Repeat> = [
+            ("range", Repeat::new(Some(0), Some(1))),
+        ].iter().cloned().collect();
+
+        let mut stmts = parse_stmt_collection(parser, map)?;
+
+        Ok(NumericalRestrictions {
+            range: collect_opt_stmt!(stmts, RangeStmt)?,
+        })
+    }
+}
+
 //
 // TBD: body-stmts
 //
