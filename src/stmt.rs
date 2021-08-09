@@ -904,27 +904,37 @@ impl Stmt for IdentityStmt {
     }
 }
 
+*/
+
 ///
-///
+/// 7.18.2. The "base" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct BaseStmt {
+    identifier_ref: IdentifierRef,
 }
 
 impl Stmt for BaseStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = IdentifierRef;
+
+    /// Sub Statements.
+    type SubStmts = ();
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "base"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::BaseStmt(BaseStmt {
+            identifier_ref: arg,
+        })
     }
 }
+
+/*
 
 ///
 ///
