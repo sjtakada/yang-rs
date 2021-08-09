@@ -47,7 +47,7 @@ lazy_static! {
         m.insert("range", RangeStmt::parse as StmtParserFn);
         m.insert("fraction-digits", FractionDigitsStmt::parse as StmtParserFn);
         m.insert("length", LengthStmt::parse as StmtParserFn);
-//        m.insert("pattern", PatternStmt::parse as StmtParserFn);
+        m.insert("pattern", PatternStmt::parse as StmtParserFn);
         m.insert("modifier", ModifierStmt::parse as StmtParserFn);
 /*
         m.insert("default", DefaultStmt::parse as StmtParserFn);
@@ -206,7 +206,7 @@ pub enum StmtType {
     RangeStmt(RangeStmt),
     FractionDigitsStmt(FractionDigitsStmt),
     LengthStmt(LengthStmt),
-//    PatternStmt(PatternStmt),
+    PatternStmt(PatternStmt),
     ModifierStmt(ModifierStmt),
 /*
     DefaultStmt(DefaultStmt),
@@ -290,7 +290,7 @@ impl fmt::Debug for StmtType {
             StmtType::RangeStmt(stmt) => write!(f, "range-stmt {:?}", stmt),
             StmtType::FractionDigitsStmt(stmt) => write!(f, "fraction-digits-stmt {:?}", stmt),
             StmtType::LengthStmt(stmt) => write!(f, "length-stmt {:?}", stmt),
-//            StmtType::PatternStmt(stmt) => write!(f, "pattern-stmt {:?}", stmt),
+            StmtType::PatternStmt(stmt) => write!(f, "pattern-stmt {:?}", stmt),
             StmtType::ModifierStmt(stmt) => write!(f, "modifier-stmt {:?}", stmt),
 /*
             StmtType::DefaultStmt(stmt) => write!(f, "default-stmt {:?}", stmt),

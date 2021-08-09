@@ -1210,31 +1210,80 @@ impl Stmt for LengthStmt {
     }
 }
 
-/*
-
 ///
-///
+/// 9.4.6. The "pattern" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct PatternStmt {
+    pattern_arg: String,
+    modifier: Option<ModifierStmt>,
+    error_message: Option<ErrorMessageStmt>,
+    error_app_tag: Option<ErrorAppTagStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
 }
 
 impl Stmt for PatternStmt {
     /// Arg type.
     type Arg = String;
 
+    /// Sub Statements.
+    type SubStmts = (Option<ModifierStmt>, Option<ErrorMessageStmt>, Option<ErrorAppTagStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "pattern"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::PatternStmt(PatternStmt {
+            pattern_arg: arg,
+            modifier: None,
+            error_message: None,
+            error_app_tag: None,
+            description: None,
+            reference: None,
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::PatternStmt(PatternStmt {
+            pattern_arg: arg,
+            modifier: substmts.0,
+            error_message: substmts.1,
+            error_app_tag: substmts.2,
+            description: substmts.3,
+            reference: substmts.4,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let map: HashMap<&'static str, Repeat> = [
+            ("modifier", Repeat::new(Some(0), Some(1))),
+            ("error-message", Repeat::new(Some(0), Some(1))),
+            ("error-app-tag", Repeat::new(Some(0), Some(1))),
+            ("description", Repeat::new(Some(0), Some(1))),
+            ("reference", Repeat::new(Some(0), Some(1))),
+        ].iter().cloned().collect();
+
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+
+        Ok((collect_opt_stmt!(stmts, ModifierStmt)?,
+            collect_opt_stmt!(stmts, ErrorMessageStmt)?,
+            collect_opt_stmt!(stmts, ErrorAppTagStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,))
     }
 }
-
-*/
 
 ///
 /// 9.4.6. The "modifier" Statement.
