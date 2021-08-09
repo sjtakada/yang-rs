@@ -49,8 +49,8 @@ lazy_static! {
         m.insert("length", LengthStmt::parse as StmtParserFn);
         m.insert("pattern", PatternStmt::parse as StmtParserFn);
         m.insert("modifier", ModifierStmt::parse as StmtParserFn);
-/*
         m.insert("default", DefaultStmt::parse as StmtParserFn);
+/*
         m.insert("enum", EnumStmt::parse as StmtParserFn);
         m.insert("path", PathStmt::parse as StmtParserFn);
         m.insert("require-instance", RequireInstanceStmt::parse as StmtParserFn);
@@ -208,8 +208,8 @@ pub enum StmtType {
     LengthStmt(LengthStmt),
     PatternStmt(PatternStmt),
     ModifierStmt(ModifierStmt),
-/*
     DefaultStmt(DefaultStmt),
+/*
     EnumStmt(EnumStmt),
     PathStmt(PathStmt),
     RequireInstanceStmt(RequireInstanceStmt),
@@ -292,8 +292,8 @@ impl fmt::Debug for StmtType {
             StmtType::LengthStmt(stmt) => write!(f, "length-stmt {:?}", stmt),
             StmtType::PatternStmt(stmt) => write!(f, "pattern-stmt {:?}", stmt),
             StmtType::ModifierStmt(stmt) => write!(f, "modifier-stmt {:?}", stmt),
-/*
             StmtType::DefaultStmt(stmt) => write!(f, "default-stmt {:?}", stmt),
+/*
             StmtType::EnumStmt(stmt) => write!(f, "enum-stmt {:?}", stmt),
             StmtType::PathStmt(stmt) => write!(f, "path-stmt {:?}", stmt),
             StmtType::RequireInstanceStmt(stmt) => write!(f, "require-instance-stmt {:?}", stmt),

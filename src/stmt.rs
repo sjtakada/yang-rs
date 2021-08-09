@@ -1313,29 +1313,35 @@ impl Stmt for ModifierStmt {
     }
 }
 
-/*
-
 ///
-///
+/// The "default" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct DefaultStmt {
+    string: String,
 }
 
 impl Stmt for DefaultStmt {
     /// Arg type.
     type Arg = String;
 
+    /// Sub Statements.
+    type SubStmts = ();
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "default"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::DefaultStmt(DefaultStmt {
+            string: arg,
+        })
     }
 }
+
+/*
 
 ///
 ///
