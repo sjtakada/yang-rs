@@ -55,8 +55,8 @@ lazy_static! {
         m.insert("path", PathStmt::parse as StmtParserFn);
         m.insert("require-instance", RequireInstanceStmt::parse as StmtParserFn);
         m.insert("bit", BitStmt::parse as StmtParserFn);
-        m.insert("position", PositionStmt::parse as StmtParserFn);
 */
+        m.insert("position", PositionStmt::parse as StmtParserFn);
         m.insert("status", StatusStmt::parse as StmtParserFn);
         m.insert("config", ConfigStmt::parse as StmtParserFn);
         m.insert("mandatory", MandatoryStmt::parse as StmtParserFn);
@@ -214,8 +214,8 @@ pub enum StmtType {
     PathStmt(PathStmt),
     RequireInstanceStmt(RequireInstanceStmt),
     BitStmt(BitStmt),
-    PositionStmt(PositionStmt),
 */
+    PositionStmt(PositionStmt),
     StatusStmt(StatusStmt),
     ConfigStmt(ConfigStmt),
     MandatoryStmt(MandatoryStmt),
@@ -298,8 +298,8 @@ impl fmt::Debug for StmtType {
             StmtType::PathStmt(stmt) => write!(f, "path-stmt {:?}", stmt),
             StmtType::RequireInstanceStmt(stmt) => write!(f, "require-instance-stmt {:?}", stmt),
             StmtType::BitStmt(stmt) => write!(f, "bit-stmt {:?}", stmt),
-            StmtType::PositionStmt(stmt) => write!(f, "position-stmt {:?}", stmt),
 */
+            StmtType::PositionStmt(stmt) => write!(f, "position-stmt {:?}", stmt),
             StmtType::StatusStmt(stmt) => write!(f, "status-stmt {:?}", stmt),
             StmtType::ConfigStmt(stmt) => write!(f, "config-stmt {:?}", stmt),
             StmtType::MandatoryStmt(stmt) => write!(f, "mandatory-stmt {:?}", stmt),

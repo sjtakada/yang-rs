@@ -395,7 +395,7 @@ impl StmtArg for MinValueArg {
         if is_non_negative_integer_value(&str) {
             match str.parse::<u64>() {
                 Ok(num) => Ok(MinValueArg { val: num }),
-                Err(_) => Err(YangError::ArgumentParseError("min-value-arg".to_string()))
+                Err(_) => Err(YangError::ArgumentParseError("min-value-arg".to_string())),
             }
         } else {
             Err(YangError::ArgumentParseError("min-value-arg".to_string()))
@@ -448,14 +448,17 @@ impl StmtArg for MaxValueArg {
 ///
 #[derive(Debug, Clone)]
 pub struct IntegerValue {
-    val: String,
+    val: i64,
 }
 
 impl StmtArg for IntegerValue {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         if is_integer_value(&str) {
-            Ok(IntegerValue { val: str })
+            match str.parse::<i64>() {
+                Ok(num) => Ok(IntegerValue { val: num }),
+                Err(_) => Err(YangError::ArgumentParseError("integer-value".to_string())),
+            }
         } else {
             Err(YangError::ArgumentParseError("integer-value".to_string()))
         }
@@ -631,6 +634,29 @@ impl StmtArg for ModifierArg {
         }
     }
 }
+
+///
+/// The "position-value-arg".
+///
+#[derive(Debug, Clone, PartialEq)]
+pub struct PositionValueArg {
+    val: u64,
+}
+
+impl StmtArg for PositionValueArg {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        if is_non_negative_integer_value(&str) {
+            match str.parse::<u64>() {
+                Ok(num) => Ok(PositionValueArg { val: num }),
+                Err(_) => Err(YangError::ArgumentParseError("position-value-arg".to_string())),
+            }
+        } else {
+            Err(YangError::ArgumentParseError("position-value-arg".to_string()))
+        }
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
