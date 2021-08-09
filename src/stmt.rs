@@ -1141,29 +1141,76 @@ impl Stmt for FractionDigitsStmt {
     }
 }
 
-/*
-
 ///
-///
+/// 9.4.4. The "length" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct LengthStmt {
+    length_arg: LengthArg,
+    error_message: Option<ErrorMessageStmt>,
+    error_app_tag: Option<ErrorAppTagStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
 }
 
 impl Stmt for LengthStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = LengthArg;
+
+    /// Sub Statements.
+    type SubStmts = (Option<ErrorMessageStmt>, Option<ErrorAppTagStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "length"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::LengthStmt(LengthStmt {
+            length_arg: arg,
+            error_message: None,
+            error_app_tag: None,
+            description: None,
+            reference: None,
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::LengthStmt(LengthStmt {
+            length_arg: arg,
+            error_message: substmts.0,
+            error_app_tag: substmts.1,
+            description: substmts.2,
+            reference: substmts.3,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let map: HashMap<&'static str, Repeat> = [
+            ("error-message", Repeat::new(Some(0), Some(1))),
+            ("error-app-tag", Repeat::new(Some(0), Some(1))),
+            ("description", Repeat::new(Some(0), Some(1))),
+            ("reference", Repeat::new(Some(0), Some(1))),
+        ].iter().cloned().collect();
+
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+
+        Ok((collect_opt_stmt!(stmts, ErrorMessageStmt)?,
+            collect_opt_stmt!(stmts, ErrorAppTagStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,))
     }
 }
+
+/*
 
 ///
 ///
