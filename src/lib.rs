@@ -61,4 +61,12 @@ macro_rules! collect_opt_stmt {
     );
 }
 
-
+#[macro_export]
+macro_rules! parse_a_stmt {
+    ($st:ident, $parser:ident) => {
+        match <$st>::parse($parser)? {
+            StmtType::$st(stmt) => Ok(stmt),
+            _ => Err(YangError::UnexpectedStatement($parser.line())),
+        }
+    };
+}

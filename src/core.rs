@@ -5,6 +5,7 @@
 
 use std::fmt;
 use std::collections::HashMap;
+use std::collections::HashSet;
 
 use super::error::*;
 use super::parser::*;
@@ -39,8 +40,8 @@ lazy_static! {
         m.insert("feature", FeatureStmt::parse as StmtParserFn);
         m.insert("if-feature", IfFeatureStmt::parse as StmtParserFn);
         m.insert("typedef", TypedefStmt::parse as StmtParserFn);
-        m.insert("type", TypeStmt::parse as StmtParserFn);
 */
+        m.insert("type", TypeStmt::parse as StmtParserFn);
         m.insert("range", RangeStmt::parse as StmtParserFn);
         m.insert("fraction-digits", FractionDigitsStmt::parse as StmtParserFn);
 /*
@@ -98,7 +99,7 @@ lazy_static! {
     };
 }
 
-// Collection of statements in HashMap.
+// Statement collection.
 type StmtCollection = HashMap<String, Vec<StmtType>>;
 
 // Statement Parser callback type.
@@ -111,7 +112,7 @@ fn call_stmt_parser(parser: &mut Parser, keyword: &str) -> Result<StmtType, Yang
 }
 
 // Get a list of statements in any order.
-pub fn parse_stmt_collection(parser: &mut Parser, map: HashMap<&'static str, Repeat>) -> Result<StmtCollection, YangError> {
+pub fn parse_stmt_in_any_order(parser: &mut Parser, map: HashMap<&'static str, Repeat>) -> Result<StmtCollection, YangError> {
     let mut stmts: StmtCollection = HashMap::new();
 
     loop {
@@ -156,6 +157,22 @@ println!("*** parse_stmts {:?}", token);
     Ok(stmts)
 }
 
+// Expect one of statements from given set.
+pub fn expect_a_stmt(parser: &mut Parser, set: HashSet<&'static str>) -> Result<StmtType, YangError> {
+    let token = parser.get_token()?;
+println!("*** parse_stmts {:?}", token);
+    match token {
+        Token::Identifier(ref keyword) => {
+            if set.contains(keyword as &str) {
+                Ok(call_stmt_parser(parser, &keyword)?)
+            } else {
+                Err(YangError::UnexpectedStatement(parser.line()))
+            }
+        }
+        _ => Err(YangError::UnexpectedStatement(parser.line())),
+    }
+}
+
 // Yang Statement
 pub enum StmtType {
     ModuleStmt(ModuleStmt),
@@ -182,8 +199,8 @@ pub enum StmtType {
     FeatureStmt(FeatureStmt),
     IfFeatureStmt(IfFeatureStmt),
     TypedefStmt(TypedefStmt),
-    TypeStmt(TypeStmt),
 */
+    TypeStmt(TypeStmt),
     RangeStmt(RangeStmt),
     FractionDigitsStmt(FractionDigitsStmt),
 /*
@@ -266,8 +283,8 @@ impl fmt::Debug for StmtType {
             StmtType::FeatureStmt(stmt) => write!(f, "feature-stmt {:?}", stmt),
             StmtType::IfFeatureStmt(stmt) => write!(f, "if-feature-stmt {:?}", stmt),
             StmtType::TypedefStmt(stmt) => write!(f, "typedef-stmt {:?}", stmt),
-            StmtType::TypeStmt(stmt) => write!(f, "type-stmt {:?}", stmt),
 */
+            StmtType::TypeStmt(stmt) => write!(f, "type-stmt {:?}", stmt),
             StmtType::RangeStmt(stmt) => write!(f, "range-stmt {:?}", stmt),
             StmtType::FractionDigitsStmt(stmt) => write!(f, "fraction-digits-stmt {:?}", stmt),
 /*

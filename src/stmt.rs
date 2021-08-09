@@ -16,6 +16,7 @@ use super::arg::*;
 use crate::collect_a_stmt;
 use crate::collect_vec_stmt;
 use crate::collect_opt_stmt;
+use crate::parse_a_stmt;
 
 #[derive(Clone, Debug)]
 pub struct Repeat {
@@ -81,11 +82,6 @@ pub trait Stmt {
     fn new_with_substmts(_arg: Self::Arg, _substmts: Self::SubStmts) -> StmtType where Self: Sized {
         panic!();
     }
-
-    // Parse a statement arg.
-//    fn parse_arg(parser: &mut Parser) -> Result<Self::Arg, YangError> where Self::Arg: StmtArg {
-//        Self::Arg::parse_arg(parser)
-//    }
 
     /// Parse substatements.
     fn parse_substmts(_parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
@@ -338,7 +334,7 @@ impl Stmt for ImportStmt {
             ("reference", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
-        let mut stmts = parse_stmt_collection(parser, map)?;
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
 
         Ok((collect_a_stmt!(stmts, PrefixStmt)?,
             collect_opt_stmt!(stmts, RevisionDateStmt)?,
@@ -403,7 +399,7 @@ impl Stmt for IncludeStmt {
             ("reference", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
-        let mut stmts = parse_stmt_collection(parser, map)?;
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
 
         Ok((collect_opt_stmt!(stmts, RevisionDateStmt)?,
             collect_opt_stmt!(stmts, DescriptionStmt)?,
@@ -506,7 +502,7 @@ impl Stmt for BelongsToStmt {
             ("prefix", Repeat::new(Some(1), Some(1))),
         ].iter().cloned().collect();
 
-        let mut stmts = parse_stmt_collection(parser, map)?;
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
 
         Ok((collect_a_stmt!(stmts, PrefixStmt)?,))
     }
@@ -699,7 +695,7 @@ impl Stmt for RevisionStmt {
             ("reference", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
-        let mut stmts = parse_stmt_collection(parser, map)?;
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
         
         Ok((collect_opt_stmt!(stmts, DescriptionStmt)?,
             collect_opt_stmt!(stmts, ReferenceStmt)?))
@@ -792,7 +788,7 @@ impl Stmt for ExtensionStmt {
             ("reference", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
-        let mut stmts = parse_stmt_collection(parser, map)?;
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
 
         Ok((collect_opt_stmt!(stmts, ArgumentStmt)?,
             collect_opt_stmt!(stmts, StatusStmt)?,
@@ -849,7 +845,7 @@ impl Stmt for ArgumentStmt {
             ("yin-element", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
-        let mut stmts = parse_stmt_collection(parser, map)?;
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
 
         Ok((collect_opt_stmt!(stmts, YinElementStmt)?,))
     }
@@ -996,29 +992,38 @@ impl Stmt for TypedefStmt {
     }
 }
 
+*/
+
 ///
-///
+/// 7.4. The "type" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct TypeStmt {
+    type_body: Option<TypeBodyStmts>,
 }
 
 impl Stmt for TypeStmt {
     /// Arg type.
     type Arg = String;
 
+    /// Sub Statements.
+    type SubStmts = Option<TypeBodyStmts>;
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "type"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has substatements.
+    fn has_substmts() -> bool {
+        true
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        Ok(Some(TypeBodyStmts::parse(parser)?))
     }
 }
-
-*/
 
 ///
 /// 9.2.4. The "range" Statement.
@@ -1089,7 +1094,7 @@ impl Stmt for RangeStmt {
             ("reference", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
-        let mut stmts = parse_stmt_collection(parser, map)?;
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
 
         Ok((collect_opt_stmt!(stmts, ErrorMessageStmt)?,
             collect_opt_stmt!(stmts, ErrorAppTagStmt)?,
@@ -1530,7 +1535,7 @@ impl Stmt for MustStmt {
             ("reference", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
-        let mut stmts = parse_stmt_collection(parser, map)?;
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
 
         Ok((collect_opt_stmt!(stmts, ErrorMessageStmt)?,
             collect_opt_stmt!(stmts, ErrorAppTagStmt)?,
@@ -2291,7 +2296,7 @@ impl ModuleHeaderStmts {
             ("prefix", Repeat::new(Some(1), Some(1))),
         ].iter().cloned().collect();
 
-        let mut stmts = parse_stmt_collection(parser, map)?;
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
 
         Ok(ModuleHeaderStmts {
             yang_version: collect_a_stmt!(stmts, YangVersionStmt)?,
@@ -2318,7 +2323,7 @@ impl SubmoduleHeaderStmts {
             ("belongs-to", Repeat::new(Some(1), Some(1))),
         ].iter().cloned().collect();
 
-        let mut stmts = parse_stmt_collection(parser, map)?;
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
 
         Ok(SubmoduleHeaderStmts {
             yang_version: collect_a_stmt!(stmts, YangVersionStmt)?,
@@ -2347,7 +2352,7 @@ impl MetaStmts {
             ("reference", Repeat::new(Some(0), None)),
         ].iter().cloned().collect();
 
-        let mut stmts = parse_stmt_collection(parser, map)?;
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
 
         Ok(MetaStmts {
             organization: collect_opt_stmt!(stmts, OrganizationStmt)?,
@@ -2374,7 +2379,7 @@ impl LinkageStmts {
             ("include", Repeat::new(Some(0), None)),
         ].iter().cloned().collect();
 
-        let mut stmts = parse_stmt_collection(parser, map)?;
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
 
         Ok(LinkageStmts {
             import: collect_vec_stmt!(stmts, ImportStmt)?,
@@ -2397,7 +2402,7 @@ impl RevisionStmts {
             ("revision", Repeat::new(Some(0), None)),
         ].iter().cloned().collect();
 
-        let mut stmts = parse_stmt_collection(parser, map)?;
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
 
         Ok(RevisionStmts {
             revision: collect_vec_stmt!(stmts, RevisionStmt)?,
@@ -2419,7 +2424,7 @@ impl NumericalRestrictions {
             ("range", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
-        let mut stmts = parse_stmt_collection(parser, map)?;
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
 
         Ok(NumericalRestrictions {
             range: collect_opt_stmt!(stmts, RangeStmt)?,
@@ -2443,11 +2448,108 @@ impl Decimal64Specification {
             ("range", Repeat::new(Some(0), Some(1))),
         ].iter().cloned().collect();
 
-        let mut stmts = parse_stmt_collection(parser, map)?;
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
 
         Ok(Decimal64Specification {
             fraction_digits: collect_a_stmt!(stmts, FractionDigitsStmt)?,
             range: collect_opt_stmt!(stmts, RangeStmt)?,
         })
+    }
+}
+
+///
+/// Type Body Statements.
+///
+#[derive(Debug, Clone)]
+pub enum TypeBodyStmts {
+    NumericalRestrictions(NumericalRestrictions),
+    Decimal64Specification(Decimal64Specification),
+}
+
+impl TypeBodyStmts {
+    pub fn parse(parser: &mut Parser) -> Result<TypeBodyStmts, YangError> {
+        let token = parser.peek_token()?;
+        let stmts = match token {
+            Token::Identifier(ref keyword) => {
+                match keyword as &str {
+                    "range" => {
+                        let range = parse_a_stmt!(RangeStmt, parser)?;
+                        if parser.expect_keyword("fraction-digits")? {
+                            let decimal64_specification = Decimal64Specification {
+                                fraction_digits: parse_a_stmt!(FractionDigitsStmt, parser)?,
+                                range: Some(range),
+                            };
+                            TypeBodyStmts::Decimal64Specification(decimal64_specification)
+                        } else {
+                            let numerical_restrictions = NumericalRestrictions { range: Some(range) };
+                            TypeBodyStmts::NumericalRestrictions(numerical_restrictions)
+                        }
+                    }
+                    "fraction-digits" => {
+                        let fraction_digits = parse_a_stmt!(FractionDigitsStmt, parser)?;
+                        if parser.expect_keyword("range")? {
+                            let decimal64_specification = Decimal64Specification {
+                                fraction_digits: fraction_digits,
+                                range: Some(parse_a_stmt!(RangeStmt, parser)?),
+                            };
+                            TypeBodyStmts::Decimal64Specification(decimal64_specification)
+                        } else {
+                            let decimal64_specification = Decimal64Specification {
+                                fraction_digits: fraction_digits,
+                                range: None,
+                            };
+                            TypeBodyStmts::Decimal64Specification(decimal64_specification)
+                        }
+                    }
+                    "length" => {
+                        panic!();
+                    }
+                    "pattern" => {
+                        panic!();
+                    }
+                    "enum" => {
+                        panic!();
+                    }
+                    "path" => {
+                        panic!();
+                    }
+                    "require-instance" => {
+                        panic!();
+                    }
+                    "base" => {
+                        panic!();
+                    }
+                    "bit" => {
+                        panic!();
+                    }
+                    "type" => {
+                        panic!();
+                    }
+                    "binary" => {
+                        panic!();
+                    }
+                    _ => return Err(YangError::UnexpectedStatement(parser.line())),
+                }
+            }
+            Token::BlockEnd => {
+                panic!();
+            }
+            _ => return Err(YangError::UnexpectedStatement(parser.line())),
+        };
+
+        // numerical restrictions		[range-stmt]
+        // decimal64 specification		fraction-digits-stmt [range-stmt]	(any order)
+        // string specification			[length-stmt] *pattern-stmt		(any order)
+        // enum specification			1*enum-stmt
+        // leafref-specification		path-stmt [require-instance-stmt]	(any order)
+        // identityref-specification		1*base-stmt
+        // instance-identifier-specpfication	[require-instance-stmt]
+        // bits-specification			1*bit-stmt
+        // union-specification			1*type-stmt
+        // binary-specification			[length-stmt]
+
+//        let stmts = TypeBodyStmts::NumericalRestrictions(NumericalRestrictions { range: None });
+
+        Ok(stmts)
     }
 }
