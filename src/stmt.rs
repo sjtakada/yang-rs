@@ -1234,27 +1234,37 @@ impl Stmt for PatternStmt {
     }
 }
 
+*/
+
 ///
-///
+/// 9.4.6. The "modifier" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ModifierStmt {
+    modifier_arg: ModifierArg,
 }
 
 impl Stmt for ModifierStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = ModifierArg;
+
+    /// Sub Statements.
+    type SubStmts = ();
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "modifier"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::ModifierStmt(ModifierStmt {
+            modifier_arg: arg,
+        })
     }
 }
+
+/*
 
 ///
 ///

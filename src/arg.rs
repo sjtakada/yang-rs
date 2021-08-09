@@ -614,6 +614,24 @@ impl StmtArg for LengthArg {
     }
 }
 
+///
+/// The "modifier-arg".
+///
+#[derive(Debug, Clone, PartialEq)]
+pub struct ModifierArg {
+}
+
+impl StmtArg for ModifierArg {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        if str == "invert-match" {
+            Ok(ModifierArg { })
+        } else {
+            Err(YangError::ArgumentParseError("modifier-arg".to_string()))
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
