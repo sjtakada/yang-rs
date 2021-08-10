@@ -344,7 +344,19 @@ impl fmt::Debug for StmtType {
     }
 }
 
-// String helper for core rules.
+// String helper functions for Basic rules.
+pub fn is_node_identifier(s: &str) -> bool {
+    let parts: Vec<_> = s.split(":").collect();
+
+    if parts.len() == 1 {
+        is_identifier(parts[0])
+    } else if parts.len() == 2 {
+        is_identifier(parts[0]) && is_identifier(parts[1]) 
+    } else {
+        false
+    }
+}
+
 pub fn is_current_function_invocation(s: &str) -> bool {
     let s = s.trim();
 
@@ -364,6 +376,20 @@ pub fn is_current_function_invocation(s: &str) -> bool {
                 true
             }
         }
+    }
+}
+
+pub fn is_identifier(s: &str) -> bool {
+    if !s.starts_with(|c: char| c.is_alphabetic() || c == '_') {
+        false
+    } else if s.len() > 1 {
+        if let Some(_) = &s[1..].find(|c: char| !c.is_alphabetic() && !c.is_ascii_digit() && c != '_' && c != '-' && c != '.') {
+            false
+        } else {
+            true
+        }
+    } else {
+        true
     }
 }
 
@@ -412,6 +438,55 @@ pub fn is_decimal_value(s: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+
+    #[test]
+    pub fn test_current_function_invocation() {
+        let s = "current()";
+        assert_eq!(is_current_function_invocation(&s), true);
+
+        let s = "  current () ";
+        assert_eq!(is_current_function_invocation(&s), true);
+
+        let s = "current ( )";
+        assert_eq!(is_current_function_invocation(&s), true);
+
+        let s = "current (   ) ";
+        assert_eq!(is_current_function_invocation(&s), true);
+
+        let s = "current (   ) ";
+        assert_eq!(is_current_function_invocation(&s), true);
+
+        let s = "current ( 0 ) ";
+        assert_eq!(is_current_function_invocation(&s), false);
+    }
+
+    #[test]
+    pub fn test_identifier() {
+        let s = "identifier";
+        assert_eq!(is_identifier(&s), true);
+
+        let s = "_0123456789-abcdefghijklmnokprstuvwxyz_";
+        assert_eq!(is_identifier(&s), true);
+
+        let s = "_ABCDEFGHIJKLMNOKPRSTUVWXYZ-0123456789_";
+        assert_eq!(is_identifier(&s), true);
+
+        let s = "1a";
+        assert_eq!(is_identifier(&s), false);
+
+        let s = "_";
+        assert_eq!(is_identifier(&s), true);
+
+        let s = "_3.14159265";
+        assert_eq!(is_identifier(&s), true);
+
+        let s = "_127.0.0.1";
+        assert_eq!(is_identifier(&s), true);
+
+        let s = "_ff02::1";
+        assert_eq!(is_identifier(&s), false);
+    }
 
     #[test]
     pub fn test_integer_value() {
@@ -516,26 +591,5 @@ mod tests {
 
         let s = "3.14159265";
         assert_eq!(is_decimal_value(&s), true);
-    }
-
-    #[test]
-    pub fn test_current_function_invocation() {
-        let s = "current()";
-        assert_eq!(is_current_function_invocation(&s), true);
-
-        let s = "  current () ";
-        assert_eq!(is_current_function_invocation(&s), true);
-
-        let s = "current ( )";
-        assert_eq!(is_current_function_invocation(&s), true);
-
-        let s = "current (   ) ";
-        assert_eq!(is_current_function_invocation(&s), true);
-
-        let s = "current (   ) ";
-        assert_eq!(is_current_function_invocation(&s), true);
-
-        let s = "current ( 0 ) ";
-        assert_eq!(is_current_function_invocation(&s), false);
     }
 }

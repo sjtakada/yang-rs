@@ -51,7 +51,7 @@ fn parse_string(parser: &mut Parser) -> Result<String, YangError> {
         // Statement argument.
         Token::Identifier(s) |
         Token::QuotedString(s) => Ok(s),
-        // 
+        // End of Input.
         Token::EndOfInput => Err(YangError::UnexpectedEof),
         // Unexpected Token.
         _ => Err(YangError::UnexpectedToken(parser.line())),
@@ -85,16 +85,10 @@ impl FromStr for Identifier {
     type Err = YangError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if !s.starts_with(|c: char| c.is_alphabetic() || c == '_') {
-            Err(YangError::ArgumentParseError("identifier"))
-        } else if s.len() > 1 {
-            if let Some(_) = &s[1..].find(|c: char| !c.is_alphabetic() && !c.is_ascii_digit() && c != '_' && c != '-' && c != '.') {
-                Err(YangError::ArgumentParseError("identifier"))
-            } else {
-                Ok(Identifier { str: s.to_string() })
-            }
-        } else {
+        if is_identifier(s) {
             Ok(Identifier { str: s.to_string() })
+        } else {
+            Err(YangError::ArgumentParseError("identifier"))
         }
     }
 }
@@ -739,7 +733,7 @@ impl PathKeyExpr {
             let i = 1;
 
             loop {
-                if paths[1] != ".." {
+                if paths[i] != ".." {
                     return Err(YangError::ArgumentParseError("path-key-expr"))
                 }
             }
