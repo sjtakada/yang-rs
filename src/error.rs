@@ -42,7 +42,7 @@ quick_error! {
         MethodNotImplemented {
             display("Method not implemented")
         }
-        ArgumentParseError(s: String) {
+        ArgumentParseError(s: &'static str) {
             display("Argument parse error: {}", s)
         }
         PlaceHolder {

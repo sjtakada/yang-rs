@@ -345,6 +345,28 @@ impl fmt::Debug for StmtType {
 }
 
 // String helper for core rules.
+pub fn is_current_function_invocation(s: &str) -> bool {
+    let s = s.trim();
+
+    if !s.starts_with("current") {
+        false
+    } else {
+        let s = &s[7..].trim_start();
+
+        if !s.starts_with("(") {
+            false
+        } else {
+            let s = &s[1..].trim();
+
+            if s != &")" {
+                false
+            } else {
+                true
+            }
+        }
+    }
+}
+
 pub fn is_integer_value(s: &str) -> bool {
     if s.starts_with("-") {
         is_non_negative_integer_value(&s[1..])
@@ -494,5 +516,26 @@ mod tests {
 
         let s = "3.14159265";
         assert_eq!(is_decimal_value(&s), true);
+    }
+
+    #[test]
+    pub fn test_current_function_invocation() {
+        let s = "current()";
+        assert_eq!(is_current_function_invocation(&s), true);
+
+        let s = "  current () ";
+        assert_eq!(is_current_function_invocation(&s), true);
+
+        let s = "current ( )";
+        assert_eq!(is_current_function_invocation(&s), true);
+
+        let s = "current (   ) ";
+        assert_eq!(is_current_function_invocation(&s), true);
+
+        let s = "current (   ) ";
+        assert_eq!(is_current_function_invocation(&s), true);
+
+        let s = "current ( 0 ) ";
+        assert_eq!(is_current_function_invocation(&s), false);
     }
 }
