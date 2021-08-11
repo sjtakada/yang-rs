@@ -14,7 +14,6 @@ use super::parser::*;
 
 // Aliases.
 pub type Prefix = Identifier;
-pub type NodeIdentifier = IdentifierRef;
 
 // TBD
 //
@@ -146,6 +145,60 @@ impl StmtArg for IdentifierRef {
     }
 }
 
+///
+/// "node-identifier".
+///
+#[derive(Clone, PartialEq)]
+pub struct NodeIdentifier {
+    prefix: Option<Prefix>,
+    identifier: Identifier,
+}
+
+impl fmt::Debug for NodeIdentifier {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self.prefix {
+            Some(prefix) => write!(f, "{}:{}", prefix, self.identifier),
+            None => write!(f, "{}", self.identifier),
+        }
+    }
+}
+
+impl FromStr for NodeIdentifier {
+    type Err = YangError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.find(":") {
+            Some(p) => {
+                let prefix = Identifier::from_str(&s[..p])?;
+                let identifier = Identifier::from_str(&s[p + 1..])?;
+
+                Ok(NodeIdentifier { prefix: Some(prefix), identifier})
+            }
+            None => {
+                let identifier = Identifier::from_str(&s)?;
+                Ok(NodeIdentifier { prefix: None, identifier })
+            }
+        }
+    }
+}
+
+impl ToString for NodeIdentifier {
+    fn to_string(&self) -> String {
+        match &self.prefix {
+            Some(prefix) => format!("{}:{}", prefix, self.identifier),
+            None => format!("{}", self.identifier),
+        }
+    }
+}
+
+impl StmtArg for NodeIdentifier {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        NodeIdentifier::from_str(&str)
+    }
+}
+
+
 // Yang String.
 impl StmtArg for String {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
@@ -160,7 +213,7 @@ impl StmtArg for Url {
 
         match Url::parse(&s) {
             Ok(url) => Ok(url),
-            Err(err) => Err(YangError::ArgumentParseError("url"))
+            Err(_) => Err(YangError::ArgumentParseError("url"))
         }
     }
 }
@@ -709,6 +762,20 @@ pub struct PathEqualityExpr {
     path_key_expr: PathKeyExpr,
 }
 
+impl PathEqualityExpr {
+    pub fn parse(str: &str) -> Result<PathEqualityExpr, YangError> {
+        match str.find('=') {
+            Some(p) => {
+                Ok(PathEqualityExpr {
+                    node_identifier: NodeIdentifier::from_str(&str[0..p].trim())?,
+                    path_key_expr: PathKeyExpr::from_str(&str[p + 1..].trim())?,
+                })
+            }
+            None => Err(YangError::ArgumentParseError("path-equality-expr"))
+        }
+    }
+}
+
 /// "path-key-expr".
 ///
 /// path-key-expr       = current-function-invocation *WSP "/" *WSP
@@ -723,23 +790,47 @@ pub struct PathKeyExpr {
     rel_path_keyexpr: String,
 }
 
-impl PathKeyExpr {
-    pub fn parse(parser: &mut Parser) -> Result<PathKeyExpr, YangError> {
-        let str = parse_string(parser)?;
+impl FromStr for PathKeyExpr {
+    type Err = YangError;
 
-        // Validation only.
+    fn from_str(str: &str) -> Result<Self, Self::Err> {
+        // TBD: Validation only.
         let paths: Vec<_> = str.split("/").map(|s| s.trim()).collect();
-        if is_current_function_invocation(&paths[0]) {
-            let i = 1;
+        // Minimum of "current() / .. / node-identifier".
+        if paths.len() < 3 {
+            return Err(YangError::ArgumentParseError("path-key-expr"))
+        // Invalid current function invocation.
+        } else if !is_current_function_invocation(&paths[0]) {
+            return Err(YangError::ArgumentParseError("path-key-expr"))
+        // Validate rel-path-keyexpr.
+        } else {
+            let mut i = 1;
 
-            loop {
-                if paths[i] != ".." {
+            if paths[i] != ".." {
+                Err(YangError::ArgumentParseError("path-key-expr"))
+            } else {
+                i += 1;
+                while i < paths.len() && paths[i] == ".." {
+                    i += 1;
+                }
+                if i >= paths.len() {
                     return Err(YangError::ArgumentParseError("path-key-expr"))
                 }
+
+                if !is_node_identifier(paths[i]) {
+                    return Err(YangError::ArgumentParseError("path-key-expr"))
+                }
+
+                while i < paths.len() {
+                    if !is_node_identifier(paths[i]) {
+                        return Err(YangError::ArgumentParseError("path-key-expr"))
+                    }
+                    i += 1;
+                }
+
+                Ok(PathKeyExpr { rel_path_keyexpr: str.to_string() })
             }
         }
-
-        Ok(PathKeyExpr { rel_path_keyexpr: str })
     }
 }
 
@@ -920,7 +1011,7 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match RangeArg::parse_arg(&mut parser) {
-            Ok(arg) => assert!(false),
+            Ok(_) => assert!(false),
             Err(err) => assert_eq!(err.to_string(), "Argument parse error: range-arg"),
         }
 
@@ -966,8 +1057,47 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match LengthArg::parse_arg(&mut parser) {
-            Ok(arg) => assert!(false),
+            Ok(_) => assert!(false),
             Err(err) => assert_eq!(err.to_string(), "Argument parse error: length-arg"),
+        }
+    }
+
+    #[test]
+    pub fn test_path_key_expr() {
+        let s = "current()/../node";
+        match PathKeyExpr::from_str(s) {
+            Ok(arg) => assert_eq!(arg, PathKeyExpr { rel_path_keyexpr: "current()/../node".to_string() }),
+            Err(err) => panic!("{:?}", err.to_string()),
+        }
+
+        let s = "current()/../../../node";
+        match PathKeyExpr::from_str(s) {
+            Ok(arg) => assert_eq!(arg, PathKeyExpr { rel_path_keyexpr: "current()/../../../node".to_string() }),
+            Err(err) => panic!("{:?}", err.to_string()),
+        }
+
+        let s = "current()/../../../node/node/node";
+        match PathKeyExpr::from_str(s) {
+            Ok(arg) => assert_eq!(arg, PathKeyExpr { rel_path_keyexpr: "current()/../../../node/node/node".to_string() }),
+            Err(err) => panic!("{:?}", err.to_string()),
+        }
+
+        let s = "current ( ) / .. / .. / .. / node / node / node ";
+        match PathKeyExpr::from_str(s) {
+            Ok(arg) => assert_eq!(arg, PathKeyExpr { rel_path_keyexpr: "current ( ) / .. / .. / .. / node / node / node ".to_string() }),
+            Err(err) => panic!("{:?}", err.to_string()),
+        }
+
+        let s = "current()/..";
+        match PathKeyExpr::from_str(s) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: path-key-expr"),
+        }
+
+        let s = "current()/node";
+        match PathKeyExpr::from_str(s) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: path-key-expr"),
         }
     }
 }
