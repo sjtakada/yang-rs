@@ -755,6 +755,20 @@ pub struct PathPredicate {
     path_equality_expr: PathEqualityExpr,
 }
 
+impl FromStr for PathPredicate {
+    type Err = YangError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if !s.starts_with("[") || !s.ends_with("]") {
+            Err(YangError::ArgumentParseError("path-predicate"))
+        } else {
+            Ok(PathPredicate {
+                path_equality_expr: PathEqualityExpr::from_str(&s[1..s.len() - 1])?,
+            })
+        }
+    }
+}
+
 /// "path-equality-expr".
 #[derive(Debug, Clone, PartialEq)]
 pub struct PathEqualityExpr {
@@ -762,13 +776,15 @@ pub struct PathEqualityExpr {
     path_key_expr: PathKeyExpr,
 }
 
-impl PathEqualityExpr {
-    pub fn parse(str: &str) -> Result<PathEqualityExpr, YangError> {
-        match str.find('=') {
+impl FromStr for PathEqualityExpr {
+    type Err = YangError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.find('=') {
             Some(p) => {
                 Ok(PathEqualityExpr {
-                    node_identifier: NodeIdentifier::from_str(&str[0..p].trim())?,
-                    path_key_expr: PathKeyExpr::from_str(&str[p + 1..].trim())?,
+                    node_identifier: NodeIdentifier::from_str(&s[0..p].trim())?,
+                    path_key_expr: PathKeyExpr::from_str(&s[p + 1..].trim())?,
                 })
             }
             None => Err(YangError::ArgumentParseError("path-equality-expr"))
