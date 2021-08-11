@@ -718,9 +718,20 @@ impl StmtArg for PathArg {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
-        let path_arg = PathArg::AbsolutePath(AbsolutePath { nodes: Vec::new() });
+        if str.starts_with("/") {
+            Ok(PathArg::AbsolutePath(AbsolutePath::from_str(str)?))
+//        } else if str.starts_with("..") {
+//          Ok(PathArg::RelativePath(RelativePath::from_str(str)?))
+//        } else {
+            Err(YangError::ArgumentParseError("path-arg"))
+        }
+    }
+}
 
-        Ok(path_arg)
+pub fn get_path_predicate(s: &str) -> Result<usize, YangError> {
+    match s.find(']' {
+        Some(pos) => Ok(pos),
+        None => Err(YangError::ArgumentParseError("path-predicate"))
     }
 }
 
@@ -728,6 +739,51 @@ impl StmtArg for PathArg {
 #[derive(Debug, Clone, PartialEq)]
 pub struct AbsolutePath {
     nodes: Vec<AbsolutePathNode>,
+}
+
+impl FromStr for AbsolutePath {
+    type Err = YangError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut s = &s[..];
+        let mut nodes = Vec::new();
+
+        while s.len() > 0 {
+            if !s.starts_with("/") {
+                return Err(YangError::ArgumentParseError("absolute-path"))
+            }
+            s = &s[1..];
+
+            let node_identifier;
+            let mut path_predicate = Vec::new();
+
+            match s.find(|c: char| c == '[' || c == '/') {
+                Some(pos) => {
+                    node_identifier = NodeIdentifier::from_str(&s[..pos])?;
+
+                    if s[pos] == '[' {
+                        s = &s[pos..];
+                        while {
+                            let end = get_path_predicate(s)?;
+                            path_predicate.push(PathPredicate::from_str(&s[..end])?);
+                            s = &s[end..];
+                            s[0] == '['
+                        } { }
+                    } else /* if s[pos + 1] == '/'*/ {
+                        nodes.push(AbsolutePathNode { node_identifier, path_predicate });
+                        break;
+                    }
+                }
+                None => {
+                    node_identifier = NodeIdentifier::from_str(s[1..])?;
+                }
+            }
+
+            nodes.push(AbsolutePathNode { node_identifier, path_predicate });
+        }
+
+        Ok(AbsolutePath { nodes })
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
