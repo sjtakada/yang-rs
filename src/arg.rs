@@ -728,13 +728,6 @@ impl StmtArg for PathArg {
     }
 }
 
-pub fn get_path_predicate(s: &str) -> Result<usize, YangError> {
-    match s.find(']') {
-        Some(pos) => Ok(pos),
-        None => Err(YangError::ArgumentParseError("path-predicate"))
-    }
-}
-
 /// "absolute-path".
 #[derive(Debug, Clone, PartialEq)]
 pub struct AbsolutePath {
@@ -748,27 +741,21 @@ impl FromStr for AbsolutePath {
         let mut s = &s[..];
         let mut nodes = Vec::new();
 
-//println!("** 00");
         while s.len() > 0 {
-//println!("** 10");
             if !s.starts_with('/') {
                 return Err(YangError::ArgumentParseError("absolute-path"))
             }
             s = &s[1..];
 
-//println!("** 20");
             let node_identifier;
             let mut path_predicate = Vec::new();
 
-//println!("** 30");
             match s.find(|c: char| c == '[' || c == '/') {
                 Some(pos) => {
-//println!("** 40 {:?}", s);
                     node_identifier = NodeIdentifier::from_str(&s[..pos])?;
                     s = &s[pos..];
 
                     if s.starts_with('[') {
-//println!("** 50");
                         // do while.
                         while {
                             let pos = match s.find(']') {
@@ -778,25 +765,20 @@ impl FromStr for AbsolutePath {
 
                             path_predicate.push(PathPredicate::from_str(&s[..pos])?);
                             s = &s[pos..];
-//println!("** 51 {:?}", s);
 
                             s.len() > 0 && s.starts_with('[')
                         } { };
-//println!("** 60");
                     }
                 }
                 None => {
-//println!("** 70");
                     node_identifier = NodeIdentifier::from_str(&s)?;
                     nodes.push(PathNode { node_identifier, path_predicate });
                     break;
                 }
             }
-//println!("** 80");
 
             nodes.push(PathNode { node_identifier, path_predicate });
         }
-//println!("** 99");
 
         Ok(AbsolutePath { nodes })
     }
