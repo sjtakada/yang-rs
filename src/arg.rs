@@ -718,18 +718,18 @@ impl StmtArg for PathArg {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
-        if str.starts_with("/") {
-            Ok(PathArg::AbsolutePath(AbsolutePath::from_str(str)?))
+        if str.starts_with('/') {
+            Ok(PathArg::AbsolutePath(AbsolutePath::from_str(&str)?))
 //        } else if str.starts_with("..") {
 //          Ok(PathArg::RelativePath(RelativePath::from_str(str)?))
-//        } else {
+        } else {
             Err(YangError::ArgumentParseError("path-arg"))
         }
     }
 }
 
 pub fn get_path_predicate(s: &str) -> Result<usize, YangError> {
-    match s.find(']' {
+    match s.find(']') {
         Some(pos) => Ok(pos),
         None => Err(YangError::ArgumentParseError("path-predicate"))
     }
@@ -738,7 +738,7 @@ pub fn get_path_predicate(s: &str) -> Result<usize, YangError> {
 /// "absolute-path".
 #[derive(Debug, Clone, PartialEq)]
 pub struct AbsolutePath {
-    nodes: Vec<AbsolutePathNode>,
+    nodes: Vec<PathNode>,
 }
 
 impl FromStr for AbsolutePath {
@@ -748,46 +748,62 @@ impl FromStr for AbsolutePath {
         let mut s = &s[..];
         let mut nodes = Vec::new();
 
+//println!("** 00");
         while s.len() > 0 {
-            if !s.starts_with("/") {
+//println!("** 10");
+            if !s.starts_with('/') {
                 return Err(YangError::ArgumentParseError("absolute-path"))
             }
             s = &s[1..];
 
+//println!("** 20");
             let node_identifier;
             let mut path_predicate = Vec::new();
 
+//println!("** 30");
             match s.find(|c: char| c == '[' || c == '/') {
                 Some(pos) => {
+//println!("** 40 {:?}", s);
                     node_identifier = NodeIdentifier::from_str(&s[..pos])?;
+                    s = &s[pos..];
 
-                    if s[pos] == '[' {
-                        s = &s[pos..];
+                    if s.starts_with('[') {
+//println!("** 50");
+                        // do while.
                         while {
-                            let end = get_path_predicate(s)?;
-                            path_predicate.push(PathPredicate::from_str(&s[..end])?);
-                            s = &s[end..];
-                            s[0] == '['
-                        } { }
-                    } else /* if s[pos + 1] == '/'*/ {
-                        nodes.push(AbsolutePathNode { node_identifier, path_predicate });
-                        break;
+                            let pos = match s.find(']') {
+                                Some(p) => Ok(p + 1),
+                                None => Err(YangError::ArgumentParseError("path-predicate"))
+                            }?;
+
+                            path_predicate.push(PathPredicate::from_str(&s[..pos])?);
+                            s = &s[pos..];
+//println!("** 51 {:?}", s);
+
+                            s.len() > 0 && s.starts_with('[')
+                        } { };
+//println!("** 60");
                     }
                 }
                 None => {
-                    node_identifier = NodeIdentifier::from_str(s[1..])?;
+//println!("** 70");
+                    node_identifier = NodeIdentifier::from_str(&s)?;
+                    nodes.push(PathNode { node_identifier, path_predicate });
+                    break;
                 }
             }
+//println!("** 80");
 
-            nodes.push(AbsolutePathNode { node_identifier, path_predicate });
+            nodes.push(PathNode { node_identifier, path_predicate });
         }
+//println!("** 99");
 
         Ok(AbsolutePath { nodes })
     }
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct AbsolutePathNode {
+pub struct PathNode {
     node_identifier: NodeIdentifier,
     path_predicate: Vec<PathPredicate>,
 }
@@ -815,7 +831,7 @@ impl FromStr for PathPredicate {
     type Err = YangError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if !s.starts_with("[") || !s.ends_with("]") {
+        if !s.starts_with('[') || !s.ends_with(']') {
             Err(YangError::ArgumentParseError("path-predicate"))
         } else {
             Ok(PathPredicate {
@@ -1170,6 +1186,37 @@ mod tests {
         match PathKeyExpr::from_str(s) {
             Ok(_) => assert!(false),
             Err(err) => assert_eq!(err.to_string(), "Argument parse error: path-key-expr"),
+        }
+    }
+
+    #[test]
+    pub fn test_absolute_path() {
+        let s = "/node1/node2[id=current()/../rel1/rel2]";
+        let path = AbsolutePath {
+            nodes: vec![PathNode { node_identifier: NodeIdentifier::from_str("node1").unwrap(), path_predicate: vec![] },
+                        PathNode { node_identifier: NodeIdentifier::from_str("node2").unwrap(), path_predicate:
+                                   vec![PathPredicate { path_equality_expr: PathEqualityExpr { node_identifier: NodeIdentifier::from_str("id").unwrap(),
+                                                                                               path_key_expr: PathKeyExpr { rel_path_keyexpr: "current()/../rel1/rel2".to_string() } } }] }] };
+
+        match AbsolutePath::from_str(s) {
+            Ok(p) => assert_eq!(p, path),
+            Err(err) => panic!("{:?}", err.to_string()),
+        }
+
+        let s = "/node1/node2[id1=current()/../rel1/rel2][prefix:id2=current()/../../rel3/rel4]/node3";
+        let path = AbsolutePath {
+            nodes: vec![PathNode { node_identifier: NodeIdentifier::from_str("node1").unwrap(), path_predicate: vec![] },
+                        PathNode { node_identifier: NodeIdentifier::from_str("node2").unwrap(), path_predicate:
+                                   vec![PathPredicate { path_equality_expr: PathEqualityExpr { node_identifier: NodeIdentifier::from_str("id1").unwrap(),
+                                                                                               path_key_expr: PathKeyExpr { rel_path_keyexpr: "current()/../rel1/rel2".to_string() } } },
+                                        PathPredicate { path_equality_expr: PathEqualityExpr { node_identifier: NodeIdentifier::from_str("prefix:id2").unwrap(),
+                                                                                               path_key_expr: PathKeyExpr { rel_path_keyexpr: "current()/../../rel3/rel4".to_string() } } }] },
+                        PathNode { node_identifier: NodeIdentifier::from_str("node3").unwrap(), path_predicate: vec![] },
+            ] };
+
+        match AbsolutePath::from_str(s) {
+            Ok(p) => assert_eq!(p, path),
+            Err(err) => panic!("{:?}", err.to_string()),
         }
     }
 }
