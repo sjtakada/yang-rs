@@ -720,8 +720,8 @@ impl StmtArg for PathArg {
 
         if str.starts_with('/') {
             Ok(PathArg::AbsolutePath(AbsolutePath::from_str(&str)?))
-//        } else if str.starts_with("..") {
-//          Ok(PathArg::RelativePath(RelativePath::from_str(str)?))
+        } else if str.starts_with("..") {
+            Ok(PathArg::RelativePath(RelativePath::from_str(&str)?))
         } else {
             Err(YangError::ArgumentParseError("path-arg"))
         }
@@ -793,15 +793,86 @@ pub struct PathNode {
 /// "relative-path".
 #[derive(Debug, Clone, PartialEq)]
 pub struct RelativePath {
+    up: u32,
+    descendant_path: DescendantPath,
+}
 
+impl FromStr for RelativePath {
+    type Err = YangError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut s = &s[..];
+        let mut up = 0;
+
+        if !s.starts_with("../") {
+            return Err(YangError::ArgumentParseError("relative-path"))
+        }
+
+        while {
+            up += 1;
+            s = &s[3..];
+            s.len() > 0 && s.starts_with("../")
+        } { };
+
+        let descendant_path = DescendantPath::from_str(s)?;
+        Ok(RelativePath{ up, descendant_path })
+    }
 }
 
 /// "descendant-path".
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescendantPath {
     node_identifier: NodeIdentifier,
-
+    path_predicate: Vec<PathPredicate>,
+    absolute_path: Option<AbsolutePath>,
 }
+
+impl FromStr for DescendantPath {
+    type Err = YangError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut s = &s[..];
+        let node_identifier;
+        let mut path_predicate = Vec::new();
+        let mut absolute_path = None;
+
+        if s.len() == 0 {
+            return Err(YangError::ArgumentParseError("descendant-path"))
+        }
+
+        match s.find(|c: char| c == '[' || c == '/') {
+            Some(pos) => {
+                node_identifier = NodeIdentifier::from_str(&s[..pos])?;
+                s = &s[pos..];
+
+                if s.starts_with('[') {
+                    // do while.
+                    while {
+                        let pos = match s.find(']') {
+                            Some(p) => Ok(p + 1),
+                            None => Err(YangError::ArgumentParseError("path-predicate"))
+                        }?;
+
+                        path_predicate.push(PathPredicate::from_str(&s[..pos])?);
+                        s = &s[pos..];
+
+                        s.len() > 0 && s.starts_with('[')
+                    } { };
+                }
+
+                if s.len() > 0 {
+                    absolute_path = Some(AbsolutePath::from_str(s)?);
+                }
+            }
+            None => {
+                node_identifier = NodeIdentifier::from_str(s)?;
+            }
+        }
+
+        Ok(DescendantPath { node_identifier, path_predicate, absolute_path })
+    }
+}
+
 
 /// "path-predicate".
 #[derive(Debug, Clone, PartialEq)]
