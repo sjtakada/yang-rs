@@ -1272,5 +1272,51 @@ mod tests {
             Err(err) => panic!("{:?}", err.to_string()),
         }
     }
+
+    #[test]
+    pub fn test_descendant_path() {
+        let s = "node0/node1/node2[id=current()/../rel1/rel2]";
+
+        let absolute_path = AbsolutePath {
+            nodes: vec![PathNode { node_identifier: NodeIdentifier::from_str("node1").unwrap(), path_predicate: vec![] },
+                        PathNode { node_identifier: NodeIdentifier::from_str("node2").unwrap(), path_predicate:
+                                   vec![PathPredicate { path_equality_expr: PathEqualityExpr { node_identifier: NodeIdentifier::from_str("id").unwrap(),
+                                                                                               path_key_expr: PathKeyExpr { rel_path_keyexpr: "current()/../rel1/rel2".to_string() } } }] }] };
+        let descendant_path = DescendantPath {
+            node_identifier: NodeIdentifier::from_str("node0").unwrap(),
+            path_predicate: vec![],
+            absolute_path: Some(absolute_path),
+        };
+
+        match DescendantPath::from_str(s) {
+            Ok(p) => assert_eq!(p, descendant_path),
+            Err(err) => panic!("{:?}", err.to_string()),
+        }
+    }
+
+    #[test]
+    pub fn test_relative_path() {
+        let s = "../../node0/node1/node2";
+
+        let absolute_path = AbsolutePath {
+            nodes: vec![PathNode { node_identifier: NodeIdentifier::from_str("node1").unwrap(), path_predicate: vec![] },
+                        PathNode { node_identifier: NodeIdentifier::from_str("node2").unwrap(), path_predicate: vec![] }]};
+
+        let descendant_path = DescendantPath {
+            node_identifier: NodeIdentifier::from_str("node0").unwrap(),
+            path_predicate: vec![],
+            absolute_path: Some(absolute_path),
+        };
+
+        let relative_path = RelativePath {
+            up: 2u32,
+            descendant_path,
+        };
+
+        match RelativePath::from_str(s) {
+            Ok(p) => assert_eq!(p, relative_path),
+            Err(err) => panic!("{:?}", err.to_string()),
+        }
+    }
 }
 
