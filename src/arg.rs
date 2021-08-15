@@ -985,6 +985,17 @@ impl FromStr for PathKeyExpr {
 ///
 /// Tokenizer for "if-feature".
 /// 
+pub enum IfFeatureToken {
+    Init,
+    ParenBegin,
+    ParenEnd,
+    Not,
+    And,
+    Or,
+    IdentifierRef(String),
+    EndOfLine,
+}
+
 pub struct Tokenizer {
     str: String,
     pos: usize,
@@ -1002,18 +1013,28 @@ impl Tokenizer {
         &self.str[self.pos..]
     }
 
-    pub fn get_token(&mut self) -> Option<&str> {
+    pub fn get_token(&mut self) -> IfFeatureToken {
         if let Some(p) = self.line().find(|c: char| !c.is_whitespace()) {
             self.pos += p;
         }
 
         if self.line().len() == 0 {
-            None
-        } else if self.line().starts_with(|c: char| c == '(' || c == ')') {
-            let token = &self.str[self.pos..self.pos + 1];
-
+            IfFeatureToken::EndOfLine
+        } else if self.line().starts_with('(') {
             self.pos += 1;
-            Some(token)
+            IfFeatureToken::ParenBegin
+        } else if self.line().starts_with(')') {
+            self.pos += 1;
+            IfFeatureToken::ParenEnd
+        } else if self.line().starts_with("not") {
+            self.pos += 3;
+            IfFeatureToken::Not
+        } else if self.line().starts_with("and") {
+            self.pos += 3;
+            IfFeatureToken::And
+        } else if self.line().starts_with("or") {
+            self.pos += 2;
+            IfFeatureToken::Or
         } else {
             let p = match self.line().find(|c: char| !c.is_alphanumeric() && c != '-' && c != '_' && c != '.' && c != ':') {
                 Some(p) => p,
@@ -1022,7 +1043,7 @@ impl Tokenizer {
             let token = &self.str[self.pos..self.pos + p];
 
             self.pos += p;
-            Some(token)
+            IfFeatureToken::IdentifierRef(token.to_string())
         }
     }
 }
@@ -1052,41 +1073,57 @@ impl IfFeatureExpr {
         let mut terms: Vec<IfFeatureTerm> = Vec::new();
         let mut factors: Vec<IfFeatureFactor> = Vec::new();
         let mut not: Option<bool> = None;
+        let mut prev = IfFeatureToken::Init;
 
         loop {
-            match tokenizer.get_token() {
-                Some(token) => {
-                    match token as &str {
-                        "(" => {
-                            let expr = Box::new(IfFeatureExpr::parse(tokenizer)?);
-                            factors.push(IfFeatureFactor::IfFeatureExpr((not.take(), expr)));
-                        }
-                        ")" => {
-                            break;
-                        }
-                        "or" => {
-                            terms.push(IfFeatureTerm { factors: factors.drain(..).collect() });
-                            factors = Vec::new();
-                        }
-                        "and" => {
+            let token = tokenizer.get_token();
 
-                        }
-                        "not" => {
-                            not.replace(true);
-                        }
-                        _ => {
-                            let identifier_ref = IdentifierRef::from_str(token)?;
-                            factors.push(IfFeatureFactor::IdentifierRef((not.take(), identifier_ref)));
-                        }
-                    }
+//                    if prev == "" && (token == ")" || token == "or" || token == "and") { 
+//                        let err = format!("Unexcpected token {} for if-feature-expr", token);
+//                        return Err(YangError::ArgumentParseError(""))  // TBD
+//                    }
+            match token {
+                IfFeatureToken::Init => {}
+                IfFeatureToken::ParenBegin => {
+//                    if prev == ")" || prev == "and" || prev == "(" {
+//                        return Err(YangError::ArgumentParseError(""))  // TBD
+//                    }
+
+                    let expr = Box::new(IfFeatureExpr::parse(tokenizer)?);
+                    factors.push(IfFeatureFactor::IfFeatureExpr((not.take(), expr)));
                 }
-                None => {
+                IfFeatureToken::ParenEnd => {
+//                    if prev == "or" || prev == "and" || prev == "(" {
+//                        return Err(YangError::ArgumentParseError(""))  // TBD
+//                    }
+
                     break;
                 }
-            }
-        }
-        terms.push(IfFeatureTerm { factors: factors.drain(..).collect() });
+                IfFeatureToken::Or => {
+//                    if prev == "or" || prev == "and" || prev == "(" || prev == "not" {
+//                        return Err(YangError::ArgumentParseError(""))  // TBD
+//                    }
 
+                    terms.push(IfFeatureTerm { factors: factors.drain(..).collect() });
+                    factors = Vec::new();
+                }
+                IfFeatureToken::And => {
+
+                }
+                IfFeatureToken::Not => {
+                    not.replace(true);
+                }
+                IfFeatureToken::IdentifierRef(str) => {
+                    let identifier_ref = IdentifierRef::from_str(&str)?;
+                    factors.push(IfFeatureFactor::IdentifierRef((not.take(), identifier_ref)));
+                }
+                IfFeatureToken::EndOfLine => break,
+            }
+
+//            prev = token;
+        }
+
+        terms.push(IfFeatureTerm { factors: factors.drain(..).collect() });
         Ok(IfFeatureExpr { terms })
     }
 }
@@ -1486,58 +1523,6 @@ mod tests {
     }
 
     #[test]
-    pub fn test_if_feature_parser() {
-        let s = "p1 and p2 or p3 and p4 and not (p5 and p6)";
-        let mut tknzr = Tokenizer::new(s.to_string());
-
-        if let Some(token) = tknzr.get_token() {
-            assert_eq!(token, "p1");
-        }
-        if let Some(token) = tknzr.get_token() {
-            assert_eq!(token, "and");
-        }
-        if let Some(token) = tknzr.get_token() {
-            assert_eq!(token, "p2");
-        }
-        if let Some(token) = tknzr.get_token() {
-            assert_eq!(token, "or");
-        }
-        if let Some(token) = tknzr.get_token() {
-            assert_eq!(token, "p3");
-        }
-        if let Some(token) = tknzr.get_token() {
-            assert_eq!(token, "and");
-        }
-        if let Some(token) = tknzr.get_token() {
-            assert_eq!(token, "p4");
-        }
-        if let Some(token) = tknzr.get_token() {
-            assert_eq!(token, "and");
-        }
-        if let Some(token) = tknzr.get_token() {
-            assert_eq!(token, "not");
-        }
-        if let Some(token) = tknzr.get_token() {
-            assert_eq!(token, "(");
-        }
-        if let Some(token) = tknzr.get_token() {
-            assert_eq!(token, "p5");
-        }
-        if let Some(token) = tknzr.get_token() {
-            assert_eq!(token, "and");
-        }
-        if let Some(token) = tknzr.get_token() {
-            assert_eq!(token, "p6");
-        }
-        if let Some(token) = tknzr.get_token() {
-            assert_eq!(token, ")");
-        }
-        if let Some(token) = tknzr.get_token() {
-            panic!();
-        }
-    }
-
-    #[test]
     pub fn test_if_feature_expr() {
         let s = r#""p1:id1 and p1:id2 or (p2:id3 and p2:id4) or not p3:id5""#;
         let mut parser = Parser::new(s.to_string());
@@ -1555,6 +1540,7 @@ mod tests {
             Ok(expr) =>
                 assert_eq!(format!("{:?}", expr), "p1:id1 and p1:id2 or (p2:id3 and p2:id4) or not p3:id5"),
             Err(_) => panic!(),
+
         }
     }
 }
