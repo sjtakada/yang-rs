@@ -1028,16 +1028,16 @@ impl FromStr for PathKeyExpr {
 }
 
 /// "if-feature-expr".
-#[derive(Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct IfFeatureExpr {
     terms: Vec<IfFeatureTerm>,
 }
 
-impl fmt::Debug for IfFeatureExpr {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.to_string())
-    }
-}
+//impl fmt::Debug for IfFeatureExpr {
+//    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+//        write!(f, "{}", self.to_string())
+//    }
+//}
 
 impl ToString for IfFeatureExpr {
     fn to_string(&self) -> String {
