@@ -1027,147 +1027,72 @@ impl FromStr for PathKeyExpr {
     }
 }
 
-///
-/// The "if-feature-expr-str".
-///
-#[derive(Debug, Clone, PartialEq)]
-pub struct IfFeatureExprStr {
-    expr: IfFeatureExpr,
-}
-
-impl StmtArg for IfFeatureExprStr {
-    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
-        let str = parse_string(parser)?;
-        let arg_parser = ArgParser::new(str);
-
-        let expr = IfFeatureExpr::parse()?;
-        Ok(IfFeatureExprStr { expr })
-    }
-}
-
 /// "if-feature-expr".
 #[derive(Debug, Clone, PartialEq)]
 pub struct IfFeatureExpr {
-    term: Box<IfFeatureTerm>,
-    or_expr: Option<Box<IfFeatureExpr>>,
+    terms: Vec<IfFeatureTerm>,
 }
 
 impl IfFeatureExpr {
+    /// Recursively parse "if-feature" arg string.
     pub fn parse(parser: &mut ArgParser) -> Result<Self, YangError> {
-        let mut pos = 0;
-        if let Some(p) = s.find(|c: char| !c.is_whitespace()) {
-            pos += p;
-        }
+        let mut terms: Vec<IfFeatureTerm> = Vec::new();
+        let mut factors: Vec<IfFeatureFactor> = Vec::new();
+        let mut not: Option<bool> = None;
 
-        let (term, p) = IfFeatureTerm::parse(&s[pos..])?;
-        pos += p;
+        loop {
+            match parser.get_token() {
+                Some(token) => {
+                    match token as &str {
+                        "(" => {
+                            let expr = Box::new(IfFeatureExpr::parse(parser)?);
+                            factors.push(IfFeatureFactor::IfFeatureExpr((not.take(), expr)));
+                        }
+                        ")" => break,
+                        "or" => {
+                            terms.push(IfFeatureTerm { factors: factors.drain(..).collect() });
+                            factors = Vec::new();
+                        }
+                        "and" => {
 
-        if let Some(p) = &s[pos..].find(|c: char| !c.is_whitespace()) {
-            pos += p;
-        }
-
-        if s[pos..].starts_with("or") {
-            pos += 2;
-
-            if let Some(p) = &s[pos..].find(|c: char| !c.is_whitespace()) {
-                pos += p;
+                        }
+                        "not" => {
+                            not.replace(true);
+                        }
+                        _ => {
+                            let identifier_ref = IdentifierRef::from_str(token)?;
+                            factors.push(IfFeatureFactor::IdentifierRef((not.take(), identifier_ref)));
+                        }
+                    }
+                }
+                None => break,
             }
-
-            let (or_expr, p) = IfFeatureExpr::parse(&s[pos..])?;
-            pos += p;
-
-            let expr = IfFeatureExpr { term: Box::new(term), or_expr: Some(Box::new(or_expr)) };
-            Ok((expr, pos))
-        } else {
-            let expr = IfFeatureExpr { term: Box::new(term), or_expr: None };
-            Ok((expr, pos))
         }
+
+        Ok(IfFeatureExpr { terms })
+    }
+}
+
+impl StmtArg for IfFeatureExpr {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        let mut arg_parser = ArgParser::new(str);
+
+        Ok(IfFeatureExpr::parse(&mut arg_parser)?)
     }
 }
 
 /// "if-feature-term".
 #[derive(Debug, Clone, PartialEq)]
 pub struct IfFeatureTerm {
-    factor: Box<IfFeatureFactor>,
-    and_term: Option<Box<IfFeatureTerm>>,
-}
-
-impl IfFeatureTerm {
-    pub fn parse(s: &str) -> Result<(Self, usize), YangError> {
-        let mut pos = 0;
-        if let Some(p) = s.find(|c: char| !c.is_whitespace()) {
-            pos += p;
-        }
-
-        let (factor, p) = IfFeatureFactor::parse(&s[pos..])?;
-        pos += p;
-
-        if let Some(p) = &s[pos..].find(|c: char| !c.is_whitespace()) {
-            pos += p;
-        }
-
-        if s[pos..].starts_with("and") {
-            pos += 3;
-
-            if let Some(p) = &s[pos..].find(|c: char| !c.is_whitespace()) {
-                pos += p;
-            }
-
-            let (and_term, p) = IfFeatureTerm::parse(&s[pos..])?;
-            pos += p;
-
-            let term = IfFeatureTerm { factor: Box::new(factor), and_term: Some(Box::new(and_term)) };
-            Ok((term, pos))
-        } else {
-            let term = IfFeatureTerm { factor: Box::new(factor), and_term: None };
-            Ok((term, pos))
-        }
-    }
+    factors: Vec<IfFeatureFactor>,
 }
 
 /// "if-feature-factor".
 #[derive(Debug, Clone, PartialEq)]
 pub enum IfFeatureFactor {
-    Not(Box<IfFeatureFactor>),
-    Expr(IfFeatureExpr),
-    Arg(IdentifierRef),
-}
-
-impl IfFeatureFactor {
-    pub fn parse(s: &str) -> Result<(Self, usize), YangError> {
-        let mut pos = 0;
-
-        if s.starts_with("not") {
-            pos += 3;
-            if let Some(p) = &s[pos..].find(|c: char| !c.is_whitespace()) {
-                pos += p;
-                let (factor, p)= IfFeatureFactor::parse(&s[pos..])?;
-                pos += p;
-
-                Ok((IfFeatureFactor::Not(Box::new(factor)), pos))
-            } else {
-                Err(YangError::ArgumentParseError("IfFeatureFactor"))
-            }
-        } else if s.starts_with('(') {
-            pos += 1;
-            if let Some(p) = &s[pos..].find(')') {
-                let t = &s[pos..pos + p];
-                pos += p + 1;
-
-                let (expr, _) = IfFeatureExpr::parse(&t)?;
-                Ok((IfFeatureFactor::Expr(expr), pos))
-            } else {
-                Err(YangError::ArgumentParseError("IfFeatureFactor"))
-            }
-        } else {
-            if let Some(p) = s.find(|c: char| !c.is_alphabetic() && !c.is_ascii_digit() && c != '.' && c != ':' && c != '-' && c != '_') {
-                let identifier_ref_arg = IdentifierRef::from_str(&s[..p])?;
-                Ok((IfFeatureFactor::Arg(identifier_ref_arg), p))
-            } else {
-                Err(YangError::ArgumentParseError("IfFeatureFactor"))
-            }
-        }
-    }
+    IfFeatureExpr((Option<bool>, Box<IfFeatureExpr>)),
+    IdentifierRef((Option<bool>, IdentifierRef)),
 }
 
 #[cfg(test)]
@@ -1512,6 +1437,67 @@ mod tests {
             Ok(p) => assert_eq!(p, relative_path),
             Err(err) => panic!("{:?}", err.to_string()),
         }
+    }
+
+    #[test]
+    pub fn test_if_feature_parser() {
+        let s = "p1 and p2 or p3 and p4 and not (p5 and p6)";
+        let mut parser = ArgParser::new(s.to_string());
+
+        if let Some(token) = parser.get_token() {
+            assert_eq!(token, "p1");
+        }
+        if let Some(token) = parser.get_token() {
+            assert_eq!(token, "and");
+        }
+        if let Some(token) = parser.get_token() {
+            assert_eq!(token, "p2");
+        }
+        if let Some(token) = parser.get_token() {
+            assert_eq!(token, "or");
+        }
+        if let Some(token) = parser.get_token() {
+            assert_eq!(token, "p3");
+        }
+        if let Some(token) = parser.get_token() {
+            assert_eq!(token, "and");
+        }
+        if let Some(token) = parser.get_token() {
+            assert_eq!(token, "p4");
+        }
+        if let Some(token) = parser.get_token() {
+            assert_eq!(token, "and");
+        }
+        if let Some(token) = parser.get_token() {
+            assert_eq!(token, "not");
+        }
+        if let Some(token) = parser.get_token() {
+            assert_eq!(token, "(");
+        }
+        if let Some(token) = parser.get_token() {
+            assert_eq!(token, "p5");
+        }
+        if let Some(token) = parser.get_token() {
+            assert_eq!(token, "and");
+        }
+        if let Some(token) = parser.get_token() {
+            assert_eq!(token, "p6");
+        }
+        if let Some(token) = parser.get_token() {
+            assert_eq!(token, ")");
+        }
+        if let Some(token) = parser.get_token() {
+            panic!();
+        }
+    }
+
+    #[test]
+    pub fn test_if_feature_expr() {
+        let s = "p1:id1 and p1:id2 or p2:id3 and p2:id4 and not p3:id5";
+        let mut parser = Parser::new(s.to_string());
+
+        let expr = IfFeatureExpr::parse_arg(&mut parser);
+        println!("{:?}", expr);
     }
 }
 
