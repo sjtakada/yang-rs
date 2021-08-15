@@ -1048,7 +1048,9 @@ impl IfFeatureExpr {
                             let expr = Box::new(IfFeatureExpr::parse(parser)?);
                             factors.push(IfFeatureFactor::IfFeatureExpr((not.take(), expr)));
                         }
-                        ")" => break,
+                        ")" => {
+                            break;
+                        }
                         "or" => {
                             terms.push(IfFeatureTerm { factors: factors.drain(..).collect() });
                             factors = Vec::new();
@@ -1065,9 +1067,12 @@ impl IfFeatureExpr {
                         }
                     }
                 }
-                None => break,
+                None => {
+                    break;
+                }
             }
         }
+        terms.push(IfFeatureTerm { factors: factors.drain(..).collect() });
 
         Ok(IfFeatureExpr { terms })
     }
@@ -1493,7 +1498,7 @@ mod tests {
 
     #[test]
     pub fn test_if_feature_expr() {
-        let s = "p1:id1 and p1:id2 or p2:id3 and p2:id4 and not p3:id5";
+        let s = r#""p1:id1 and p1:id2 or (p2:id3 and p2:id4) or not p3:id5""#;
         let mut parser = Parser::new(s.to_string());
 
         let expr = IfFeatureExpr::parse_arg(&mut parser);
