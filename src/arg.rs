@@ -58,51 +58,6 @@ fn parse_string(parser: &mut Parser) -> Result<String, YangError> {
 }
 
 ///
-/// Arg parser for "if-feature".
-/// 
-pub struct ArgParser {
-    str: String,
-    pos: usize,
-}
-
-impl ArgParser {
-    pub fn new(s: String) -> ArgParser {
-        ArgParser {
-            str: s,
-            pos: 0,
-        }
-    }
-
-    pub fn line(&mut self) -> &str {
-        &self.str[self.pos..]
-    }
-
-    pub fn get_token(&mut self) -> Option<&str> {
-        if let Some(p) = self.line().find(|c: char| !c.is_whitespace()) {
-            self.pos += p;
-        }
-
-        if self.line().len() == 0 {
-            None
-        } else if self.line().starts_with(|c: char| c == '(' || c == ')') {
-            let token = &self.str[self.pos..self.pos + 1];
-
-            self.pos += 1;
-            Some(token)
-        } else {
-            let p = match self.line().find(|c: char| !c.is_alphanumeric() && c != '-' && c != '_' && c != '.' && c != ':') {
-                Some(p) => p,
-                None => self.str.len() - self.pos,
-            };
-            let token = &self.str[self.pos..self.pos + p];
-
-            self.pos += p;
-            Some(token)
-        }
-    }
-}
-
-///
 /// Trait for statement arg.
 ///
 pub trait StmtArg {
@@ -1027,17 +982,62 @@ impl FromStr for PathKeyExpr {
     }
 }
 
+///
+/// Tokenizer for "if-feature".
+/// 
+pub struct Tokenizer {
+    str: String,
+    pos: usize,
+}
+
+impl Tokenizer {
+    pub fn new(s: String) -> Tokenizer {
+        Tokenizer {
+            str: s,
+            pos: 0,
+        }
+    }
+
+    pub fn line(&mut self) -> &str {
+        &self.str[self.pos..]
+    }
+
+    pub fn get_token(&mut self) -> Option<&str> {
+        if let Some(p) = self.line().find(|c: char| !c.is_whitespace()) {
+            self.pos += p;
+        }
+
+        if self.line().len() == 0 {
+            None
+        } else if self.line().starts_with(|c: char| c == '(' || c == ')') {
+            let token = &self.str[self.pos..self.pos + 1];
+
+            self.pos += 1;
+            Some(token)
+        } else {
+            let p = match self.line().find(|c: char| !c.is_alphanumeric() && c != '-' && c != '_' && c != '.' && c != ':') {
+                Some(p) => p,
+                None => self.str.len() - self.pos,
+            };
+            let token = &self.str[self.pos..self.pos + p];
+
+            self.pos += p;
+            Some(token)
+        }
+    }
+}
+
 /// "if-feature-expr".
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct IfFeatureExpr {
     terms: Vec<IfFeatureTerm>,
 }
 
-//impl fmt::Debug for IfFeatureExpr {
-//    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-//        write!(f, "{}", self.to_string())
-//    }
-//}
+impl fmt::Debug for IfFeatureExpr {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.to_string())
+    }
+}
 
 impl ToString for IfFeatureExpr {
     fn to_string(&self) -> String {
@@ -1048,17 +1048,17 @@ impl ToString for IfFeatureExpr {
 
 impl IfFeatureExpr {
     /// Recursively parse "if-feature" arg string.
-    pub fn parse(parser: &mut ArgParser) -> Result<Self, YangError> {
+    pub fn parse(tokenizer: &mut Tokenizer) -> Result<Self, YangError> {
         let mut terms: Vec<IfFeatureTerm> = Vec::new();
         let mut factors: Vec<IfFeatureFactor> = Vec::new();
         let mut not: Option<bool> = None;
 
         loop {
-            match parser.get_token() {
+            match tokenizer.get_token() {
                 Some(token) => {
                     match token as &str {
                         "(" => {
-                            let expr = Box::new(IfFeatureExpr::parse(parser)?);
+                            let expr = Box::new(IfFeatureExpr::parse(tokenizer)?);
                             factors.push(IfFeatureFactor::IfFeatureExpr((not.take(), expr)));
                         }
                         ")" => {
@@ -1094,9 +1094,9 @@ impl IfFeatureExpr {
 impl StmtArg for IfFeatureExpr {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
-        let mut arg_parser = ArgParser::new(str);
+        let mut tokenizer = Tokenizer::new(str);
 
-        Ok(IfFeatureExpr::parse(&mut arg_parser)?)
+        Ok(IfFeatureExpr::parse(&mut tokenizer)?)
     }
 }
 
@@ -1488,51 +1488,51 @@ mod tests {
     #[test]
     pub fn test_if_feature_parser() {
         let s = "p1 and p2 or p3 and p4 and not (p5 and p6)";
-        let mut parser = ArgParser::new(s.to_string());
+        let mut tknzr = Tokenizer::new(s.to_string());
 
-        if let Some(token) = parser.get_token() {
+        if let Some(token) = tknzr.get_token() {
             assert_eq!(token, "p1");
         }
-        if let Some(token) = parser.get_token() {
+        if let Some(token) = tknzr.get_token() {
             assert_eq!(token, "and");
         }
-        if let Some(token) = parser.get_token() {
+        if let Some(token) = tknzr.get_token() {
             assert_eq!(token, "p2");
         }
-        if let Some(token) = parser.get_token() {
+        if let Some(token) = tknzr.get_token() {
             assert_eq!(token, "or");
         }
-        if let Some(token) = parser.get_token() {
+        if let Some(token) = tknzr.get_token() {
             assert_eq!(token, "p3");
         }
-        if let Some(token) = parser.get_token() {
+        if let Some(token) = tknzr.get_token() {
             assert_eq!(token, "and");
         }
-        if let Some(token) = parser.get_token() {
+        if let Some(token) = tknzr.get_token() {
             assert_eq!(token, "p4");
         }
-        if let Some(token) = parser.get_token() {
+        if let Some(token) = tknzr.get_token() {
             assert_eq!(token, "and");
         }
-        if let Some(token) = parser.get_token() {
+        if let Some(token) = tknzr.get_token() {
             assert_eq!(token, "not");
         }
-        if let Some(token) = parser.get_token() {
+        if let Some(token) = tknzr.get_token() {
             assert_eq!(token, "(");
         }
-        if let Some(token) = parser.get_token() {
+        if let Some(token) = tknzr.get_token() {
             assert_eq!(token, "p5");
         }
-        if let Some(token) = parser.get_token() {
+        if let Some(token) = tknzr.get_token() {
             assert_eq!(token, "and");
         }
-        if let Some(token) = parser.get_token() {
+        if let Some(token) = tknzr.get_token() {
             assert_eq!(token, "p6");
         }
-        if let Some(token) = parser.get_token() {
+        if let Some(token) = tknzr.get_token() {
             assert_eq!(token, ")");
         }
-        if let Some(token) = parser.get_token() {
+        if let Some(token) = tknzr.get_token() {
             panic!();
         }
     }
@@ -1542,9 +1542,19 @@ mod tests {
         let s = r#""p1:id1 and p1:id2 or (p2:id3 and p2:id4) or not p3:id5""#;
         let mut parser = Parser::new(s.to_string());
 
-        let expr = IfFeatureExpr::parse_arg(&mut parser);
-        println!("{:?}", expr);
+        match IfFeatureExpr::parse_arg(&mut parser) {
+            Ok(expr) =>
+                assert_eq!(format!("{:?}", expr), "p1:id1 and p1:id2 or (p2:id3 and p2:id4) or not p3:id5"),
+            Err(_) => panic!(),
+        }
+
+        let s = r#""p1:id1 p1:id2""#;
+        let mut parser = Parser::new(s.to_string());
+
+        match IfFeatureExpr::parse_arg(&mut parser) {
+            Ok(expr) =>
+                assert_eq!(format!("{:?}", expr), "p1:id1 and p1:id2 or (p2:id3 and p2:id4) or not p3:id5"),
+            Err(_) => panic!(),
+        }
     }
 }
-
-
