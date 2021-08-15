@@ -4,7 +4,6 @@
 //
 
 use quick_error::*;
-//use super::parser::*;
 
 quick_error! {
     #[derive(Debug)]
@@ -43,10 +42,12 @@ quick_error! {
             display("Method not implemented")
         }
         ArgumentParseError(s: &'static str) {
-            display("Argument parse error: {}", s)
+            display("Argument parse error: {} at line ", s)
         }
         PlaceHolder {
             display("placeholder")
         }
     }
 }
+
+pub struct ArgError;

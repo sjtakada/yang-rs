@@ -80,13 +80,13 @@ impl fmt::Display for Identifier {
 }
 
 impl FromStr for Identifier {
-    type Err = YangError;
+    type Err = ArgError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if is_identifier(s) {
             Ok(Identifier { str: s.to_string() })
         } else {
-            Err(YangError::ArgumentParseError("identifier"))
+            Err(ArgError)
         }
     }
 }
@@ -95,7 +95,7 @@ impl StmtArg for Identifier {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
-        Identifier::from_str(&str)
+        Identifier::from_str(&str).or(Err(YangError::ArgumentParseError("identifier")))
     }
 }
 
@@ -132,13 +132,16 @@ impl FromStr for IdentifierRef {
     fn from_str(str: &str) -> Result<Self, Self::Err> {
         match str.find(":") {
             Some(p) => {
-                let prefix = Identifier::from_str(&str[..p])?;
-                let identifier = Identifier::from_str(&str[p + 1..])?;
+                let prefix = Identifier::from_str(&str[..p])
+                    .or(Err(YangError::ArgumentParseError("identifier-ref")))?;
+                let identifier = Identifier::from_str(&str[p + 1..])
+                    .or(Err(YangError::ArgumentParseError("identifier-ref")))?;
 
                 Ok(IdentifierRef { prefix: Some(prefix), identifier})
             }
             None => {
-                let identifier = Identifier::from_str(&str)?;
+                let identifier = Identifier::from_str(&str)
+                    .or(Err(YangError::ArgumentParseError("identifier-ref")))?;
                 Ok(IdentifierRef { prefix: None, identifier })
             }
         }
@@ -176,13 +179,16 @@ impl FromStr for NodeIdentifier {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.find(":") {
             Some(p) => {
-                let prefix = Identifier::from_str(&s[..p])?;
-                let identifier = Identifier::from_str(&s[p + 1..])?;
+                let prefix = Identifier::from_str(&s[..p])
+                    .or(Err(YangError::ArgumentParseError("node-identifier")))?;
+                let identifier = Identifier::from_str(&s[p + 1..])
+                    .or(Err(YangError::ArgumentParseError("node-identifier")))?;
 
                 Ok(NodeIdentifier { prefix: Some(prefix), identifier})
             }
             None => {
-                let identifier = Identifier::from_str(&s)?;
+                let identifier = Identifier::from_str(&s)
+                    .or(Err(YangError::ArgumentParseError("node-identifier")))?;
                 Ok(NodeIdentifier { prefix: None, identifier })
             }
         }
