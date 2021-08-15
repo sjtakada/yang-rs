@@ -174,21 +174,18 @@ impl fmt::Debug for NodeIdentifier {
 }
 
 impl FromStr for NodeIdentifier {
-    type Err = YangError;
+    type Err = ArgError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.find(":") {
             Some(p) => {
-                let prefix = Identifier::from_str(&s[..p])
-                    .or(Err(YangError::ArgumentParseError("node-identifier")))?;
-                let identifier = Identifier::from_str(&s[p + 1..])
-                    .or(Err(YangError::ArgumentParseError("node-identifier")))?;
+                let prefix = Identifier::from_str(&s[..p])?;
+                let identifier = Identifier::from_str(&s[p + 1..])?;
 
                 Ok(NodeIdentifier { prefix: Some(prefix), identifier})
             }
             None => {
-                let identifier = Identifier::from_str(&s)
-                    .or(Err(YangError::ArgumentParseError("node-identifier")))?;
+                let identifier = Identifier::from_str(&s)?;
                 Ok(NodeIdentifier { prefix: None, identifier })
             }
         }
@@ -207,7 +204,7 @@ impl ToString for NodeIdentifier {
 impl StmtArg for NodeIdentifier {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
-        NodeIdentifier::from_str(&str)
+        NodeIdentifier::from_str(&str).or(Err(YangError::ArgumentParseError("node-identifier")))
     }
 }
 
@@ -732,9 +729,13 @@ impl StmtArg for PathArg {
         let str = parse_string(parser)?;
 
         if str.starts_with('/') {
-            Ok(PathArg::AbsolutePath(AbsolutePath::from_str(&str)?))
+            Ok(PathArg::AbsolutePath(AbsolutePath::from_str(&str)
+                                     .or(Err(YangError::ArgumentParseError("absolute-path")))?
+            ))
         } else if str.starts_with("..") {
-            Ok(PathArg::RelativePath(RelativePath::from_str(&str)?))
+            Ok(PathArg::RelativePath(RelativePath::from_str(&str)
+                                     .or(Err(YangError::ArgumentParseError("relative-path")))?
+            ))
         } else {
             Err(YangError::ArgumentParseError("path-arg"))
         }
@@ -748,7 +749,7 @@ pub struct AbsolutePath {
 }
 
 impl FromStr for AbsolutePath {
-    type Err = YangError;
+    type Err = ArgError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut s = &s[..];
@@ -756,7 +757,7 @@ impl FromStr for AbsolutePath {
 
         while s.len() > 0 {
             if !s.starts_with('/') {
-                return Err(YangError::ArgumentParseError("absolute-path"))
+                return Err(ArgError)
             }
             s = &s[1..];
 
@@ -773,7 +774,7 @@ impl FromStr for AbsolutePath {
                         while {
                             let pos = match s.find(']') {
                                 Some(p) => Ok(p + 1),
-                                None => Err(YangError::ArgumentParseError("path-predicate"))
+                                None => Err(ArgError)
                             }?;
 
                             path_predicate.push(PathPredicate::from_str(&s[..pos])?);
@@ -811,14 +812,14 @@ pub struct RelativePath {
 }
 
 impl FromStr for RelativePath {
-    type Err = YangError;
+    type Err = ArgError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut s = &s[..];
         let mut up = 0;
 
         if !s.starts_with("../") {
-            return Err(YangError::ArgumentParseError("relative-path"))
+            return Err(ArgError)
         }
 
         while {
@@ -841,7 +842,7 @@ pub struct DescendantPath {
 }
 
 impl FromStr for DescendantPath {
-    type Err = YangError;
+    type Err = ArgError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut s = &s[..];
@@ -850,7 +851,7 @@ impl FromStr for DescendantPath {
         let mut absolute_path = None;
 
         if s.len() == 0 {
-            return Err(YangError::ArgumentParseError("descendant-path"))
+            return Err(ArgError)
         }
 
         match s.find(|c: char| c == '[' || c == '/') {
@@ -863,7 +864,7 @@ impl FromStr for DescendantPath {
                     while {
                         let pos = match s.find(']') {
                             Some(p) => Ok(p + 1),
-                            None => Err(YangError::ArgumentParseError("path-predicate"))
+                            None => Err(ArgError),
                         }?;
 
                         path_predicate.push(PathPredicate::from_str(&s[..pos])?);
@@ -894,11 +895,11 @@ pub struct PathPredicate {
 }
 
 impl FromStr for PathPredicate {
-    type Err = YangError;
+    type Err = ArgError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if !s.starts_with('[') || !s.ends_with(']') {
-            Err(YangError::ArgumentParseError("path-predicate"))
+            Err(ArgError)
         } else {
             Ok(PathPredicate {
                 path_equality_expr: PathEqualityExpr::from_str(&s[1..s.len() - 1])?,
@@ -915,7 +916,7 @@ pub struct PathEqualityExpr {
 }
 
 impl FromStr for PathEqualityExpr {
-    type Err = YangError;
+    type Err = ArgError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.find('=') {
@@ -925,7 +926,7 @@ impl FromStr for PathEqualityExpr {
                     path_key_expr: PathKeyExpr::from_str(&s[p + 1..].trim())?,
                 })
             }
-            None => Err(YangError::ArgumentParseError("path-equality-expr"))
+            None => Err(ArgError)
         }
     }
 }
@@ -945,39 +946,39 @@ pub struct PathKeyExpr {
 }
 
 impl FromStr for PathKeyExpr {
-    type Err = YangError;
+    type Err = ArgError;
 
     fn from_str(str: &str) -> Result<Self, Self::Err> {
         // TBD: Validation only.
         let paths: Vec<_> = str.split("/").map(|s| s.trim()).collect();
         // Minimum of "current() / .. / node-identifier".
         if paths.len() < 3 {
-            return Err(YangError::ArgumentParseError("path-key-expr"))
+            return Err(ArgError)
         // Invalid current function invocation.
         } else if !is_current_function_invocation(&paths[0]) {
-            return Err(YangError::ArgumentParseError("path-key-expr"))
+            return Err(ArgError)
         // Validate rel-path-keyexpr.
         } else {
             let mut i = 1;
 
             if paths[i] != ".." {
-                Err(YangError::ArgumentParseError("path-key-expr"))
+                Err(ArgError)
             } else {
                 i += 1;
                 while i < paths.len() && paths[i] == ".." {
                     i += 1;
                 }
                 if i >= paths.len() {
-                    return Err(YangError::ArgumentParseError("path-key-expr"))
+                    return Err(ArgError)
                 }
 
                 if !is_node_identifier(paths[i]) {
-                    return Err(YangError::ArgumentParseError("path-key-expr"))
+                    return Err(ArgError)
                 }
 
                 while i < paths.len() {
                     if !is_node_identifier(paths[i]) {
-                        return Err(YangError::ArgumentParseError("path-key-expr"))
+                        return Err(ArgError)
                     }
                     i += 1;
                 }
