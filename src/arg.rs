@@ -1078,10 +1078,16 @@ impl IfFeatureExpr {
         loop {
             let token = tokenizer.get_token();
 
-//                    if prev == "" && (token == ")" || token == "or" || token == "and") { 
-//                        let err = format!("Unexcpected token {} for if-feature-expr", token);
-//                        return Err(YangError::ArgumentParseError(""))  // TBD
-//                    }
+            if let IfFeatureToken::Init = prev {
+                match token {
+                    IfFeatureToken::Or |
+                    IfFeatureToken::And => {
+                        return Err(YangError::ArgumentParseError(""));  // TBD
+                    }
+                    _ => {}
+                }
+            }
+
             match token {
                 IfFeatureToken::Init => {}
                 IfFeatureToken::ParenBegin => {
