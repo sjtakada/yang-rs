@@ -1028,9 +1028,22 @@ impl FromStr for PathKeyExpr {
 }
 
 /// "if-feature-expr".
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct IfFeatureExpr {
     terms: Vec<IfFeatureTerm>,
+}
+
+impl fmt::Debug for IfFeatureExpr {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.to_string())
+    }
+}
+
+impl ToString for IfFeatureExpr {
+    fn to_string(&self) -> String {
+        let vec: Vec<_> = self.terms.iter().map(|t| t.to_string()).collect();
+        format!("{}", vec.join(" or "))
+    }
 }
 
 impl IfFeatureExpr {
@@ -1093,11 +1106,39 @@ pub struct IfFeatureTerm {
     factors: Vec<IfFeatureFactor>,
 }
 
+impl ToString for IfFeatureTerm {
+    fn to_string(&self) -> String {
+        let vec: Vec<_> = self.factors.iter().map(|f| f.to_string()).collect();
+        format!("{}", vec.join(" and "))
+    }
+}
+
 /// "if-feature-factor".
 #[derive(Debug, Clone, PartialEq)]
 pub enum IfFeatureFactor {
     IfFeatureExpr((Option<bool>, Box<IfFeatureExpr>)),
     IdentifierRef((Option<bool>, IdentifierRef)),
+}
+
+impl ToString for IfFeatureFactor {
+    fn to_string(&self) -> String {
+        match self {
+            IfFeatureFactor::IfFeatureExpr((not, expr)) => {
+                if let Some(_) = not {
+                    format!("not ({:?})", expr)
+                } else {
+                    format!("({:?})", expr)
+                }
+            }
+            IfFeatureFactor::IdentifierRef((not, identifier_ref)) => {
+                if let Some(_) = not {
+                    format!("not {:?}", identifier_ref)
+                } else {
+                    format!("{:?}", identifier_ref)
+                }
+            }
+        }
+    }
 }
 
 #[cfg(test)]
@@ -1505,4 +1546,5 @@ mod tests {
         println!("{:?}", expr);
     }
 }
+
 
