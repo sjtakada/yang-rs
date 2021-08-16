@@ -34,7 +34,7 @@ lazy_static! {
         m.insert("extension", ExtensionStmt::parse as StmtParserFn);
         m.insert("argument", ArgumentStmt::parse as StmtParserFn);
         m.insert("yin-element", YinElementStmt::parse as StmtParserFn);
-//        m.insert("identity", IdentityStmt::parse as StmtParserFn);
+        m.insert("identity", IdentityStmt::parse as StmtParserFn);
         m.insert("base", BaseStmt::parse as StmtParserFn);
         m.insert("feature", FeatureStmt::parse as StmtParserFn);
         m.insert("if-feature", IfFeatureStmt::parse as StmtParserFn);
@@ -46,12 +46,10 @@ lazy_static! {
         m.insert("pattern", PatternStmt::parse as StmtParserFn);
         m.insert("modifier", ModifierStmt::parse as StmtParserFn);
         m.insert("default", DefaultStmt::parse as StmtParserFn);
-/*
         m.insert("enum", EnumStmt::parse as StmtParserFn);
-        m.insert("path", PathStmt::parse as StmtParserFn);
-        m.insert("require-instance", RequireInstanceStmt::parse as StmtParserFn);
-        m.insert("bit", BitStmt::parse as StmtParserFn);
-*/
+//        m.insert("path", PathStmt::parse as StmtParserFn);
+//        m.insert("require-instance", RequireInstanceStmt::parse as StmtParserFn);
+//        m.insert("bit", BitStmt::parse as StmtParserFn);
         m.insert("position", PositionStmt::parse as StmtParserFn);
         m.insert("status", StatusStmt::parse as StmtParserFn);
         m.insert("config", ConfigStmt::parse as StmtParserFn);
@@ -191,7 +189,7 @@ pub enum StmtType {
     ExtensionStmt(ExtensionStmt),
     ArgumentStmt(ArgumentStmt),
     YinElementStmt(YinElementStmt),
-//    IdentityStmt(IdentityStmt),
+    IdentityStmt(IdentityStmt),
     BaseStmt(BaseStmt),
     FeatureStmt(FeatureStmt),
     IfFeatureStmt(IfFeatureStmt),
@@ -203,12 +201,10 @@ pub enum StmtType {
     PatternStmt(PatternStmt),
     ModifierStmt(ModifierStmt),
     DefaultStmt(DefaultStmt),
-/*
     EnumStmt(EnumStmt),
-    PathStmt(PathStmt),
-    RequireInstanceStmt(RequireInstanceStmt),
-    BitStmt(BitStmt),
-*/
+//    PathStmt(PathStmt),
+//    RequireInstanceStmt(RequireInstanceStmt),
+//    BitStmt(BitStmt),
     PositionStmt(PositionStmt),
     StatusStmt(StatusStmt),
     ConfigStmt(ConfigStmt),
@@ -273,7 +269,7 @@ impl fmt::Debug for StmtType {
             StmtType::ExtensionStmt(stmt) => write!(f, "extension-stmt {:?}", stmt),
             StmtType::ArgumentStmt(stmt) => write!(f, "argument-stmt {:?}", stmt),
             StmtType::YinElementStmt(stmt) => write!(f, "yin-element-stmt {:?}", stmt),
-//            StmtType::IdentityStmt(stmt) => write!(f, "identity-stmt {:?}", stmt),
+            StmtType::IdentityStmt(stmt) => write!(f, "identity-stmt {:?}", stmt),
             StmtType::BaseStmt(stmt) => write!(f, "base-stmt {:?}", stmt),
             StmtType::FeatureStmt(stmt) => write!(f, "feature-stmt {:?}", stmt),
             StmtType::IfFeatureStmt(stmt) => write!(f, "if-feature-stmt {:?}", stmt),
@@ -285,12 +281,10 @@ impl fmt::Debug for StmtType {
             StmtType::PatternStmt(stmt) => write!(f, "pattern-stmt {:?}", stmt),
             StmtType::ModifierStmt(stmt) => write!(f, "modifier-stmt {:?}", stmt),
             StmtType::DefaultStmt(stmt) => write!(f, "default-stmt {:?}", stmt),
-/*
             StmtType::EnumStmt(stmt) => write!(f, "enum-stmt {:?}", stmt),
-            StmtType::PathStmt(stmt) => write!(f, "path-stmt {:?}", stmt),
-            StmtType::RequireInstanceStmt(stmt) => write!(f, "require-instance-stmt {:?}", stmt),
-            StmtType::BitStmt(stmt) => write!(f, "bit-stmt {:?}", stmt),
-*/
+//            StmtType::PathStmt(stmt) => write!(f, "path-stmt {:?}", stmt),
+//            StmtType::RequireInstanceStmt(stmt) => write!(f, "require-instance-stmt {:?}", stmt),
+//            StmtType::BitStmt(stmt) => write!(f, "bit-stmt {:?}", stmt),
             StmtType::PositionStmt(stmt) => write!(f, "position-stmt {:?}", stmt),
             StmtType::StatusStmt(stmt) => write!(f, "status-stmt {:?}", stmt),
             StmtType::ConfigStmt(stmt) => write!(f, "config-stmt {:?}", stmt),
