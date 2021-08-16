@@ -48,7 +48,7 @@ lazy_static! {
         m.insert("default", DefaultStmt::parse as StmtParserFn);
         m.insert("enum", EnumStmt::parse as StmtParserFn);
         m.insert("path", PathStmt::parse as StmtParserFn);
-//        m.insert("require-instance", RequireInstanceStmt::parse as StmtParserFn);
+        m.insert("require-instance", RequireInstanceStmt::parse as StmtParserFn);
 //        m.insert("bit", BitStmt::parse as StmtParserFn);
         m.insert("position", PositionStmt::parse as StmtParserFn);
         m.insert("status", StatusStmt::parse as StmtParserFn);
@@ -203,7 +203,7 @@ pub enum StmtType {
     DefaultStmt(DefaultStmt),
     EnumStmt(EnumStmt),
     PathStmt(PathStmt),
-//    RequireInstanceStmt(RequireInstanceStmt),
+    RequireInstanceStmt(RequireInstanceStmt),
 //    BitStmt(BitStmt),
     PositionStmt(PositionStmt),
     StatusStmt(StatusStmt),
@@ -283,7 +283,7 @@ impl fmt::Debug for StmtType {
             StmtType::DefaultStmt(stmt) => write!(f, "default-stmt {:?}", stmt),
             StmtType::EnumStmt(stmt) => write!(f, "enum-stmt {:?}", stmt),
             StmtType::PathStmt(stmt) => write!(f, "path-stmt {:?}", stmt),
-//            StmtType::RequireInstanceStmt(stmt) => write!(f, "require-instance-stmt {:?}", stmt),
+            StmtType::RequireInstanceStmt(stmt) => write!(f, "require-instance-stmt {:?}", stmt),
 //            StmtType::BitStmt(stmt) => write!(f, "bit-stmt {:?}", stmt),
             StmtType::PositionStmt(stmt) => write!(f, "position-stmt {:?}", stmt),
             StmtType::StatusStmt(stmt) => write!(f, "status-stmt {:?}", stmt),

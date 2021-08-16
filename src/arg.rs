@@ -1227,6 +1227,28 @@ impl ToString for IfFeatureFactor {
     }
 }
 
+///
+/// Require Instance Arg.
+///
+#[derive(Debug, Clone)]
+pub struct RequireInstanceArg {
+    arg: bool,
+}
+
+impl StmtArg for RequireInstanceArg {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        if str == "true" {
+            Ok(RequireInstanceArg { arg: true })
+        } else if str == "false" {
+            Ok(RequireInstanceArg { arg: false })
+        } else {
+            Err(YangError::ArgumentParseError("require-instance-arg", parser.line()))
+        }
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
