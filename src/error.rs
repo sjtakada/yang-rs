@@ -42,7 +42,8 @@ quick_error! {
             display("Method not implemented")
         }
         ArgumentParseError(s: &'static str, line: usize) {
-            from(err: ArgError) -> (err.str, 0)
+//            context(err: ArgError, line: usize) -> (err.str, line)
+//            from(err: ArgError) -> (err.str, 0)
             display("Argument parse error: {} at line {}", s, line)
         }
 //        ArgumentParseError(s: &'static str) {
@@ -54,8 +55,22 @@ quick_error! {
     }
 }
 
+use std::fmt;
+
 pub struct ArgError {
     pub str: &'static str
+}
+
+impl fmt::Display for ArgError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "An Error Occurred, Please Try Again!")
+    }
+}
+
+impl fmt::Debug for ArgError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{{ file: {}, line: {} }}", file!(), line!())
+    }
 }
 
 impl ArgError {
@@ -65,9 +80,3 @@ impl ArgError {
         }
     }
 }
-
-//impl ToString for ArgError {
-//    fn to_string(&self) -> String {
-//        format!("{}", "hoge")
-//    }
-//}

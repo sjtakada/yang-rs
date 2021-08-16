@@ -583,14 +583,14 @@ impl StmtArg for RangeArg {
                     return Err(YangError::ArgumentParseError("range-arg", parser.line()));
                 }
 
-                lower = RangeBoundary::from_str(bounds[0])?;
+                lower = RangeBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?;
                 upper = None;
             } else if bounds.len() == 2 {
                 if bounds[0] == "" || bounds[1] == "" {
                     return Err(YangError::ArgumentParseError("range-arg", parser.line()));
                 }
-                lower = RangeBoundary::from_str(bounds[0])?;
-                upper = Some(RangeBoundary::from_str(bounds[1])?);
+                lower = RangeBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?;
+                upper = Some(RangeBoundary::from_str(bounds[1]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?);
             } else {
                 return Err(YangError::ArgumentParseError("range-arg", parser.line()));
             }
@@ -656,14 +656,14 @@ impl StmtArg for LengthArg {
                     return Err(YangError::ArgumentParseError("length-arg", parser.line()));
                 }
 
-                lower = LengthBoundary::from_str(bounds[0])?;
+                lower = LengthBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?;
                 upper = None;
             } else if bounds.len() == 2 {
                 if bounds[0] == "" || bounds[1] == "" {
                     return Err(YangError::ArgumentParseError("length-arg", parser.line()));
                 }
-                lower = LengthBoundary::from_str(bounds[0])?;
-                upper = Some(LengthBoundary::from_str(bounds[1])?);
+                lower = LengthBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?;
+                upper = Some(LengthBoundary::from_str(bounds[1]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?);
             } else {
                 return Err(YangError::ArgumentParseError("length-arg", parser.line()));
             }
@@ -1077,7 +1077,7 @@ impl ToString for IfFeatureExpr {
 
 impl IfFeatureExpr {
     /// Recursively parse "if-feature" arg string.
-    pub fn parse(tokenizer: &mut Tokenizer) -> Result<Self, YangError> {
+    pub fn parse(tokenizer: &mut Tokenizer) -> Result<Self, ArgError> {
         let mut terms: Vec<IfFeatureTerm> = Vec::new();
         let mut factors: Vec<IfFeatureFactor> = Vec::new();
         let mut not: Option<bool> = None;
@@ -1092,7 +1092,7 @@ impl IfFeatureExpr {
                         IfFeatureToken::ParenBegin |
                         IfFeatureToken::ParenEnd |
                         IfFeatureToken::IdentifierRef(_) => {
-                            return Err(YangError::ArgumentParseError("", 0))  // TBD
+                            return Err(ArgError::new("if-feature-expr"))
                         }
                         _ => {}
                     }
@@ -1108,7 +1108,7 @@ impl IfFeatureExpr {
                         IfFeatureToken::Not |
                         IfFeatureToken::And |
                         IfFeatureToken::Or => {
-                            return Err(YangError::ArgumentParseError("", 0))  // TBD
+                            return Err(ArgError::new("if-feature-expr"))
                         }
                         _ => {}
                     }
@@ -1122,7 +1122,7 @@ impl IfFeatureExpr {
                         IfFeatureToken::Not |
                         IfFeatureToken::And |
                         IfFeatureToken::Or => {
-                            return Err(YangError::ArgumentParseError("", 0))  // TBD
+                            return Err(ArgError::new("if-feature-expr"))
                         }
                         _ => {}
                     }
@@ -1137,7 +1137,7 @@ impl IfFeatureExpr {
                         IfFeatureToken::Not |
                         IfFeatureToken::And |
                         IfFeatureToken::Or => {
-                            return Err(YangError::ArgumentParseError("", 0))  // TBD
+                            return Err(ArgError::new("if-feature-expr"))
                         }
                         _ => {}
                     }
@@ -1147,7 +1147,7 @@ impl IfFeatureExpr {
                         IfFeatureToken::ParenEnd |
                         IfFeatureToken::Not |
                         IfFeatureToken::IdentifierRef(_) => {
-                            return Err(YangError::ArgumentParseError("", 0))  // TBD
+                            return Err(ArgError::new("if-feature-expr"))
                         }
                         _ => {}
                     }
@@ -1158,7 +1158,7 @@ impl IfFeatureExpr {
                     match prev {
                         IfFeatureToken::ParenEnd |
                         IfFeatureToken::IdentifierRef(_) => {
-                            return Err(YangError::ArgumentParseError("", 0))  // TBD
+                            return Err(ArgError::new("if-feature-expr"))
                         }
                         _ => {}
                     }
@@ -1182,7 +1182,7 @@ impl StmtArg for IfFeatureExpr {
         let str = parse_string(parser)?;
         let mut tokenizer = Tokenizer::new(str);
 
-        Ok(IfFeatureExpr::parse(&mut tokenizer)?)
+        IfFeatureExpr::parse(&mut tokenizer).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))
     }
 }
 
