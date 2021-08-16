@@ -36,10 +36,21 @@ macro_rules! collect_vec_stmt {
     ($stmts:expr, $st:ident) => (
         match $stmts.get_mut(<$st>::keyword()) {
             Some(v) => {
-                let w: Vec<_> = v.drain(..)
-                    .map(|en| if let StmtType::$st(stmt) = en { stmt } else { panic!("Invalid Stmt"); })
-                    .collect();
-                Ok(w)
+                let mut error = false;
+                let mut w = Vec::new();
+                for en in v.drain(..) {
+                    if let StmtType::$st(stmt) = en {
+                        w.push(stmt)
+                    } else {
+                        error = true;
+                    }
+                }
+
+                if error {
+                    Err(YangError::PlaceHolder)
+                } else {
+                    Ok(w)
+                }
             }
             None => Ok(Vec::new()),
         }

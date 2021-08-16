@@ -86,7 +86,7 @@ impl FromStr for Identifier {
         if is_identifier(s) {
             Ok(Identifier { str: s.to_string() })
         } else {
-            Err(ArgError)
+            Err(ArgError::new("identifier"))
         }
     }
 }
@@ -95,7 +95,10 @@ impl StmtArg for Identifier {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
-        Identifier::from_str(&str).or(Err(YangError::ArgumentParseError("identifier")))
+        match Identifier::from_str(&str) {
+            Ok(arg) => Ok(arg),
+            Err(e) => Err(YangError::ArgumentParseError(e.str)),
+        }
     }
 }
 
@@ -133,15 +136,15 @@ impl FromStr for IdentifierRef {
         match str.find(":") {
             Some(p) => {
                 let prefix = Identifier::from_str(&str[..p])
-                    .or(Err(YangError::ArgumentParseError("identifier-ref")))?;
+                    .map_err(|e| YangError::ArgumentParseError(e.str))?;
                 let identifier = Identifier::from_str(&str[p + 1..])
-                    .or(Err(YangError::ArgumentParseError("identifier-ref")))?;
+                    .map_err(|e| YangError::ArgumentParseError(e.str))?;
 
                 Ok(IdentifierRef { prefix: Some(prefix), identifier})
             }
             None => {
                 let identifier = Identifier::from_str(&str)
-                    .or(Err(YangError::ArgumentParseError("identifier-ref")))?;
+                    .map_err(|e| YangError::ArgumentParseError(e.str))?;
                 Ok(IdentifierRef { prefix: None, identifier })
             }
         }
@@ -204,7 +207,8 @@ impl ToString for NodeIdentifier {
 impl StmtArg for NodeIdentifier {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
-        NodeIdentifier::from_str(&str).or(Err(YangError::ArgumentParseError("node-identifier")))
+        NodeIdentifier::from_str(&str)
+            .map_err(|e| YangError::ArgumentParseError(e.str))
     }
 }
 
@@ -730,11 +734,11 @@ impl StmtArg for PathArg {
 
         if str.starts_with('/') {
             Ok(PathArg::AbsolutePath(AbsolutePath::from_str(&str)
-                                     .or(Err(YangError::ArgumentParseError("absolute-path")))?
+                                     .map_err(|e| YangError::ArgumentParseError(e.str))?
             ))
         } else if str.starts_with("..") {
             Ok(PathArg::RelativePath(RelativePath::from_str(&str)
-                                     .or(Err(YangError::ArgumentParseError("relative-path")))?
+                                     .map_err(|e| YangError::ArgumentParseError(e.str))?
             ))
         } else {
             Err(YangError::ArgumentParseError("path-arg"))
@@ -757,7 +761,7 @@ impl FromStr for AbsolutePath {
 
         while s.len() > 0 {
             if !s.starts_with('/') {
-                return Err(ArgError)
+                return Err(ArgError::new("absolute-path"))
             }
             s = &s[1..];
 
@@ -774,7 +778,7 @@ impl FromStr for AbsolutePath {
                         while {
                             let pos = match s.find(']') {
                                 Some(p) => Ok(p + 1),
-                                None => Err(ArgError)
+                                None => Err(ArgError::new("absolute-path"))
                             }?;
 
                             path_predicate.push(PathPredicate::from_str(&s[..pos])?);
@@ -819,7 +823,7 @@ impl FromStr for RelativePath {
         let mut up = 0;
 
         if !s.starts_with("../") {
-            return Err(ArgError)
+            return Err(ArgError::new("relative-path"))
         }
 
         while {
@@ -851,7 +855,7 @@ impl FromStr for DescendantPath {
         let mut absolute_path = None;
 
         if s.len() == 0 {
-            return Err(ArgError)
+            return Err(ArgError::new("descendant-path"))
         }
 
         match s.find(|c: char| c == '[' || c == '/') {
@@ -864,7 +868,7 @@ impl FromStr for DescendantPath {
                     while {
                         let pos = match s.find(']') {
                             Some(p) => Ok(p + 1),
-                            None => Err(ArgError),
+                            None => Err(ArgError::new("descendant-path")),
                         }?;
 
                         path_predicate.push(PathPredicate::from_str(&s[..pos])?);
@@ -899,7 +903,7 @@ impl FromStr for PathPredicate {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if !s.starts_with('[') || !s.ends_with(']') {
-            Err(ArgError)
+            Err(ArgError::new("path-predicate"))
         } else {
             Ok(PathPredicate {
                 path_equality_expr: PathEqualityExpr::from_str(&s[1..s.len() - 1])?,
@@ -926,7 +930,7 @@ impl FromStr for PathEqualityExpr {
                     path_key_expr: PathKeyExpr::from_str(&s[p + 1..].trim())?,
                 })
             }
-            None => Err(ArgError)
+            None => Err(ArgError::new("path-equality-expr"))
         }
     }
 }
@@ -953,32 +957,32 @@ impl FromStr for PathKeyExpr {
         let paths: Vec<_> = str.split("/").map(|s| s.trim()).collect();
         // Minimum of "current() / .. / node-identifier".
         if paths.len() < 3 {
-            return Err(ArgError)
+            return Err(ArgError::new("path-key-expr"))
         // Invalid current function invocation.
         } else if !is_current_function_invocation(&paths[0]) {
-            return Err(ArgError)
+            return Err(ArgError::new("path-key-expr"))
         // Validate rel-path-keyexpr.
         } else {
             let mut i = 1;
 
             if paths[i] != ".." {
-                Err(ArgError)
+                Err(ArgError::new("path-key-expr"))
             } else {
                 i += 1;
                 while i < paths.len() && paths[i] == ".." {
                     i += 1;
                 }
                 if i >= paths.len() {
-                    return Err(ArgError)
+                    return Err(ArgError::new("path-key-expr"))
                 }
 
                 if !is_node_identifier(paths[i]) {
-                    return Err(ArgError)
+                    return Err(ArgError::new("path-key-expr"))
                 }
 
                 while i < paths.len() {
                     if !is_node_identifier(paths[i]) {
-                        return Err(ArgError)
+                        return Err(ArgError::new("path-key-expr"))
                     }
                     i += 1;
                 }

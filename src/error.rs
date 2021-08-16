@@ -42,12 +42,32 @@ quick_error! {
             display("Method not implemented")
         }
         ArgumentParseError(s: &'static str) {
+            from(err: ArgError) -> (err.str)
             display("Argument parse error: {} at line ", s)
         }
+//        ArgumentParseError(s: &'static str) {
+//            display("Argument parse error: {} at line ", s)
+//        }
         PlaceHolder {
             display("placeholder")
         }
     }
 }
 
-pub struct ArgError;
+pub struct ArgError {
+    pub str: &'static str
+}
+
+impl ArgError {
+    pub fn new(str: &'static str) -> ArgError {
+        ArgError {
+            str
+        }
+    }
+}
+
+//impl ToString for ArgError {
+//    fn to_string(&self) -> String {
+//        format!("{}", "hoge")
+//    }
+//}
