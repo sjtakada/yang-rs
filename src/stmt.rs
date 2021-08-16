@@ -934,31 +934,74 @@ impl Stmt for BaseStmt {
     }
 }
 
-/*
-
 ///
 ///
 ///
 #[derive(Debug, Clone)]
 pub struct FeatureStmt {
+    identifier_arg: Identifier,
+    if_feature: Vec<IfFeatureStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
 }
 
 impl Stmt for FeatureStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
+
+    /// Sub Statements.
+    type SubStmts = (Vec<IfFeatureStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "feature"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::FeatureStmt(FeatureStmt {
+            identifier_arg: arg,
+            if_feature: Vec::new(),
+            status: None,
+            description: None,
+            reference: None,
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::FeatureStmt(FeatureStmt {
+            identifier_arg: arg,
+            if_feature: substmts.0,
+            status: substmts.1,
+            description: substmts.2,
+            reference: substmts.3,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let map: HashMap<&'static str, Repeat> = [
+            ("if_feature", Repeat::new(Some(0), None)),
+            ("status", Repeat::new(Some(0), Some(1))),
+            ("description", Repeat::new(Some(0), Some(1))),
+            ("reference", Repeat::new(Some(0), Some(1))),
+        ].iter().cloned().collect();
+
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+
+        Ok((collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?))
     }
 }
-
-*/
 
 ///
 ///

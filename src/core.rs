@@ -36,7 +36,7 @@ lazy_static! {
         m.insert("yin-element", YinElementStmt::parse as StmtParserFn);
 //        m.insert("identity", IdentityStmt::parse as StmtParserFn);
         m.insert("base", BaseStmt::parse as StmtParserFn);
-//        m.insert("feature", FeatureStmt::parse as StmtParserFn);
+        m.insert("feature", FeatureStmt::parse as StmtParserFn);
         m.insert("if-feature", IfFeatureStmt::parse as StmtParserFn);
 //        m.insert("typedef", TypedefStmt::parse as StmtParserFn);
         m.insert("type", TypeStmt::parse as StmtParserFn);
@@ -193,7 +193,7 @@ pub enum StmtType {
     YinElementStmt(YinElementStmt),
 //    IdentityStmt(IdentityStmt),
     BaseStmt(BaseStmt),
-//    FeatureStmt(FeatureStmt),
+    FeatureStmt(FeatureStmt),
     IfFeatureStmt(IfFeatureStmt),
 //    TypedefStmt(TypedefStmt),
     TypeStmt(TypeStmt),
@@ -275,7 +275,7 @@ impl fmt::Debug for StmtType {
             StmtType::YinElementStmt(stmt) => write!(f, "yin-element-stmt {:?}", stmt),
 //            StmtType::IdentityStmt(stmt) => write!(f, "identity-stmt {:?}", stmt),
             StmtType::BaseStmt(stmt) => write!(f, "base-stmt {:?}", stmt),
-//            StmtType::FeatureStmt(stmt) => write!(f, "feature-stmt {:?}", stmt),
+            StmtType::FeatureStmt(stmt) => write!(f, "feature-stmt {:?}", stmt),
             StmtType::IfFeatureStmt(stmt) => write!(f, "if-feature-stmt {:?}", stmt),
 //            StmtType::TypedefStmt(stmt) => write!(f, "typedef-stmt {:?}", stmt),
             StmtType::TypeStmt(stmt) => write!(f, "type-stmt {:?}", stmt),
