@@ -4,7 +4,6 @@
 //
 
 use quick_error::*;
-//use super::parser::*;
 
 quick_error! {
     #[derive(Debug)]
@@ -42,11 +41,42 @@ quick_error! {
         MethodNotImplemented {
             display("Method not implemented")
         }
-        ArgumentParseError(s: String) {
-            display("Agument parse error: {}", s)
+        ArgumentParseError(s: &'static str, line: usize) {
+//            context(err: ArgError, line: usize) -> (err.str, line)
+//            from(err: ArgError) -> (err.str, 0)
+            display("Argument parse error: {} at line {}", s, line)
         }
+//        ArgumentParseError(s: &'static str) {
+//            display("Argument parse error: {} at line ", s)
+//        }
         PlaceHolder {
             display("placeholder")
+        }
+    }
+}
+
+use std::fmt;
+
+pub struct ArgError {
+    pub str: &'static str
+}
+
+impl fmt::Display for ArgError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "An Error Occurred, Please Try Again!")
+    }
+}
+
+impl fmt::Debug for ArgError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{{ file: {}, line: {} }}", file!(), line!())
+    }
+}
+
+impl ArgError {
+    pub fn new(str: &'static str) -> ArgError {
+        ArgError {
+            str
         }
     }
 }

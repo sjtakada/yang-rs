@@ -13,6 +13,7 @@ use std::io::Error;
 use std::io::ErrorKind;
 use std::path::Path;
 
+use super::core::*;
 use super::error::*;
 use super::stmt::*;
 
@@ -230,6 +231,13 @@ impl Parser {
         self.saved.replace(None)
     }
 
+    /// Get a token and save it.
+    pub fn peek_token(&mut self) -> Result<Token, YangError> {
+        let token = self.get_token()?;
+        self.save_token(token.clone());
+        Ok(token)
+    }
+
     /// Get a token except whitespace and comment.
     pub fn get_token(&mut self) -> Result<Token, YangError> {
         let mut st = String::new();
@@ -429,6 +437,15 @@ impl Parser {
         Ok((token, pos))
     }
 
+    /// Expect a given keyword.
+    pub fn expect_keyword(&mut self, keyword: &str) -> Result<bool, YangError> {
+        let token = self.peek_token()?;
+        match token {
+            Token::Identifier(k) => Ok(k == keyword),
+            _ => Err(YangError::UnexpectedToken(self.line())),
+        }
+    }
+
     /// Entry point of YANG parser. It will return a module or submodule statement.
     pub fn parse_yang(&mut self) -> Result<StmtType, YangError> {
         let map: HashMap<&'static str, Repeat> = [
@@ -438,7 +455,7 @@ impl Parser {
 
 //        println!("*** size_of {}", size_of::<ModuleStmt>());
 
-        let mut stmts = parse_stmt_collection(self, map)?;
+        let mut stmts = parse_stmt_in_any_order(self, map)?;
         if stmts.contains_key("module") {
             let module = collect_a_stmt!(stmts, ModuleStmt)?;
             Ok(StmtType::ModuleStmt(module))
