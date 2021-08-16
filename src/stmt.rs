@@ -1569,32 +1569,79 @@ impl Stmt for RequireInstanceStmt {
     }
 }
 
-/*
-
 ///
-///
+/// 9.7.4. The "bit" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct BitStmt {
+    identifier_arg: Identifier,
+    if_feature: Vec<IfFeatureStmt>,
+    position: Option<PositionStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
 }
 
 impl Stmt for BitStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
+
+    /// Sub Statements.
+    type SubStmts = (Vec<IfFeatureStmt>, Option<PositionStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "bit"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::BitStmt(BitStmt {
+            identifier_arg: arg,
+            if_feature: Vec::new(),
+            position: None,
+            status: None,
+            description: None,
+            reference: None,
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::BitStmt(BitStmt {
+            identifier_arg: arg, 
+            if_feature: substmts.0,
+            position: substmts.1,
+            status: substmts.2,
+            description: substmts.3,
+            reference: substmts.4,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let map: HashMap<&'static str, Repeat> = [
+            ("if_feature", Repeat::new(Some(0), None)),
+            ("position", Repeat::new(Some(0), Some(1))),
+            ("status", Repeat::new(Some(0), Some(1))),
+            ("description", Repeat::new(Some(0), Some(1))),
+            ("reference", Repeat::new(Some(0), Some(1))),
+        ].iter().cloned().collect();
+
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+
+        Ok((collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_opt_stmt!(stmts, PositionStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?))
     }
 }
-
-*/
-
 
 ///
 /// 9.7.4.2. The "position" Statement.
