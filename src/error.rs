@@ -41,9 +41,9 @@ quick_error! {
         MethodNotImplemented {
             display("Method not implemented")
         }
-        ArgumentParseError(s: &'static str) {
-            from(err: ArgError) -> (err.str)
-            display("Argument parse error: {} at line ", s)
+        ArgumentParseError(s: &'static str, line: usize) {
+            from(err: ArgError) -> (err.str, 0)
+            display("Argument parse error: {} at line {}", s, line)
         }
 //        ArgumentParseError(s: &'static str) {
 //            display("Argument parse error: {} at line ", s)
