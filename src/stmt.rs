@@ -1051,7 +1051,7 @@ impl Stmt for FeatureStmt {
 }
 
 ///
-///
+/// 7.20.2. The "if-feature" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct IfFeatureStmt {
@@ -1440,7 +1440,7 @@ impl Stmt for DefaultStmt {
 }
 
 ///
-///
+/// 9.6.4. The "enum" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct EnumStmt {
@@ -1513,29 +1513,35 @@ impl Stmt for EnumStmt {
     }
 }
 
-/*
-
 ///
-///
+/// 9.9.2. The "path" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct PathStmt {
+    path_arg: PathArg,
 }
 
 impl Stmt for PathStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = PathArg;
+
+    /// Sub Statements.
+    type SubStmts = ();
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "path"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::PathStmt(PathStmt {
+            path_arg: arg,
+        })
     }
 }
+
+/*
 
 ///
 ///
