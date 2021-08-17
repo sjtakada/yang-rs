@@ -1249,6 +1249,37 @@ impl StmtArg for RequireInstanceArg {
 }
 
 
+///
+/// Key Arg.
+///
+#[derive(Debug, Clone, PartialEq)]
+pub struct KeyArg {
+    keys: Vec<NodeIdentifier>,
+}
+
+impl StmtArg for KeyArg {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        let mut keys = Vec::new();
+        let mut s = &str[..];
+
+        while {
+            let pos = match s.find(char::is_whitespace) {
+                Some(p) => p,
+                None => s.len(),
+            };
+
+            let node_identifier = NodeIdentifier::from_str(&s[..pos]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?;
+            keys.push(node_identifier);
+            
+            s = &s[pos..].trim();
+            s.len() > 0
+        } { }
+
+        Ok(KeyArg { keys })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1615,5 +1646,22 @@ mod tests {
 
         }
 */
+    }
+
+    #[test]
+    pub fn test_key_arg() {
+        let s = r#""p1:id1 p1:id2 p2:id3 id4 id5""#;
+        let mut parser = Parser::new(s.to_string());
+
+        match KeyArg::parse_arg(&mut parser) {
+            Ok(arg) => assert_eq!(arg, KeyArg {
+                keys: vec![NodeIdentifier::from_str("p1:id1").unwrap(),
+                           NodeIdentifier::from_str("p1:id2").unwrap(),
+                           NodeIdentifier::from_str("p2:id3").unwrap(),
+                           NodeIdentifier::from_str("id4").unwrap(),
+                           NodeIdentifier::from_str("id5").unwrap(),
+            ] }),
+            Err(err) => panic!(err.to_string()),
+        }
     }
 }
