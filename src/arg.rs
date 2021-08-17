@@ -1291,29 +1291,37 @@ pub enum SchemaNodeid {
     Descendant(Vec<NodeIdentifier>)
 }
 
-impl StmtArg for SchemaNodeid {
-    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
-        let str = parse_string(parser)?;
+impl FromStr for SchemaNodeid {
+    type Err = ArgError;
 
+    fn from_str(str: &str) -> Result<Self, Self::Err> {
         if let Some(_) = str.find(char::is_whitespace) {
-            Err(YangError::ArgumentParseError("schema-nodeid", parser.line()))
+            Err(ArgError::new("schema-nodeid"))
         } else if let Some(_) = str.find("//") {
-            Err(YangError::ArgumentParseError("schema-nodeid", parser.line()))
+            Err(ArgError::new("schema-nodeid"))
         } else {            
             if str.starts_with('/') {
                 let mut vec: Vec<NodeIdentifier> = Vec::new();
                 for n in (&str[1..]).split('/') {
-                    vec.push(NodeIdentifier::from_str(n).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?);
+                    vec.push(NodeIdentifier::from_str(n)?);
                 }
                 Ok(SchemaNodeid::Absolute(vec))
             } else {
                 let mut vec: Vec<NodeIdentifier> = Vec::new();
                 for n in str.split('/') {
-                    vec.push(NodeIdentifier::from_str(n).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?);
+                    vec.push(NodeIdentifier::from_str(n)?);
                 }
                 Ok(SchemaNodeid::Descendant(vec))
             }
         }
+    }
+}
+
+impl StmtArg for SchemaNodeid {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+
+        SchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))
     }
 }
 
