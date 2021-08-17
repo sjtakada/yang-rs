@@ -4,6 +4,7 @@
 //
 
 use std::fmt;
+use std::iter::Iterator;
 use std::str::FromStr;
 use std::string::ToString;
 use url::Url;
@@ -1280,6 +1281,53 @@ impl StmtArg for KeyArg {
     }
 }
 
+///
+/// Schema Nodeid.
+///
+pub enum SchemaNodeid {
+    Absolute(Vec<NodeIdentifier>),
+    Descendant(Vec<NodeIdentifier>)
+}
+
+impl StmtArg for SchemaNodeid {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+
+        if let Some(_) = str.find(char::is_whitespace) {
+            Err(YangError::ArgumentParseError("schema-nodeid", parser.line()))
+        } else if let Some(_) = str.find("//") {
+            Err(YangError::ArgumentParseError("schema-nodeid", parser.line()))
+        } else {            
+            if str.starts_with('/') {
+                let mut vec: Vec<NodeIdentifier> = Vec::new();
+                for n in (&str[1..]).split('/') {
+                    vec.push(NodeIdentifier::from_str(n).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?);
+                }
+                Ok(SchemaNodeid::Absolute(vec))
+            } else {
+                let mut vec: Vec<NodeIdentifier> = Vec::new();
+                for n in str.split('/') {
+                    vec.push(NodeIdentifier::from_str(n).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?);
+                }
+                Ok(SchemaNodeid::Descendant(vec))
+            }
+        }
+    }
+}
+
+impl ToString for SchemaNodeid {
+    fn to_string(&self) -> String {
+        match self {
+            SchemaNodeid::Absolute(vec) => {
+                format!("/{}", vec.iter().map(|n| n.to_string()).collect::<Vec<String>>().join("/"))
+            }
+            SchemaNodeid::Descendant(vec) => {
+                vec.iter().map(|n| n.to_string()).collect::<Vec<String>>().join("/")
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1661,6 +1709,41 @@ mod tests {
                            NodeIdentifier::from_str("id4").unwrap(),
                            NodeIdentifier::from_str("id5").unwrap(),
             ] }),
+            Err(err) => panic!(err.to_string()),
+        }
+    }
+
+    #[test]
+    pub fn test_schema_nodeid() {
+        let s = r#""/id1/id2/id3""#;
+        let mut parser = Parser::new(s.to_string());
+
+        match SchemaNodeid::parse_arg(&mut parser) {
+            Ok(arg) => {
+                assert_eq!(arg.to_string(), "/id1/id2/id3");
+                match arg {
+                    SchemaNodeid::Absolute(vec) => {
+                        assert_eq!(vec.len(), 3);
+                    }
+                    SchemaNodeid::Descendant(_) => panic!(),
+                }
+            }
+            Err(err) => panic!(err.to_string()),
+        }
+
+        let s = r#""id1/id2/id3""#;
+        let mut parser = Parser::new(s.to_string());
+
+        match SchemaNodeid::parse_arg(&mut parser) {
+            Ok(arg) => {
+                assert_eq!(arg.to_string(), "id1/id2/id3");
+                match arg {
+                    SchemaNodeid::Absolute(_) => panic!(),
+                    SchemaNodeid::Descendant(vec) => {
+                        assert_eq!(vec.len(), 3);
+                    }
+                }
+            }
             Err(err) => panic!(err.to_string()),
         }
     }

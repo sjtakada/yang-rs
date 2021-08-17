@@ -42,13 +42,8 @@ quick_error! {
             display("Method not implemented")
         }
         ArgumentParseError(s: &'static str, line: usize) {
-//            context(err: ArgError, line: usize) -> (err.str, line)
-//            from(err: ArgError) -> (err.str, 0)
             display("Argument parse error: {} at line {}", s, line)
         }
-//        ArgumentParseError(s: &'static str) {
-//            display("Argument parse error: {} at line ", s)
-//        }
         PlaceHolder {
             display("placeholder")
         }
