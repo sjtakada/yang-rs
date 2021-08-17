@@ -52,19 +52,14 @@ quick_error! {
 
 use std::fmt;
 
+#[derive(Debug)]
 pub struct ArgError {
     pub str: &'static str
 }
 
 impl fmt::Display for ArgError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "An Error Occurred, Please Try Again!")
-    }
-}
-
-impl fmt::Debug for ArgError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{{ file: {}, line: {} }}", file!(), line!())
+        write!(f, "Arg error: {}", self.str)
     }
 }
 

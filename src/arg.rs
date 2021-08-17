@@ -955,6 +955,8 @@ impl FromStr for PathKeyExpr {
         let paths: Vec<_> = str.split("/").map(|s| s.trim()).collect();
         // Minimum of "current() / .. / node-identifier".
         if paths.len() < 3 {
+            println!("*** hoge");
+
             return Err(ArgError::new("path-key-expr"))
         // Invalid current function invocation.
         } else if !is_current_function_invocation(&paths[0]) {
@@ -1581,19 +1583,18 @@ mod tests {
             Ok(arg) => assert_eq!(arg, PathKeyExpr { rel_path_keyexpr: "current ( ) / .. / .. / .. / node / node / node ".to_string() }),
             Err(err) => panic!("{:?}", err.to_string()),
         }
-/*
+
         let s = "current()/..";
         match PathKeyExpr::from_str(s) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: path-key-expr at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Arg error: path-key-expr"),
         }
 
-        let s = "current()/node";
+        let s = "current()/node/node/node";
         match PathKeyExpr::from_str(s) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: path-key-expr at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Arg error: path-key-expr"),
         }
-*/
     }
 
     #[test]
