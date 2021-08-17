@@ -1284,57 +1284,81 @@ impl StmtArg for KeyArg {
 }
 
 ///
-/// Schema Nodeid.
+/// Schema Nodeid.  TODO - may consolidate.
 ///
-pub enum SchemaNodeid {
-    Absolute(Vec<NodeIdentifier>),
-    Descendant(Vec<NodeIdentifier>)
+pub struct AbsoluteSchemaNodeid {
+    nodes: Vec<NodeIdentifier>,
 }
 
-impl FromStr for SchemaNodeid {
+pub struct DescendantSchemaNodeid {
+    nodes: Vec<NodeIdentifier>,
+}
+
+impl FromStr for AbsoluteSchemaNodeid {
     type Err = ArgError;
 
     fn from_str(str: &str) -> Result<Self, Self::Err> {
         if let Some(_) = str.find(char::is_whitespace) {
-            Err(ArgError::new("schema-nodeid"))
+            Err(ArgError::new("absolute-schema-nodeid"))
         } else if let Some(_) = str.find("//") {
-            Err(ArgError::new("schema-nodeid"))
-        } else {            
-            if str.starts_with('/') {
-                let mut vec: Vec<NodeIdentifier> = Vec::new();
-                for n in (&str[1..]).split('/') {
-                    vec.push(NodeIdentifier::from_str(n)?);
-                }
-                Ok(SchemaNodeid::Absolute(vec))
-            } else {
-                let mut vec: Vec<NodeIdentifier> = Vec::new();
-                for n in str.split('/') {
-                    vec.push(NodeIdentifier::from_str(n)?);
-                }
-                Ok(SchemaNodeid::Descendant(vec))
+            Err(ArgError::new("absolute-schema-nodeid"))
+        } else if str.starts_with('/') {
+            let mut nodes: Vec<NodeIdentifier> = Vec::new();
+            for n in (&str[1..]).split('/') {
+                nodes.push(NodeIdentifier::from_str(n)?);
             }
+            Ok(AbsoluteSchemaNodeid { nodes })
+        } else {
+            Err(ArgError::new("absolute-schema-nodeid"))
         }
     }
 }
 
-impl StmtArg for SchemaNodeid {
+impl FromStr for DescendantSchemaNodeid {
+    type Err = ArgError;
+
+    fn from_str(str: &str) -> Result<Self, Self::Err> {
+        if let Some(_) = str.find(char::is_whitespace) {
+            Err(ArgError::new("descendant-schema-nodeid"))
+        } else if let Some(_) = str.find("//") {
+            Err(ArgError::new("descendant-schema-nodeid"))
+        } else if !str.starts_with('/') {
+            let mut nodes: Vec<NodeIdentifier> = Vec::new();
+            for n in str.split('/') {
+                nodes.push(NodeIdentifier::from_str(n)?);
+            }
+            Ok(DescendantSchemaNodeid { nodes })
+        } else {
+            Err(ArgError::new("descendant-schema-nodeid"))
+        }
+    }
+}
+
+impl StmtArg for AbsoluteSchemaNodeid {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
-        SchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))
+        AbsoluteSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))
     }
 }
 
-impl ToString for SchemaNodeid {
+impl StmtArg for DescendantSchemaNodeid {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+
+        DescendantSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))
+    }
+}
+
+impl ToString for AbsoluteSchemaNodeid {
     fn to_string(&self) -> String {
-        match self {
-            SchemaNodeid::Absolute(vec) => {
-                format!("/{}", vec.iter().map(|n| n.to_string()).collect::<Vec<String>>().join("/"))
-            }
-            SchemaNodeid::Descendant(vec) => {
-                vec.iter().map(|n| n.to_string()).collect::<Vec<String>>().join("/")
-            }
-        }
+        format!("/{}", self.nodes.iter().map(|n| n.to_string()).collect::<Vec<String>>().join("/"))
+    }
+}
+
+impl ToString for DescendantSchemaNodeid {
+    fn to_string(&self) -> String {
+        self.nodes.iter().map(|n| n.to_string()).collect::<Vec<String>>().join("/")
     }
 }
 
@@ -1721,35 +1745,28 @@ mod tests {
     }
 
     #[test]
-    pub fn test_schema_nodeid() {
+    pub fn test_absolute_schema_nodeid() {
         let s = r#""/id1/id2/id3""#;
         let mut parser = Parser::new(s.to_string());
 
-        match SchemaNodeid::parse_arg(&mut parser) {
+        match AbsoluteSchemaNodeid::parse_arg(&mut parser) {
             Ok(arg) => {
                 assert_eq!(arg.to_string(), "/id1/id2/id3");
-                match arg {
-                    SchemaNodeid::Absolute(vec) => {
-                        assert_eq!(vec.len(), 3);
-                    }
-                    SchemaNodeid::Descendant(_) => panic!(),
-                }
+                assert_eq!(arg.nodes.len(), 3);
             }
             Err(err) => panic!(err.to_string()),
         }
+    }
 
+    #[test]
+    pub fn test_descendant_schema_nodeid() {
         let s = r#""id1/id2/id3""#;
         let mut parser = Parser::new(s.to_string());
 
-        match SchemaNodeid::parse_arg(&mut parser) {
+        match DescendantSchemaNodeid::parse_arg(&mut parser) {
             Ok(arg) => {
                 assert_eq!(arg.to_string(), "id1/id2/id3");
-                match arg {
-                    SchemaNodeid::Absolute(_) => panic!(),
-                    SchemaNodeid::Descendant(vec) => {
-                        assert_eq!(vec.len(), 3);
-                    }
-                }
+                assert_eq!(arg.nodes.len(), 3);
             }
             Err(err) => panic!(err.to_string()),
         }
