@@ -1686,14 +1686,12 @@ mod tests {
 
         let s = r#""p1:id1 p1:id2""#;
         let mut parser = Parser::new(s.to_string());
-/*
+
         match IfFeatureExpr::parse_arg(&mut parser) {
-            Ok(expr) =>
-                assert_eq!(format!("{:?}", expr), "p1:id1 and p1:id2 or (p2:id3 and p2:id4) or not p3:id5"),
-            Err(_) => panic!(),
+            Ok(expr) => panic!(),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: if-feature-expr at line 0"),
 
         }
-*/
     }
 
     #[test]
