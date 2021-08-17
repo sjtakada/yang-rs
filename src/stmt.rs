@@ -2131,7 +2131,7 @@ impl Stmt for ListStmt {
 */
 
 ///
-///
+/// 7.8.2. The list's "key" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct KeyStmt {
@@ -2380,27 +2380,67 @@ impl Stmt for AugmentStmt {
     }
 }
 
+*/
 ///
 ///
 ///
 #[derive(Debug, Clone)]
 pub struct WhenStmt {
+    string: String,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
 }
 
 impl Stmt for WhenStmt {
     /// Arg type.
     type Arg = String;
 
+    /// Sub Statements.
+    type SubStmts = (Option<DescriptionStmt>, Option<ReferenceStmt>);
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "when"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::WhenStmt(WhenStmt {
+            string: arg,
+            description: None,
+            reference: None,
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::WhenStmt(WhenStmt {
+            string: arg,
+            description: substmts.0,
+            reference: substmts.1,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let map: HashMap<&'static str, Repeat> = [
+            ("description", Repeat::new(Some(0), Some(1))),
+            ("reference", Repeat::new(Some(0), Some(1))),
+        ].iter().cloned().collect();
+
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+
+        Ok((collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?))
     }
 }
+
+/*
 
 ///
 ///
