@@ -1286,10 +1286,12 @@ impl StmtArg for KeyArg {
 ///
 /// Schema Nodeid.  TODO - may consolidate.
 ///
+#[derive(Debug, Clone)]
 pub struct AbsoluteSchemaNodeid {
     nodes: Vec<NodeIdentifier>,
 }
 
+#[derive(Debug, Clone)]
 pub struct DescendantSchemaNodeid {
     nodes: Vec<NodeIdentifier>,
 }
@@ -1361,6 +1363,24 @@ impl ToString for DescendantSchemaNodeid {
         self.nodes.iter().map(|n| n.to_string()).collect::<Vec<String>>().join("/")
     }
 }
+
+///
+/// Unique Arg.  TBD.
+///
+pub struct UniqueArg {
+}
+
+/// Refine Arg.
+pub type RefineArg = DescendantSchemaNodeid;
+
+/// Uses Augment Arg.
+pub type UsesAugmentArg = DescendantSchemaNodeid;
+
+/// Augment Arg.
+pub type AugmentArg = AbsoluteSchemaNodeid;
+
+/// Deviation Arg.
+pub type DevicationArg = AbsoluteSchemaNodeid;
 
 #[cfg(test)]
 mod tests {
