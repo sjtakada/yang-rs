@@ -1365,9 +1365,31 @@ impl ToString for DescendantSchemaNodeid {
 }
 
 ///
-/// Unique Arg.  TBD.
+/// Unique Arg.
 ///
 pub struct UniqueArg {
+    nodeids: Vec<DescendantSchemaNodeid>,
+}
+
+impl StmtArg for UniqueArg {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        UniqueArg::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))
+    }
+}
+
+impl FromStr for UniqueArg {
+    type Err = ArgError;
+
+    fn from_str(str: &str) -> Result<Self, Self::Err> {
+        let mut nodeids = Vec::new();
+
+        for n in str.split_whitespace() {
+            nodeids.push(DescendantSchemaNodeid::from_str(n)?);
+        }
+
+        Ok(UniqueArg { nodeids })
+    }
 }
 
 /// Refine Arg.
