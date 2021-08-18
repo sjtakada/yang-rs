@@ -75,7 +75,9 @@ lazy_static! {
         m.insert("choice", ChoiceStmt::parse as StmtParserFn);
         m.insert("short-case", ShortCaseStmt::parse as StmtParserFn);
         m.insert("case", CaseStmt::parse as StmtParserFn);
+*/
         m.insert("anydata", AnydataStmt::parse as StmtParserFn);
+/*
         m.insert("anyxml", AnyxmlStmt::parse as StmtParserFn);
         m.insert("uses", UsesStmt::parse as StmtParserFn);
         m.insert("refine", RefineStmt::parse as StmtParserFn);
@@ -234,7 +236,9 @@ pub enum StmtType {
     ChoiceStmt(ChoiceStmt),
     ShortCaseStmt(ShortCaseStmt),
     CaseStmt(CaseStmt),
+*/
     AnydataStmt(AnydataStmt),
+/*
     AnyxmlStmt(AnyxmlStmt),
     UsesStmt(UsesStmt),
     RefineStmt(RefineStmt),
@@ -318,7 +322,9 @@ impl fmt::Debug for StmtType {
             StmtType::ChoiceStmt(stmt) => write!(f, "choice-stmt {:?}", stmt),
             StmtType::ShortCaseStmt(stmt) => write!(f, "short-case-stmt {:?}", stmt),
             StmtType::CaseStmt(stmt) => write!(f, "case-stmt {:?}", stmt),
+*/
             StmtType::AnydataStmt(stmt) => write!(f, "anydata-stmt {:?}", stmt),
+/*
             StmtType::AnyxmlStmt(stmt) => write!(f, "anyxml-stmt {:?}", stmt),
             StmtType::UsesStmt(stmt) => write!(f, "uses-stmt {:?}", stmt),
             StmtType::RefineStmt(stmt) => write!(f, "refine-stmt {:?}", stmt),
