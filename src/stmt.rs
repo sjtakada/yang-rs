@@ -936,7 +936,7 @@ impl Stmt for IdentityStmt {
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
         let map: HashMap<&'static str, Repeat> = [
-            ("if_feature", Repeat::new(Some(0), None)),
+            ("if-feature", Repeat::new(Some(0), None)),
             ("base", Repeat::new(Some(0), None)),
             ("status", Repeat::new(Some(0), Some(1))),
             ("description", Repeat::new(Some(0), Some(1))),
@@ -1035,7 +1035,7 @@ impl Stmt for FeatureStmt {
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
         let map: HashMap<&'static str, Repeat> = [
-            ("if_feature", Repeat::new(Some(0), None)),
+            ("if-feature", Repeat::new(Some(0), None)),
             ("status", Repeat::new(Some(0), Some(1))),
             ("description", Repeat::new(Some(0), Some(1))),
             ("reference", Repeat::new(Some(0), Some(1))),
@@ -1496,7 +1496,7 @@ impl Stmt for EnumStmt {
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
         let map: HashMap<&'static str, Repeat> = [
-            ("if_feature", Repeat::new(Some(0), None)),
+            ("if-feature", Repeat::new(Some(0), None)),
             ("value", Repeat::new(Some(0), Some(1))),
             ("status", Repeat::new(Some(0), Some(1))),
             ("description", Repeat::new(Some(0), Some(1))),
@@ -1626,7 +1626,7 @@ impl Stmt for BitStmt {
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
         let map: HashMap<&'static str, Repeat> = [
-            ("if_feature", Repeat::new(Some(0), None)),
+            ("if-feature", Repeat::new(Some(0), None)),
             ("position", Repeat::new(Some(0), Some(1))),
             ("status", Repeat::new(Some(0), Some(1))),
             ("description", Repeat::new(Some(0), Some(1))),
@@ -1773,7 +1773,7 @@ impl Stmt for PresenceStmt {
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
-        "presense"
+        "presence"
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
@@ -2324,7 +2324,7 @@ impl Stmt for AnydataStmt {
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
         let map: HashMap<&'static str, Repeat> = [
             ("when", Repeat::new(Some(0), Some(1))),
-            ("if_feature", Repeat::new(Some(0), None)),
+            ("if-feature", Repeat::new(Some(0), None)),
             ("must", Repeat::new(Some(0), None)),
             ("config", Repeat::new(Some(0), Some(1))),
             ("mandatory", Repeat::new(Some(0), Some(1))),
@@ -2346,71 +2346,280 @@ impl Stmt for AnydataStmt {
     }
 }
 
-/*
-
 ///
-///
+/// 7.11. The "anyxml" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct AnyxmlStmt {
+    arg: Identifier,
+    when: Option<WhenStmt>,
+    if_feature: Vec<IfFeatureStmt>,
+    must: Vec<MustStmt>,
+    config: Option<ConfigStmt>,
+    mandatory: Option<MandatoryStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
 }
 
 impl Stmt for AnyxmlStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
+
+    /// Sub Statements.
+    type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Vec<MustStmt>, Option<ConfigStmt>,
+                     Option<MandatoryStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "anyxml"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::AnyxmlStmt(AnyxmlStmt {
+            arg,
+            when: None,
+            if_feature: Vec::new(),
+            must: Vec::new(),
+            config: None,
+            mandatory: None,
+            status: None,
+            description: None,
+            reference: None,
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::AnyxmlStmt(AnyxmlStmt {
+            arg,
+            when: substmts.0,
+            if_feature: substmts.1,
+            must: substmts.2,
+            config: substmts.3,
+            mandatory: substmts.4,
+            status: substmts.5,
+            description: substmts.6,
+            reference: substmts.7,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let map: HashMap<&'static str, Repeat> = [
+            ("when", Repeat::new(Some(0), Some(1))),
+            ("if-feature", Repeat::new(Some(0), None)),
+            ("must", Repeat::new(Some(0), None)),
+            ("config", Repeat::new(Some(0), Some(1))),
+            ("mandatory", Repeat::new(Some(0), Some(1))),
+            ("status", Repeat::new(Some(0), Some(1))),
+            ("description", Repeat::new(Some(0), Some(1))),
+            ("reference", Repeat::new(Some(0), Some(1))),
+        ].iter().cloned().collect();
+
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+
+        Ok((collect_opt_stmt!(stmts, WhenStmt)?,
+            collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_vec_stmt!(stmts, MustStmt)?,
+            collect_opt_stmt!(stmts, ConfigStmt)?,
+            collect_opt_stmt!(stmts, MandatoryStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?))
     }
 }
 
 ///
-///
+/// 7.13. The "uses" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct UsesStmt {
+    arg: IdentifierRef,
+    when: Option<WhenStmt>,
+    if_feature: Vec<IfFeatureStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+    refine: Vec<RefineStmt>,
+    uses_augment: Vec<UsesAugmentStmt>,
 }
 
 impl Stmt for UsesStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = IdentifierRef;
+
+    /// Sub Statements.
+    type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Option<StatusStmt>, Option<DescriptionStmt>,
+                     Option<ReferenceStmt>, Vec<RefineStmt>, Vec<UsesAugmentStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "uses"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::UsesStmt(UsesStmt {
+            arg,
+            when: None,
+            if_feature: Vec::new(),
+            status: None,
+            description: None,
+            reference: None,
+            refine: Vec::new(),
+            uses_augment: Vec::new(),
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::UsesStmt(UsesStmt {
+            arg,
+            when: substmts.0,
+            if_feature: substmts.1,
+            status: substmts.2,
+            description: substmts.3,
+            reference: substmts.4,
+            refine: substmts.5,
+            uses_augment: substmts.6,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let map: HashMap<&'static str, Repeat> = [
+            ("when", Repeat::new(Some(0), Some(1))),
+            ("if-feature", Repeat::new(Some(0), None)),
+            ("status", Repeat::new(Some(0), Some(1))),
+            ("description", Repeat::new(Some(0), Some(1))),
+            ("reference", Repeat::new(Some(0), Some(1))),
+            ("refine", Repeat::new(Some(0), None)),
+            ("uses-augument", Repeat::new(Some(0), None)),
+        ].iter().cloned().collect();
+
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+
+        Ok((collect_opt_stmt!(stmts, WhenStmt)?,
+            collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+            collect_vec_stmt!(stmts, RefineStmt)?,
+            collect_vec_stmt!(stmts, UsesAugmentStmt)?))
     }
 }
 
 ///
-///
+/// 7.13.2. The "refine" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct RefineStmt {
+    arg: String,
+//    arg: RefineArg,
+    if_feature: Vec<IfFeatureStmt>,
+    must: Vec<MustStmt>,
+    presence: Option<PresenceStmt>,
+    default: Vec<DefaultStmt>,
+    config: Option<ConfigStmt>,
+    mandatory: Option<MandatoryStmt>,
+    min_elements: Option<MinElementsStmt>,
+    max_elements: Option<MaxElementsStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
 }
 
 impl Stmt for RefineStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = String;//RefineArg;
+
+    /// Sub Statements.
+    type SubStmts = (Vec<IfFeatureStmt>, Vec<MustStmt>, Option<PresenceStmt>,
+                     Vec<DefaultStmt>, Option<ConfigStmt>, Option<MandatoryStmt>,
+                     Option<MinElementsStmt>, Option<MaxElementsStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "refine"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::RefineStmt(RefineStmt {
+            arg,
+            if_feature: Vec::new(),
+            must: Vec::new(),
+            presence: None,
+            default: Vec::new(),
+            config: None,
+            mandatory: None,
+            min_elements: None,
+            max_elements: None,
+            description: None,
+            reference: None,
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::RefineStmt(RefineStmt {
+            arg,
+            if_feature: substmts.0,
+            must: substmts.1,
+            presence: substmts.2,
+            default: substmts.3,
+            config: substmts.4,
+            mandatory: substmts.5,
+            min_elements: substmts.6,
+            max_elements: substmts.7,
+            description: substmts.8,
+            reference: substmts.9,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let map: HashMap<&'static str, Repeat> = [
+            ("if-feature", Repeat::new(Some(0), None)),
+            ("must", Repeat::new(Some(0), None)),
+            ("presence", Repeat::new(Some(0), Some(1))),
+            ("default", Repeat::new(Some(0), None)),
+            ("config", Repeat::new(Some(0), Some(1))),
+            ("mandatory", Repeat::new(Some(0), Some(1))),
+            ("min-elements", Repeat::new(Some(0), Some(1))),
+            ("max-elements", Repeat::new(Some(0), Some(1))),
+            ("description", Repeat::new(Some(0), Some(1))),
+            ("reference", Repeat::new(Some(0), Some(1))),
+        ].iter().cloned().collect();
+
+        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+
+        Ok((collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_vec_stmt!(stmts, MustStmt)?,
+            collect_opt_stmt!(stmts, PresenceStmt)?,
+            collect_vec_stmt!(stmts, DefaultStmt)?,
+            collect_opt_stmt!(stmts, ConfigStmt)?,
+            collect_opt_stmt!(stmts, MandatoryStmt)?,
+            collect_opt_stmt!(stmts, MinElementsStmt)?,
+            collect_opt_stmt!(stmts, MaxElementsStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?))
     }
 }
 
@@ -2419,22 +2628,23 @@ impl Stmt for RefineStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct UsesAugmentStmt {
+    arg: String,
 }
 
 impl Stmt for UsesAugmentStmt {
     /// Arg type.
     type Arg = String;
 
+    /// Sub Statements.
+    type SubStmts = ();
+
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "uses-augment"
     }
-
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
-    }
 }
+
+/*
 
 ///
 ///
