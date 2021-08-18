@@ -100,13 +100,13 @@ lazy_static! {
 }
 
 // Statement collection.
-type StmtCollection = HashMap<String, Vec<StmtType>>;
+pub type StmtCollection = HashMap<String, Vec<StmtType>>;
 
 // Statement Parser callback type.
 type StmtParserFn = fn(&mut Parser) -> Result<StmtType, YangError>;
 
 // Parse a single statement.
-fn call_stmt_parser(parser: &mut Parser, keyword: &str) -> Result<StmtType, YangError> {
+pub fn call_stmt_parser(parser: &mut Parser, keyword: &str) -> Result<StmtType, YangError> {
     let f = STMT_PARSER.get(keyword).unwrap();
     f(parser)
 }
@@ -157,6 +157,7 @@ println!("*** parse_stmts {:?}", token);
     Ok(stmts)
 }
 
+/*  TBD maybe not needed.
 // Expect one of statements from given set.
 pub fn expect_a_stmt(parser: &mut Parser, set: HashSet<&'static str>) -> Result<StmtType, YangError> {
     let token = parser.get_token()?;
@@ -172,6 +173,7 @@ println!("*** parse_stmts {:?}", token);
         _ => Err(YangError::UnexpectedStatement(parser.line())),
     }
 }
+*/
 
 // Yang Statement
 pub enum StmtType {
