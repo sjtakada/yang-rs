@@ -5,7 +5,7 @@
 
 use std::fmt;
 use std::collections::HashMap;
-use std::collections::HashSet;
+//use std::collections::HashSet;
 
 use super::error::*;
 use super::parser::*;
@@ -13,7 +13,7 @@ use super::stmt::*;
 
 // Statement Parser initialization.
 lazy_static! {
-    static ref STMT_PARSER: HashMap<&'static str, StmtParserFn> = {
+    pub static ref STMT_PARSER: HashMap<&'static str, StmtParserFn> = {
         let mut m = HashMap::new();
 
         m.insert("module", ModuleStmt::parse as StmtParserFn);
@@ -105,8 +105,10 @@ pub type StmtCollection = HashMap<String, Vec<StmtType>>;
 // Statement Parser callback type.
 type StmtParserFn = fn(&mut Parser) -> Result<StmtType, YangError>;
 
+// TODO: To be deleted following two functions in the future.
+
 // Parse a single statement.
-pub fn call_stmt_parser(parser: &mut Parser, keyword: &str) -> Result<StmtType, YangError> {
+fn call_stmt_parser(parser: &mut Parser, keyword: &str) -> Result<StmtType, YangError> {
     let f = STMT_PARSER.get(keyword).unwrap();
     f(parser)
 }

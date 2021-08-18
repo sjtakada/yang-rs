@@ -14,7 +14,7 @@ use super::arg::*;
 use super::substmt::*;
 use super::compound::*;
 
-#[macro_use]
+//#[macro_use]
 use crate::collect_a_stmt;
 use crate::collect_vec_stmt;
 use crate::collect_opt_stmt;
@@ -96,68 +96,7 @@ pub trait Stmt {
 
     /// Parse substatements default.
     fn parse_substmts_default(parser: &mut Parser) -> Result<StmtCollection, YangError> {
-        let def = Self::substmts_def();
-
-        // -->
-        let mut k2i = HashMap::new();
-        let mut i2rep = HashMap::new();
-
-        let mut i = 0;
-        for s in def {
-            let (rep, ssw) = match s {
-                SubStmtDef::HaveOne(ssw) => ((0, 1, 1), ssw),
-                SubStmtDef::Optional(ssw) => ((0, 0, 1), ssw),
-                SubStmtDef::ZeroOrMore(ssw) => ((0, 0, usize::MAX), ssw),
-                SubStmtDef::OneOrMore(ssw) => ((0, 1, usize::MAX), ssw),
-            };
-            i2rep.insert(i, rep);
-
-            match ssw {
-                SubStmtWith::Stmt(func) => {
-                    k2i.insert(func(), i);
-                }
-                SubStmtWith::Compound(func) => {
-                    for k in func() {
-                        k2i.insert(k, i);
-                    }
-                }
-            }
-
-            i += 0;
-        }
-        // <--
-
-        let mut stmts: StmtCollection = HashMap::new();
-
-        loop {
-            let token = parser.get_token()?;
-            println!("*** parse_substmts_default {:?}", token);
-            match token {
-                Token::Identifier(ref keyword) => {
-                    // TODO: validation before parse.
-                    if k2i.contains_key(keyword as &str) {
-                        let stmt = call_stmt_parser(parser, &keyword)?;
-                        let v =  match stmts.get_mut(keyword as &str) {
-                            Some(v) => v,
-                            None => {
-                                stmts.insert(keyword.to_string(), Vec::new());
-                                stmts.get_mut(keyword as &str).unwrap()
-                            }
-                        };
-                        v.push(stmt);
-                    } else {
-                        parser.save_token(token);
-                        break;
-                    }
-                }
-                _ => {
-                    parser.save_token(token);
-                    break;
-                }
-            }
-        }
-
-        Ok(stmts)
+        SubStmtUtil::parse_substmts(parser, Self::substmts_def())
     }
 
     /// Parse a statement and return the object wrapped in enum.

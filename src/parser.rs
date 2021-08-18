@@ -17,7 +17,6 @@ use super::core::*;
 use super::error::*;
 use super::stmt::*;
 
-#[macro_use]
 use crate::collect_a_stmt;
 
 /// Open and parse a YANG file.
