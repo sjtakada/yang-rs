@@ -68,18 +68,22 @@ lazy_static! {
         m.insert("leaf", LeafStmt::parse as StmtParserFn);
         m.insert("leaf-list", LeafListStmt::parse as StmtParserFn);
         m.insert("list", ListStmt::parse as StmtParserFn);
+*/
         m.insert("key", KeyStmt::parse as StmtParserFn);
         m.insert("unique", UniqueStmt::parse as StmtParserFn);
+/*
         m.insert("choice", ChoiceStmt::parse as StmtParserFn);
         m.insert("short-case", ShortCaseStmt::parse as StmtParserFn);
         m.insert("case", CaseStmt::parse as StmtParserFn);
+*/
         m.insert("anydata", AnydataStmt::parse as StmtParserFn);
         m.insert("anyxml", AnyxmlStmt::parse as StmtParserFn);
         m.insert("uses", UsesStmt::parse as StmtParserFn);
         m.insert("refine", RefineStmt::parse as StmtParserFn);
         m.insert("uses-augment", UsesAugmentStmt::parse as StmtParserFn);
-        m.insert("augment", AugmentStmt::parse as StmtParserFn);
+//        m.insert("augment", AugmentStmt::parse as StmtParserFn);
         m.insert("when", WhenStmt::parse as StmtParserFn);
+/*
         m.insert("rpc", RpcStmt::parse as StmtParserFn);
         m.insert("action", ActionStmt::parse as StmtParserFn);
         m.insert("input", InputStmt::parse as StmtParserFn);
@@ -223,18 +227,22 @@ pub enum StmtType {
     LeafStmt(LeafStmt),
     LeafListStmt(LeafListStmt),
     ListStmt(ListStmt),
+*/
     KeyStmt(KeyStmt),
     UniqueStmt(UniqueStmt),
+/*
     ChoiceStmt(ChoiceStmt),
     ShortCaseStmt(ShortCaseStmt),
     CaseStmt(CaseStmt),
+*/
     AnydataStmt(AnydataStmt),
     AnyxmlStmt(AnyxmlStmt),
     UsesStmt(UsesStmt),
     RefineStmt(RefineStmt),
     UsesAugmentStmt(UsesAugmentStmt),
-    AugmentStmt(AugmentStmt),
+//    AugmentStmt(AugmentStmt),
     WhenStmt(WhenStmt),
+/*
     RpcStmt(RpcStmt),
     ActionStmt(ActionStmt),
     InputStmt(InputStmt),
@@ -303,18 +311,22 @@ impl fmt::Debug for StmtType {
             StmtType::LeafStmt(stmt) => write!(f, "leaf-stmt {:?}", stmt),
             StmtType::LeafListStmt(stmt) => write!(f, "leaf-list-stmt {:?}", stmt),
             StmtType::ListStmt(stmt) => write!(f, "list-stmt {:?}", stmt),
+*/
             StmtType::KeyStmt(stmt) => write!(f, "key-stmt {:?}", stmt),
             StmtType::UniqueStmt(stmt) => write!(f, "unique-stmt {:?}", stmt),
+/*
             StmtType::ChoiceStmt(stmt) => write!(f, "choice-stmt {:?}", stmt),
             StmtType::ShortCaseStmt(stmt) => write!(f, "short-case-stmt {:?}", stmt),
             StmtType::CaseStmt(stmt) => write!(f, "case-stmt {:?}", stmt),
+*/
             StmtType::AnydataStmt(stmt) => write!(f, "anydata-stmt {:?}", stmt),
             StmtType::AnyxmlStmt(stmt) => write!(f, "anyxml-stmt {:?}", stmt),
             StmtType::UsesStmt(stmt) => write!(f, "uses-stmt {:?}", stmt),
             StmtType::RefineStmt(stmt) => write!(f, "refine-stmt {:?}", stmt),
             StmtType::UsesAugmentStmt(stmt) => write!(f, "uses-augment-stmt {:?}", stmt),
-            StmtType::AugmentStmt(stmt) => write!(f, "augment-stmt {:?}", stmt),
+//            StmtType::AugmentStmt(stmt) => write!(f, "augment-stmt {:?}", stmt),
             StmtType::WhenStmt(stmt) => write!(f, "when-stmt {:?}", stmt),
+/*
             StmtType::RpcStmt(stmt) => write!(f, "rpc-stmt {:?}", stmt),
             StmtType::ActionStmt(stmt) => write!(f, "action-stmt {:?}", stmt),
             StmtType::InputStmt(stmt) => write!(f, "input-stmt {:?}", stmt),

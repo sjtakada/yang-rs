@@ -4,6 +4,7 @@
 //
 
 use std::fmt;
+use std::iter::Iterator;
 use std::str::FromStr;
 use std::string::ToString;
 use url::Url;
@@ -954,6 +955,8 @@ impl FromStr for PathKeyExpr {
         let paths: Vec<_> = str.split("/").map(|s| s.trim()).collect();
         // Minimum of "current() / .. / node-identifier".
         if paths.len() < 3 {
+            println!("*** hoge");
+
             return Err(ArgError::new("path-key-expr"))
         // Invalid current function invocation.
         } else if !is_current_function_invocation(&paths[0]) {
@@ -1249,6 +1252,159 @@ impl StmtArg for RequireInstanceArg {
 }
 
 
+///
+/// Key Arg.
+///
+#[derive(Debug, Clone, PartialEq)]
+pub struct KeyArg {
+    keys: Vec<NodeIdentifier>,
+}
+
+impl StmtArg for KeyArg {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        let mut keys = Vec::new();
+        let mut s = &str[..];
+
+        while {
+            let pos = match s.find(char::is_whitespace) {
+                Some(p) => p,
+                None => s.len(),
+            };
+
+            let node_identifier = NodeIdentifier::from_str(&s[..pos]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?;
+            keys.push(node_identifier);
+            
+            s = &s[pos..].trim();
+            s.len() > 0
+        } { }
+
+        Ok(KeyArg { keys })
+    }
+}
+
+///
+/// Schema Nodeid.  TODO - may consolidate.
+///
+#[derive(Debug, Clone)]
+pub struct AbsoluteSchemaNodeid {
+    nodes: Vec<NodeIdentifier>,
+}
+
+#[derive(Debug, Clone)]
+pub struct DescendantSchemaNodeid {
+    nodes: Vec<NodeIdentifier>,
+}
+
+impl FromStr for AbsoluteSchemaNodeid {
+    type Err = ArgError;
+
+    fn from_str(str: &str) -> Result<Self, Self::Err> {
+        if let Some(_) = str.find(char::is_whitespace) {
+            Err(ArgError::new("absolute-schema-nodeid"))
+        } else if let Some(_) = str.find("//") {
+            Err(ArgError::new("absolute-schema-nodeid"))
+        } else if str.starts_with('/') {
+            let mut nodes: Vec<NodeIdentifier> = Vec::new();
+            for n in (&str[1..]).split('/') {
+                nodes.push(NodeIdentifier::from_str(n)?);
+            }
+            Ok(AbsoluteSchemaNodeid { nodes })
+        } else {
+            Err(ArgError::new("absolute-schema-nodeid"))
+        }
+    }
+}
+
+impl FromStr for DescendantSchemaNodeid {
+    type Err = ArgError;
+
+    fn from_str(str: &str) -> Result<Self, Self::Err> {
+        if let Some(_) = str.find(char::is_whitespace) {
+            Err(ArgError::new("descendant-schema-nodeid"))
+        } else if let Some(_) = str.find("//") {
+            Err(ArgError::new("descendant-schema-nodeid"))
+        } else if !str.starts_with('/') {
+            let mut nodes: Vec<NodeIdentifier> = Vec::new();
+            for n in str.split('/') {
+                nodes.push(NodeIdentifier::from_str(n)?);
+            }
+            Ok(DescendantSchemaNodeid { nodes })
+        } else {
+            Err(ArgError::new("descendant-schema-nodeid"))
+        }
+    }
+}
+
+impl StmtArg for AbsoluteSchemaNodeid {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+
+        AbsoluteSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))
+    }
+}
+
+impl StmtArg for DescendantSchemaNodeid {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+
+        DescendantSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))
+    }
+}
+
+impl ToString for AbsoluteSchemaNodeid {
+    fn to_string(&self) -> String {
+        format!("/{}", self.nodes.iter().map(|n| n.to_string()).collect::<Vec<String>>().join("/"))
+    }
+}
+
+impl ToString for DescendantSchemaNodeid {
+    fn to_string(&self) -> String {
+        self.nodes.iter().map(|n| n.to_string()).collect::<Vec<String>>().join("/")
+    }
+}
+
+///
+/// Unique Arg.
+///
+#[derive(Debug, Clone)]
+pub struct UniqueArg {
+    nodeids: Vec<DescendantSchemaNodeid>,
+}
+
+impl StmtArg for UniqueArg {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        UniqueArg::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))
+    }
+}
+
+impl FromStr for UniqueArg {
+    type Err = ArgError;
+
+    fn from_str(str: &str) -> Result<Self, Self::Err> {
+        let mut nodeids = Vec::new();
+
+        for n in str.split_whitespace() {
+            nodeids.push(DescendantSchemaNodeid::from_str(n)?);
+        }
+
+        Ok(UniqueArg { nodeids })
+    }
+}
+
+/// Refine Arg.
+pub type RefineArg = DescendantSchemaNodeid;
+
+/// Uses Augment Arg.
+pub type UsesAugmentArg = DescendantSchemaNodeid;
+
+/// Augment Arg.
+pub type AugmentArg = AbsoluteSchemaNodeid;
+
+/// Deviation Arg.
+pub type DevicationArg = AbsoluteSchemaNodeid;
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1276,7 +1432,7 @@ mod tests {
 
         match Identifier::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: identifier"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: identifier at line 0"),
         }
 
         let s = " 123$ ";
@@ -1284,7 +1440,7 @@ mod tests {
 
         match Identifier::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: identifier"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: identifier at line 0"),
         }
     }
 
@@ -1311,7 +1467,7 @@ mod tests {
 
         match IdentifierRef::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: identifier"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: identifier at line 0"),
         }
 
         let s = " _123:_456 ";
@@ -1327,7 +1483,7 @@ mod tests {
 
         match IdentifierRef::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: identifier"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: identifier at line 0"),
         }
     }
 
@@ -1346,7 +1502,7 @@ mod tests {
 
         match DateArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: date-arg"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: date-arg at line 0"),
         }
 
         let s = " 08-01-2021 ";
@@ -1354,7 +1510,7 @@ mod tests {
 
         match DateArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: date-arg"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: date-arg at line 0"),
         }
 
         let s = " 2021-08-0x ";
@@ -1362,7 +1518,7 @@ mod tests {
 
         match DateArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: date-arg"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: date-arg at line 0"),
         }
     }
 
@@ -1381,7 +1537,7 @@ mod tests {
 
         match FractionDigitsArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: fraction-digits-arg"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: fraction-digits-arg at line 0"),
         }
 
         let s = "19";
@@ -1389,7 +1545,7 @@ mod tests {
 
         match FractionDigitsArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: fraction-digits-arg"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: fraction-digits-arg at line 0"),
         }
     }
 
@@ -1427,7 +1583,7 @@ mod tests {
 
         match RangeArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: range-arg"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: range-arg at line 0"),
         }
 
         let s = r#""1.01 .. 1.99""#;
@@ -1473,7 +1629,7 @@ mod tests {
 
         match LengthArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: length-arg"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: length-arg at line 0"),
         }
     }
 
@@ -1506,13 +1662,13 @@ mod tests {
         let s = "current()/..";
         match PathKeyExpr::from_str(s) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: path-key-expr"),
+            Err(err) => assert_eq!(err.to_string(), "Arg error: path-key-expr"),
         }
 
-        let s = "current()/node";
+        let s = "current()/node/node/node";
         match PathKeyExpr::from_str(s) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: path-key-expr"),
+            Err(err) => assert_eq!(err.to_string(), "Arg error: path-key-expr"),
         }
     }
 
@@ -1606,13 +1762,56 @@ mod tests {
 
         let s = r#""p1:id1 p1:id2""#;
         let mut parser = Parser::new(s.to_string());
-/*
+
         match IfFeatureExpr::parse_arg(&mut parser) {
-            Ok(expr) =>
-                assert_eq!(format!("{:?}", expr), "p1:id1 and p1:id2 or (p2:id3 and p2:id4) or not p3:id5"),
-            Err(_) => panic!(),
+            Ok(expr) => panic!(),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error: if-feature-expr at line 0"),
 
         }
-*/
+    }
+
+    #[test]
+    pub fn test_key_arg() {
+        let s = r#""p1:id1 p1:id2 p2:id3 id4 id5""#;
+        let mut parser = Parser::new(s.to_string());
+
+        match KeyArg::parse_arg(&mut parser) {
+            Ok(arg) => assert_eq!(arg, KeyArg {
+                keys: vec![NodeIdentifier::from_str("p1:id1").unwrap(),
+                           NodeIdentifier::from_str("p1:id2").unwrap(),
+                           NodeIdentifier::from_str("p2:id3").unwrap(),
+                           NodeIdentifier::from_str("id4").unwrap(),
+                           NodeIdentifier::from_str("id5").unwrap(),
+            ] }),
+            Err(err) => panic!(err.to_string()),
+        }
+    }
+
+    #[test]
+    pub fn test_absolute_schema_nodeid() {
+        let s = r#""/id1/id2/id3""#;
+        let mut parser = Parser::new(s.to_string());
+
+        match AbsoluteSchemaNodeid::parse_arg(&mut parser) {
+            Ok(arg) => {
+                assert_eq!(arg.to_string(), "/id1/id2/id3");
+                assert_eq!(arg.nodes.len(), 3);
+            }
+            Err(err) => panic!(err.to_string()),
+        }
+    }
+
+    #[test]
+    pub fn test_descendant_schema_nodeid() {
+        let s = r#""id1/id2/id3""#;
+        let mut parser = Parser::new(s.to_string());
+
+        match DescendantSchemaNodeid::parse_arg(&mut parser) {
+            Ok(arg) => {
+                assert_eq!(arg.to_string(), "id1/id2/id3");
+                assert_eq!(arg.nodes.len(), 3);
+            }
+            Err(err) => panic!(err.to_string()),
+        }
     }
 }
