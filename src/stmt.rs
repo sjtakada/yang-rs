@@ -2158,29 +2158,35 @@ impl Stmt for KeyStmt {
     }
 }
 
-/*
-
 ///
-///
+/// 7.8.3. The list's "unique" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct UniqueStmt {
+    arg: UniqueArg,
 }
 
 impl Stmt for UniqueStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = UniqueArg;
+
+    /// Sub Statements.
+    type SubStmts = ();
 
     /// Return statement keyword in &str.
     fn keyword() -> &'static str {
         "unique"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::UniqueStmt(UniqueStmt {
+            arg: arg
+        })
     }
 }
+
+/*
 
 ///
 ///

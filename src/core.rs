@@ -70,8 +70,8 @@ lazy_static! {
         m.insert("list", ListStmt::parse as StmtParserFn);
 */
         m.insert("key", KeyStmt::parse as StmtParserFn);
-/*
         m.insert("unique", UniqueStmt::parse as StmtParserFn);
+/*
         m.insert("choice", ChoiceStmt::parse as StmtParserFn);
         m.insert("short-case", ShortCaseStmt::parse as StmtParserFn);
         m.insert("case", CaseStmt::parse as StmtParserFn);
@@ -229,8 +229,8 @@ pub enum StmtType {
     ListStmt(ListStmt),
 */
     KeyStmt(KeyStmt),
-/*
     UniqueStmt(UniqueStmt),
+/*
     ChoiceStmt(ChoiceStmt),
     ShortCaseStmt(ShortCaseStmt),
     CaseStmt(CaseStmt),
@@ -313,8 +313,8 @@ impl fmt::Debug for StmtType {
             StmtType::ListStmt(stmt) => write!(f, "list-stmt {:?}", stmt),
 */
             StmtType::KeyStmt(stmt) => write!(f, "key-stmt {:?}", stmt),
-/*
             StmtType::UniqueStmt(stmt) => write!(f, "unique-stmt {:?}", stmt),
+/*
             StmtType::ChoiceStmt(stmt) => write!(f, "choice-stmt {:?}", stmt),
             StmtType::ShortCaseStmt(stmt) => write!(f, "short-case-stmt {:?}", stmt),
             StmtType::CaseStmt(stmt) => write!(f, "case-stmt {:?}", stmt),

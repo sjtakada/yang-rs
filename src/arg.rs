@@ -1367,6 +1367,7 @@ impl ToString for DescendantSchemaNodeid {
 ///
 /// Unique Arg.
 ///
+#[derive(Debug, Clone)]
 pub struct UniqueArg {
     nodeids: Vec<DescendantSchemaNodeid>,
 }
