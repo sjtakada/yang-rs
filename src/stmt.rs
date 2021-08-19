@@ -19,38 +19,6 @@ use crate::collect_a_stmt;
 use crate::collect_vec_stmt;
 use crate::collect_opt_stmt;
 
-#[derive(Clone, Debug)]
-pub struct Repeat {
-    min: usize,
-    max: usize,
-}
-
-impl Repeat {
-    pub fn new(min: Option<usize>, max: Option<usize>) -> Repeat {
-        let lower = match min {
-            Some(min) => min,
-            None => 0,
-        };
-        let upper = match max {
-            Some(max) => max,
-            None => usize::MAX,
-        };
-
-        Repeat {
-            min: lower,
-            max: upper,
-        }
-    }
-
-    pub fn validate(&self, n: usize) -> bool {
-        if self.min <= n && n <= self.max {
-            true
-        } else {
-            false
-        }
-    }
-}
-
 //
 // Trait for a single YANG statement.
 //
