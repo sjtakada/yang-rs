@@ -1064,7 +1064,7 @@ impl Stmt for IfFeatureStmt {
 }
 
 ///
-///
+/// 7.3. The "typedef" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct TypedefStmt {
@@ -2058,30 +2058,86 @@ impl Stmt for ValueStmt {
     }
 }
 
-
-/*
-
 ///
-///
+/// 7.12. The "grouping" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct GroupingStmt {
+    arg: Identifier,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+    //typedef_grouping
+    //data_def
+//    action: Vec<ActionStmt>,
+    //notification: Vec<NotificationStmt>,
 }
 
 impl Stmt for GroupingStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
+
+    /// Sub Statements.
+    type SubStmts = (Option<StatusStmt>,Option<DescriptionStmt>, Option<ReferenceStmt>,
+                     //Type Grouping, DataDef,
+//                     Vec<ActionStmt>, //Vec<NotificationStmt>,
+    );
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "grouping"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+//             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(ActionStmt::keyword)),
+        ]
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::GroupingStmt(GroupingStmt {
+            arg,
+            status: None,
+            description: None,
+            reference: None,
+//            action: Vec::new(),
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::GroupingStmt(GroupingStmt {
+            arg,
+            status: substmts.0,
+            description: substmts.1,
+            reference: substmts.2,
+//            action: substmts.3,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+//            collect_vec_stmt!(stmts, ActionStmt)?
+        ))
     }
 }
+
+
+/*
 
 ///
 ///
