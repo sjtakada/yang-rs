@@ -287,7 +287,7 @@ impl Stmt for ImportStmt {
 
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::HaveOne(SubStmtWith::Stmt(PrefixStmt::keyword)),
+        vec![SubStmtDef::HasOne(SubStmtWith::Stmt(PrefixStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(RevisionDateStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
@@ -465,7 +465,7 @@ impl Stmt for BelongsToStmt {
 
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::HaveOne(SubStmtWith::Stmt(PrefixStmt::keyword)),
+        vec![SubStmtDef::HasOne(SubStmtWith::Stmt(PrefixStmt::keyword)),
         ]
     }
 
@@ -1097,7 +1097,7 @@ impl Stmt for TypedefStmt {
 
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::HaveOne(SubStmtWith::Stmt(TypeStmt::keyword)),
+        vec![SubStmtDef::HasOne(SubStmtWith::Stmt(TypeStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(UnitsStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(DefaultStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),

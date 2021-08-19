@@ -40,9 +40,9 @@ pub struct ModuleHeaderStmts {
 impl Compound for ModuleHeaderStmts {
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::HaveOne(SubStmtWith::Stmt(YangVersionStmt::keyword)),
-             SubStmtDef::HaveOne(SubStmtWith::Stmt(NamespaceStmt::keyword)),
-             SubStmtDef::HaveOne(SubStmtWith::Stmt(PrefixStmt::keyword)),
+        vec![SubStmtDef::HasOne(SubStmtWith::Stmt(YangVersionStmt::keyword)),
+             SubStmtDef::HasOne(SubStmtWith::Stmt(NamespaceStmt::keyword)),
+             SubStmtDef::HasOne(SubStmtWith::Stmt(PrefixStmt::keyword)),
         ]
     }
 }
@@ -72,8 +72,8 @@ pub struct SubmoduleHeaderStmts {
 impl Compound for SubmoduleHeaderStmts {
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::HaveOne(SubStmtWith::Stmt(YangVersionStmt::keyword)),
-             SubStmtDef::HaveOne(SubStmtWith::Stmt(BelongsToStmt::keyword)),
+        vec![SubStmtDef::HasOne(SubStmtWith::Stmt(YangVersionStmt::keyword)),
+             SubStmtDef::HasOne(SubStmtWith::Stmt(BelongsToStmt::keyword)),
         ]
     }
 }
@@ -231,7 +231,7 @@ pub struct Decimal64Specification {
 impl Compound for Decimal64Specification {
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::HaveOne(SubStmtWith::Stmt(FractionDigitsStmt::keyword)),
+        vec![SubStmtDef::HasOne(SubStmtWith::Stmt(FractionDigitsStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(RangeStmt::keyword)),
         ]
     }

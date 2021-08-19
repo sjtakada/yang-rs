@@ -21,7 +21,7 @@ pub enum SubStmtWith {
 #[derive(Debug, Clone)]
 pub enum SubStmtDef {
     // stmt
-    HaveOne(SubStmtWith),
+    HasOne(SubStmtWith),
     // [stmt]
     Optional(SubStmtWith),
     // *stmt
@@ -69,7 +69,7 @@ impl SubStmtUtil {
         let mut i = 0;
         for s in def {
             let (rep, ssw) = match s {
-                SubStmtDef::HaveOne(ssw) => (RepeatCount { count: 0, min: 1, max: 1 }, ssw),
+                SubStmtDef::HasOne(ssw) => (RepeatCount { count: 0, min: 1, max: 1 }, ssw),
                 SubStmtDef::Optional(ssw) => (RepeatCount { count: 0, min: 0, max: 1 }, ssw),
                 SubStmtDef::ZeroOrMore(ssw) => (RepeatCount { count: 0, min: 0, max: usize::MAX}, ssw),
                 SubStmtDef::OneOrMore(ssw) => (RepeatCount { count: 0, min: 1, max: usize::MAX}, ssw),
