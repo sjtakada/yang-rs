@@ -6,7 +6,6 @@
 //use std::mem::size_of;
 
 use std::cell::Cell;
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::Error;

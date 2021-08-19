@@ -99,6 +99,9 @@ lazy_static! {
     };
 }
 
+// Keyword.
+pub type Keyword = &'static str;
+
 // Statement collection.
 pub type StmtCollection = HashMap<String, Vec<StmtType>>;
 

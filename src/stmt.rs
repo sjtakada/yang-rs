@@ -3,8 +3,6 @@
 //  Copyright (C) 2021 Toshiaki Takada
 //
 
-use std::collections::HashMap;
-
 use url::Url;
 
 use super::core::*;

@@ -6,12 +6,11 @@
 use std::collections::HashMap;
 
 use super::core::*;
-use super::stmt::*;
+//use super::stmt::*;
 //use super::arg::*;
 use super::parser::*;
 use super::error::*;
 
-pub type Keyword = &'static str;
 pub type StmtKeywordFn = fn() -> Keyword;
 pub type CompoundKeywordFn = fn() -> Vec<Keyword>;
 
