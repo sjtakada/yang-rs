@@ -110,7 +110,7 @@ pub trait Stmt {
 #[derive(Debug, Clone)]
 pub struct ModuleStmt {
     /// Module identifier.
-    identifier_arg: Identifier,
+    arg: Identifier,
 
     /// Module header statements.
     module_header: ModuleHeaderStmts,
@@ -147,7 +147,7 @@ impl Stmt for ModuleStmt {
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
         StmtType::ModuleStmt(ModuleStmt {
-            identifier_arg: arg,
+            arg,
             module_header: substmts.0,
             linkage: substmts.1,
             meta: substmts.2,
@@ -173,7 +173,7 @@ impl Stmt for ModuleStmt {
 #[derive(Debug, Clone)]
 pub struct SubmoduleStmt {
     /// Submodule identifier.
-    identifier_arg: Identifier,
+    arg: Identifier,
 
     /// Submodule header statements.
     submodule_header: SubmoduleHeaderStmts,
@@ -209,7 +209,7 @@ impl Stmt for SubmoduleStmt {
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
         StmtType::SubmoduleStmt(SubmoduleStmt {
-            identifier_arg: arg,
+            arg,
             submodule_header: substmts.0,
             linkage: substmts.1,
             meta: substmts.2,
@@ -234,7 +234,7 @@ impl Stmt for SubmoduleStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct YangVersionStmt {
-    yang_version_arg: YangVersionArg,
+    arg: YangVersionArg,
 }
 
 impl Stmt for YangVersionStmt {
@@ -252,7 +252,7 @@ impl Stmt for YangVersionStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::YangVersionStmt(YangVersionStmt {
-            yang_version_arg: arg
+            arg,
         })
     }
 }
@@ -262,7 +262,7 @@ impl Stmt for YangVersionStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct ImportStmt {
-    identifier_arg: Identifier,
+    arg: Identifier,
     prefix: PrefixStmt,
     revision_date: Option<RevisionDateStmt>,
     description: Option<DescriptionStmt>,
@@ -298,7 +298,7 @@ impl Stmt for ImportStmt {
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
         StmtType::ImportStmt(ImportStmt {
-            identifier_arg: arg,
+            arg,
             prefix: substmts.0,
             revision_date: substmts.1,
             description: substmts.2,
@@ -322,7 +322,7 @@ impl Stmt for ImportStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct IncludeStmt {
-    identifier_arg: Identifier,
+    arg: Identifier,
     revision_date: Option<RevisionDateStmt>,
     description: Option<DescriptionStmt>,
     reference: Option<ReferenceStmt>,
@@ -356,7 +356,7 @@ impl Stmt for IncludeStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::IncludeStmt(IncludeStmt {
-            identifier_arg: arg,
+            arg,
             revision_date: None,
             description: None,
             reference: None,
@@ -366,7 +366,7 @@ impl Stmt for IncludeStmt {
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
         StmtType::IncludeStmt(IncludeStmt {
-            identifier_arg: arg,
+            arg,
             revision_date: substmts.0,
             description: substmts.1,
             reference: substmts.2,
@@ -388,7 +388,7 @@ impl Stmt for IncludeStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct NamespaceStmt {
-    uri_str: Url,
+    arg: Url,
 }
 
 impl Stmt for NamespaceStmt {
@@ -405,7 +405,7 @@ impl Stmt for NamespaceStmt {
 
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::NamespaceStmt(NamespaceStmt { uri_str: arg })
+        StmtType::NamespaceStmt(NamespaceStmt { arg })
     }
 }
 
@@ -414,7 +414,7 @@ impl Stmt for NamespaceStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct PrefixStmt {
-    prefix_arg_str: Identifier,
+    arg: Identifier,
 }
 
 impl Stmt for PrefixStmt {
@@ -431,7 +431,7 @@ impl Stmt for PrefixStmt {
 
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::PrefixStmt(PrefixStmt { prefix_arg_str: arg })
+        StmtType::PrefixStmt(PrefixStmt { arg })
     }
 }
 
@@ -441,7 +441,7 @@ impl Stmt for PrefixStmt {
 #[derive(Debug, Clone)]
 pub struct BelongsToStmt {
     /// Identifier.
-    identifier_arg: Identifier,
+    arg: Identifier,
 
     /// Prefix statement.
     prefix: PrefixStmt,
@@ -473,7 +473,7 @@ impl Stmt for BelongsToStmt {
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
         StmtType::BelongsToStmt(BelongsToStmt {
-            identifier_arg: arg,
+            arg,
             prefix: substmts.0,
         })
     }
@@ -491,7 +491,7 @@ impl Stmt for BelongsToStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct OrganizationStmt {
-    string: String,
+    arg: String,
 }
 
 impl Stmt for OrganizationStmt {
@@ -508,7 +508,7 @@ impl Stmt for OrganizationStmt {
 
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::OrganizationStmt(OrganizationStmt { string: arg })
+        StmtType::OrganizationStmt(OrganizationStmt { arg })
     }
 }
 
@@ -517,7 +517,7 @@ impl Stmt for OrganizationStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct ContactStmt {
-    string: String,
+    arg: String,
 }
 
 impl Stmt for ContactStmt {
@@ -534,7 +534,7 @@ impl Stmt for ContactStmt {
 
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::ContactStmt(ContactStmt { string: arg })
+        StmtType::ContactStmt(ContactStmt { arg })
     }
 }
 
@@ -543,7 +543,7 @@ impl Stmt for ContactStmt {
 /// 
 #[derive(Debug, Clone)]
 pub struct DescriptionStmt {
-    string: String,
+    arg: String,
 }
 
 impl Stmt for DescriptionStmt {
@@ -560,7 +560,7 @@ impl Stmt for DescriptionStmt {
 
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::DescriptionStmt(DescriptionStmt { string: arg })
+        StmtType::DescriptionStmt(DescriptionStmt { arg })
     }
 }
 
@@ -569,7 +569,7 @@ impl Stmt for DescriptionStmt {
 /// 
 #[derive(Debug, Clone)]
 pub struct ReferenceStmt {
-    string: String,
+    arg: String,
 }
 
 impl Stmt for ReferenceStmt {
@@ -586,7 +586,7 @@ impl Stmt for ReferenceStmt {
 
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::ReferenceStmt(ReferenceStmt { string: arg })
+        StmtType::ReferenceStmt(ReferenceStmt { arg })
     }
 }
 
@@ -595,7 +595,7 @@ impl Stmt for ReferenceStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct UnitsStmt {
-    string: String,
+    arg: String,
 }
 
 impl Stmt for UnitsStmt {
@@ -612,7 +612,7 @@ impl Stmt for UnitsStmt {
 
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::UnitsStmt(UnitsStmt { string: arg })
+        StmtType::UnitsStmt(UnitsStmt { arg })
     }
 }
 
@@ -622,7 +622,7 @@ impl Stmt for UnitsStmt {
 #[derive(Debug, Clone)]
 pub struct RevisionStmt {
     /// Revision date.
-    revision_date: DateArg,
+    arg: DateArg,
 
     /// Description.
     description: Option<DescriptionStmt>,
@@ -658,7 +658,7 @@ impl Stmt for RevisionStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::RevisionStmt(RevisionStmt {
-            revision_date: arg,
+            arg,
             description: None,
             reference: None,
         })
@@ -667,7 +667,7 @@ impl Stmt for RevisionStmt {
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
         StmtType::RevisionStmt(RevisionStmt {
-            revision_date: arg,
+            arg,
             description: substmts.0,
             reference: substmts.1,
         })
@@ -687,7 +687,7 @@ impl Stmt for RevisionStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct RevisionDateStmt {
-    revision_date: DateArg,
+    arg: DateArg,
 }
 
 impl Stmt for RevisionDateStmt {
@@ -704,7 +704,7 @@ impl Stmt for RevisionDateStmt {
 
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::RevisionDateStmt(RevisionDateStmt { revision_date: arg })
+        StmtType::RevisionDateStmt(RevisionDateStmt { arg })
     }
 }
 
@@ -713,7 +713,7 @@ impl Stmt for RevisionDateStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct ExtensionStmt {
-    identifier_arg: Identifier,
+    arg: Identifier,
     argument: Option<ArgumentStmt>,
     status: Option<StatusStmt>,
     description: Option<DescriptionStmt>,
@@ -749,7 +749,7 @@ impl Stmt for ExtensionStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::ExtensionStmt(ExtensionStmt {
-            identifier_arg: arg,
+            arg,
             argument: None,
             status: None,
             description: None,
@@ -760,7 +760,7 @@ impl Stmt for ExtensionStmt {
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
         StmtType::ExtensionStmt(ExtensionStmt {
-            identifier_arg: arg,
+            arg,
             argument: substmts.0,
             status: substmts.1,
             description: substmts.2,
@@ -784,7 +784,7 @@ impl Stmt for ExtensionStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct ArgumentStmt {
-    identifier_arg: Identifier,
+    arg: Identifier,
     yin_element: Option<YinElementStmt>,
 }
 
@@ -814,7 +814,7 @@ impl Stmt for ArgumentStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::ArgumentStmt(ArgumentStmt {
-            identifier_arg: arg,
+            arg,
             yin_element: None,
         })
     }
@@ -822,7 +822,7 @@ impl Stmt for ArgumentStmt {
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
         StmtType::ArgumentStmt(ArgumentStmt {
-            identifier_arg: arg,
+            arg,
             yin_element: substmts.0,
         })
     }
@@ -840,7 +840,7 @@ impl Stmt for ArgumentStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct YinElementStmt {
-    yin_element_arg: YinElementArg,
+    arg: YinElementArg,
 }
 
 impl Stmt for YinElementStmt {
@@ -858,7 +858,7 @@ impl Stmt for YinElementStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::YinElementStmt(YinElementStmt {
-            yin_element_arg: arg,
+            arg,
         })
     }
 }
@@ -868,7 +868,7 @@ impl Stmt for YinElementStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct IdentityStmt {
-    identifier_arg: Identifier,
+    arg: Identifier,
     if_feature: Vec<IfFeatureStmt>,
     base: Vec<BaseStmt>,
     status: Option<StatusStmt>,
@@ -906,7 +906,7 @@ impl Stmt for IdentityStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::IdentityStmt(IdentityStmt {
-            identifier_arg: arg,
+            arg,
             if_feature: Vec::new(),
             base: Vec::new(),
             status: None,
@@ -918,7 +918,7 @@ impl Stmt for IdentityStmt {
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
         StmtType::IdentityStmt(IdentityStmt {
-            identifier_arg: arg,
+            arg,
             if_feature: substmts.0,
             base: substmts.1,
             status: substmts.2,
@@ -944,7 +944,7 @@ impl Stmt for IdentityStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct BaseStmt {
-    identifier_ref: IdentifierRef,
+    arg: IdentifierRef,
 }
 
 impl Stmt for BaseStmt {
@@ -962,7 +962,7 @@ impl Stmt for BaseStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::BaseStmt(BaseStmt {
-            identifier_ref: arg,
+            arg,
         })
     }
 }
@@ -972,7 +972,7 @@ impl Stmt for BaseStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct FeatureStmt {
-    identifier_arg: Identifier,
+    arg: Identifier,
     if_feature: Vec<IfFeatureStmt>,
     status: Option<StatusStmt>,
     description: Option<DescriptionStmt>,
@@ -1008,7 +1008,7 @@ impl Stmt for FeatureStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::FeatureStmt(FeatureStmt {
-            identifier_arg: arg,
+            arg,
             if_feature: Vec::new(),
             status: None,
             description: None,
@@ -1019,7 +1019,7 @@ impl Stmt for FeatureStmt {
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
         StmtType::FeatureStmt(FeatureStmt {
-            identifier_arg: arg,
+            arg,
             if_feature: substmts.0,
             status: substmts.1,
             description: substmts.2,
@@ -1043,7 +1043,7 @@ impl Stmt for FeatureStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct IfFeatureStmt {
-    expr: IfFeatureExpr,
+    arg: IfFeatureExpr,
 }
 
 impl Stmt for IfFeatureStmt {
@@ -1060,7 +1060,7 @@ impl Stmt for IfFeatureStmt {
 
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::IfFeatureStmt(IfFeatureStmt { expr: arg })
+        StmtType::IfFeatureStmt(IfFeatureStmt { arg })
     }
 }
 
@@ -1095,12 +1095,13 @@ impl Stmt for TypedefStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct TypeStmt {
+    arg: IdentifierRef,
     type_body: Option<TypeBodyStmts>,
 }
 
 impl Stmt for TypeStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = IdentifierRef;
 
     /// Sub Statements.
     type SubStmts = Option<TypeBodyStmts>;
@@ -1110,8 +1111,8 @@ impl Stmt for TypeStmt {
         "type"
     }
 
-    /// Return true if this statement has substatements.
-    fn has_substmts() -> bool {
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
         true
     }
 
@@ -1127,7 +1128,7 @@ impl Stmt for TypeStmt {
 #[derive(Debug, Clone)]
 pub struct RangeStmt {
     /// Range Arg.
-    range_arg: RangeArg,
+    arg: RangeArg,
 
     /// Error Message Statement.
     error_message: Option<ErrorMessageStmt>,
@@ -1171,7 +1172,7 @@ impl Stmt for RangeStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::RangeStmt(RangeStmt {
-            range_arg: arg,
+            arg,
             error_message: None,
             error_app_tag: None,
             description: None,
@@ -1182,7 +1183,7 @@ impl Stmt for RangeStmt {
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
         StmtType::RangeStmt(RangeStmt {
-            range_arg: arg,
+            arg,
             error_message: substmts.0,
             error_app_tag: substmts.1,
             description: substmts.2,
@@ -1206,7 +1207,7 @@ impl Stmt for RangeStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct FractionDigitsStmt {
-    fraction_digits_arg: FractionDigitsArg,
+    arg: FractionDigitsArg,
 }
 
 impl Stmt for FractionDigitsStmt {
@@ -1224,7 +1225,7 @@ impl Stmt for FractionDigitsStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::FractionDigitsStmt(FractionDigitsStmt {
-            fraction_digits_arg: arg,
+            arg,
         })
     }
 }
@@ -1234,7 +1235,7 @@ impl Stmt for FractionDigitsStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct LengthStmt {
-    length_arg: LengthArg,
+    arg: LengthArg,
     error_message: Option<ErrorMessageStmt>,
     error_app_tag: Option<ErrorAppTagStmt>,
     description: Option<DescriptionStmt>,
@@ -1270,7 +1271,7 @@ impl Stmt for LengthStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::LengthStmt(LengthStmt {
-            length_arg: arg,
+            arg,
             error_message: None,
             error_app_tag: None,
             description: None,
@@ -1281,7 +1282,7 @@ impl Stmt for LengthStmt {
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
         StmtType::LengthStmt(LengthStmt {
-            length_arg: arg,
+            arg,
             error_message: substmts.0,
             error_app_tag: substmts.1,
             description: substmts.2,
@@ -1305,7 +1306,7 @@ impl Stmt for LengthStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct PatternStmt {
-    pattern_arg: String,
+    arg: String,
     modifier: Option<ModifierStmt>,
     error_message: Option<ErrorMessageStmt>,
     error_app_tag: Option<ErrorAppTagStmt>,
@@ -1344,7 +1345,7 @@ impl Stmt for PatternStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::PatternStmt(PatternStmt {
-            pattern_arg: arg,
+            arg,
             modifier: None,
             error_message: None,
             error_app_tag: None,
@@ -1356,7 +1357,7 @@ impl Stmt for PatternStmt {
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
         StmtType::PatternStmt(PatternStmt {
-            pattern_arg: arg,
+            arg,
             modifier: substmts.0,
             error_message: substmts.1,
             error_app_tag: substmts.2,
@@ -1382,7 +1383,7 @@ impl Stmt for PatternStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct ModifierStmt {
-    modifier_arg: ModifierArg,
+    arg: ModifierArg,
 }
 
 impl Stmt for ModifierStmt {
@@ -1400,7 +1401,7 @@ impl Stmt for ModifierStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::ModifierStmt(ModifierStmt {
-            modifier_arg: arg,
+            arg,
         })
     }
 }
@@ -1410,7 +1411,7 @@ impl Stmt for ModifierStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct DefaultStmt {
-    string: String,
+    arg: String,
 }
 
 impl Stmt for DefaultStmt {
@@ -1428,7 +1429,7 @@ impl Stmt for DefaultStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::DefaultStmt(DefaultStmt {
-            string: arg,
+            arg,
         })
     }
 }
@@ -1438,7 +1439,7 @@ impl Stmt for DefaultStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct EnumStmt {
-    string: String,
+    arg: String,
     if_feature: Vec<IfFeatureStmt>,
     value: Option<ValueStmt>,
     status: Option<StatusStmt>,
@@ -1476,7 +1477,7 @@ impl Stmt for EnumStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::EnumStmt(EnumStmt {
-            string: arg,
+            arg,
             if_feature: Vec::new(),
             value: None,
             status: None,
@@ -1488,7 +1489,7 @@ impl Stmt for EnumStmt {
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
         StmtType::EnumStmt(EnumStmt {
-            string: arg, 
+            arg,
             if_feature: substmts.0,
             value: substmts.1,
             status: substmts.2,
@@ -1514,7 +1515,7 @@ impl Stmt for EnumStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct PathStmt {
-    path_arg: PathArg,
+    arg: PathArg,
 }
 
 impl Stmt for PathStmt {
@@ -1532,7 +1533,7 @@ impl Stmt for PathStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::PathStmt(PathStmt {
-            path_arg: arg,
+            arg,
         })
     }
 }
@@ -1542,7 +1543,7 @@ impl Stmt for PathStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct RequireInstanceStmt {
-    require_instance_arg: RequireInstanceArg,
+    arg: RequireInstanceArg,
 }
 
 impl Stmt for RequireInstanceStmt {
@@ -1560,7 +1561,7 @@ impl Stmt for RequireInstanceStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::RequireInstanceStmt(RequireInstanceStmt {
-            require_instance_arg: arg
+            arg,
         })
     }
 }
@@ -1570,7 +1571,7 @@ impl Stmt for RequireInstanceStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct BitStmt {
-    identifier_arg: Identifier,
+    arg: Identifier,
     if_feature: Vec<IfFeatureStmt>,
     position: Option<PositionStmt>,
     status: Option<StatusStmt>,
@@ -1608,7 +1609,7 @@ impl Stmt for BitStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::BitStmt(BitStmt {
-            identifier_arg: arg,
+            arg,
             if_feature: Vec::new(),
             position: None,
             status: None,
@@ -1620,7 +1621,7 @@ impl Stmt for BitStmt {
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
         StmtType::BitStmt(BitStmt {
-            identifier_arg: arg, 
+            arg,
             if_feature: substmts.0,
             position: substmts.1,
             status: substmts.2,
@@ -1646,7 +1647,7 @@ impl Stmt for BitStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct PositionStmt {
-    position_value_arg: PositionValueArg,
+    arg: PositionValueArg,
 }
 
 impl Stmt for PositionStmt {
@@ -1664,7 +1665,7 @@ impl Stmt for PositionStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::PositionStmt(PositionStmt {
-            position_value_arg: arg
+            arg,
         })
     }
 }
@@ -1674,7 +1675,7 @@ impl Stmt for PositionStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct StatusStmt {
-    status_arg: StatusArg,
+    arg: StatusArg,
 }
 
 impl Stmt for StatusStmt {
@@ -1692,7 +1693,7 @@ impl Stmt for StatusStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::StatusStmt(StatusStmt {
-            status_arg: arg
+            arg,
         })
     }
 }
@@ -1703,7 +1704,7 @@ impl Stmt for StatusStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct ConfigStmt {
-    config_arg: ConfigArg,
+    arg: ConfigArg,
 }
 
 impl Stmt for ConfigStmt {
@@ -1721,7 +1722,7 @@ impl Stmt for ConfigStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::ConfigStmt(ConfigStmt {
-            config_arg: arg
+            arg,
         })
     }
 }
@@ -1731,7 +1732,7 @@ impl Stmt for ConfigStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct MandatoryStmt {
-    mandatory_arg: MandatoryArg,
+    arg: MandatoryArg,
 }
 
 impl Stmt for MandatoryStmt {
@@ -1749,7 +1750,7 @@ impl Stmt for MandatoryStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::MandatoryStmt(MandatoryStmt {
-            mandatory_arg: arg
+            arg,
         })
     }
 }
@@ -1759,7 +1760,7 @@ impl Stmt for MandatoryStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct PresenceStmt {
-    str: String,
+    arg: String,
 }
 
 impl Stmt for PresenceStmt {
@@ -1777,7 +1778,7 @@ impl Stmt for PresenceStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::PresenceStmt(PresenceStmt {
-            str: arg,
+            arg,
         })
     }
 }
@@ -1787,7 +1788,7 @@ impl Stmt for PresenceStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct OrderedByStmt {
-    ordered_by_arg: OrderedByArg,
+    arg: OrderedByArg,
 }
 
 impl Stmt for OrderedByStmt {
@@ -1805,7 +1806,7 @@ impl Stmt for OrderedByStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::OrderedByStmt(OrderedByStmt {
-            ordered_by_arg: arg,
+            arg,
         })
     }
 }
@@ -1886,7 +1887,7 @@ impl Stmt for MustStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct ErrorMessageStmt {
-    str: String,
+    arg: String,
 }
 
 impl Stmt for ErrorMessageStmt {
@@ -1904,7 +1905,7 @@ impl Stmt for ErrorMessageStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::ErrorMessageStmt(ErrorMessageStmt {
-            str: arg,
+            arg,
         })
     }
 }
@@ -1914,7 +1915,7 @@ impl Stmt for ErrorMessageStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct ErrorAppTagStmt {
-    str: String,
+    arg: String,
 }
 
 impl Stmt for ErrorAppTagStmt {
@@ -1932,7 +1933,7 @@ impl Stmt for ErrorAppTagStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::ErrorAppTagStmt(ErrorAppTagStmt {
-            str: arg,
+            arg,
         })
     }
 }
@@ -1942,7 +1943,7 @@ impl Stmt for ErrorAppTagStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct MinElementsStmt {
-    min_value_arg: MinValueArg,
+    arg: MinValueArg,
 }
 
 impl Stmt for MinElementsStmt {
@@ -1959,7 +1960,7 @@ impl Stmt for MinElementsStmt {
 
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::MinElementsStmt(MinElementsStmt { min_value_arg: arg })
+        StmtType::MinElementsStmt(MinElementsStmt { arg })
     }
 }
 
@@ -1968,7 +1969,7 @@ impl Stmt for MinElementsStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct MaxElementsStmt {
-    max_value_arg: MaxValueArg,
+    arg: MaxValueArg,
 }
 
 impl Stmt for MaxElementsStmt {
@@ -1985,7 +1986,7 @@ impl Stmt for MaxElementsStmt {
 
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::MaxElementsStmt(MaxElementsStmt { max_value_arg: arg })
+        StmtType::MaxElementsStmt(MaxElementsStmt { arg })
     }
 }
 
@@ -2135,7 +2136,7 @@ impl Stmt for ListStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct KeyStmt {
-    key_arg: KeyArg,
+    arg: KeyArg,
 }
 
 impl Stmt for KeyStmt {
@@ -2153,7 +2154,7 @@ impl Stmt for KeyStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::KeyStmt(KeyStmt {
-            key_arg: arg
+            arg,
         })
     }
 }
@@ -2181,7 +2182,7 @@ impl Stmt for UniqueStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::UniqueStmt(UniqueStmt {
-            arg: arg
+            arg,
         })
     }
 }
@@ -2682,7 +2683,7 @@ impl Stmt for AugmentStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct WhenStmt {
-    string: String,
+    arg: String,
     description: Option<DescriptionStmt>,
     reference: Option<ReferenceStmt>,
 }
@@ -2714,7 +2715,7 @@ impl Stmt for WhenStmt {
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::WhenStmt(WhenStmt {
-            string: arg,
+            arg,
             description: None,
             reference: None,
         })
@@ -2723,7 +2724,7 @@ impl Stmt for WhenStmt {
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
         StmtType::WhenStmt(WhenStmt {
-            string: arg,
+            arg,
             description: substmts.0,
             reference: substmts.1,
         })
