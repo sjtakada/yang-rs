@@ -18,7 +18,7 @@ use crate::parse_a_stmt;
 // Trait for compound YANG statements.
 //
 pub trait Compound {
-    // Return list fo statement keyword.
+    /// Return list fo statement keyword.
     fn keywords() -> Vec<Keyword> {
         panic!("undefined");
     }
@@ -180,7 +180,12 @@ impl RevisionStmts {
 }
 
 ///
-/// Numerical Restrictions
+/// "data-def-stmt".
+///
+
+
+///
+/// "numerical-restrictions".
 ///
 #[derive(Debug, Clone)]
 pub struct NumericalRestrictions {
@@ -206,7 +211,7 @@ impl NumericalRestrictions {
 }
 
 ///
-/// Decimal64 Specification
+/// "decimal64-specification".
 ///
 #[derive(Debug, Clone)]
 pub struct Decimal64Specification {
@@ -235,7 +240,7 @@ impl Decimal64Specification {
 }
 
 ///
-/// Type Body Statements.
+/// "type-body" Statements.
 ///
 #[derive(Debug, Clone)]
 pub enum TypeBodyStmts {
