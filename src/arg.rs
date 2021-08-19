@@ -326,7 +326,7 @@ impl FractionDigitsArg {
 
 impl ToString for FractionDigitsArg {
     fn to_string(&self) -> String {
-        format!("{}", self.digits)
+        format!("{}", self.digits())
     }
 }
 
@@ -1764,7 +1764,7 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match IfFeatureExpr::parse_arg(&mut parser) {
-            Ok(expr) => panic!(),
+            Ok(expr) => panic!("{:?}", expr),
             Err(err) => assert_eq!(err.to_string(), "Argument parse error: if-feature-expr at line 0"),
 
         }
@@ -1783,7 +1783,7 @@ mod tests {
                            NodeIdentifier::from_str("id4").unwrap(),
                            NodeIdentifier::from_str("id5").unwrap(),
             ] }),
-            Err(err) => panic!(err.to_string()),
+            Err(err) => panic!("{}", err.to_string()),
         }
     }
 
@@ -1797,7 +1797,7 @@ mod tests {
                 assert_eq!(arg.to_string(), "/id1/id2/id3");
                 assert_eq!(arg.nodes.len(), 3);
             }
-            Err(err) => panic!(err.to_string()),
+            Err(err) => panic!("{}", err.to_string()),
         }
     }
 
@@ -1811,7 +1811,7 @@ mod tests {
                 assert_eq!(arg.to_string(), "id1/id2/id3");
                 assert_eq!(arg.nodes.len(), 3);
             }
-            Err(err) => panic!(err.to_string()),
+            Err(err) => panic!("{}", err.to_string()),
         }
     }
 }

@@ -15,11 +15,13 @@ use crate::collect_opt_stmt;
 use crate::parse_a_stmt;
 
 //
-// Trait for compound of YANG statements.
+// Trait for compound YANG statements.
 //
 pub trait Compound {
     // Return list fo statement keyword.
-//    fn keywords() -> Vec<Keyword>;
+    fn keywords() -> Vec<Keyword> {
+        panic!("undefined");
+    }
 
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef>;
