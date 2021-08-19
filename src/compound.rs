@@ -332,102 +332,89 @@ pub enum TypeBodyStmts {
 }
 
 impl TypeBodyStmts {
+    /// Return substatements definition.
+    pub fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(FractionDigitsStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(RangeStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(PatternStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(LengthStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(PathStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(RequireInstanceStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(EnumStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(BaseStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(BitStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(TypeStmt::keyword)),
+        ]
+        // TBD: This check is very loose at this moment.
+    }
+
+    // decimal64 specification		fraction-digits-stmt [range-stmt]	(any order)
+    // numerical restrictions		[range-stmt]
+    // string restrictions			[length-stmt] *pattern-stmt		(any order)
+    // binary-specification			[length-stmt]
+    // leafref-specification		path-stmt [require-instance-stmt]	(any order)
+    // instance-identifier-specpfication	[require-instance-stmt]
+    // enum specification			1*enum-stmt
+    // identityref-specification		1*base-stmt
+    // bits-specification			1*bit-stmt
+    // union-specification			1*type-stmt
     pub fn parse(parser: &mut Parser) -> Result<TypeBodyStmts, YangError> {
-        let token = parser.peek_token()?;
-        let stmts = match token {
-            Token::Identifier(ref keyword) => {
-                match keyword as &str {
-                    "range" => {
-                        let range = parse_a_stmt!(RangeStmt, parser)?;
-                        if parser.expect_keyword("fraction-digits")? {
-                            let decimal64_specification = Decimal64Specification {
-                                fraction_digits: parse_a_stmt!(FractionDigitsStmt, parser)?,
-                                range: Some(range),
-                            };
-                            TypeBodyStmts::Decimal64Specification(decimal64_specification)
-                        } else {
-                            let numerical_restrictions = NumericalRestrictions { range: Some(range) };
-                            TypeBodyStmts::NumericalRestrictions(numerical_restrictions)
-                        }
-                    }
-                    "fraction-digits" => {
-                        let fraction_digits = parse_a_stmt!(FractionDigitsStmt, parser)?;
-                        if parser.expect_keyword("range")? {
-                            let decimal64_specification = Decimal64Specification {
-                                fraction_digits: fraction_digits,
-                                range: Some(parse_a_stmt!(RangeStmt, parser)?),
-                            };
-                            TypeBodyStmts::Decimal64Specification(decimal64_specification)
-                        } else {
-                            let decimal64_specification = Decimal64Specification {
-                                fraction_digits: fraction_digits,
-                                range: None,
-                            };
-                            TypeBodyStmts::Decimal64Specification(decimal64_specification)
-                        }
-                    }
-                    "length" => {
-/*
-                        let length = parse_a_stmt!(LengthStmt, parser)?;
-                        if parser.expect_keyword("pattern")? {
-                            let string_restrictions = StringRestrictions {
-                                length: parse_a_stmt!(LengthStmt, parser)?,
-                                pattern: parse_a_stmt!(PatternStmt, parser)?,
-                            };
-                            TypeBodyStmts::StringRestrictions(string_restrictions)
-                        } else {
-                            let binary_specification = BinarySpecification { length: Some(length) };
-                            TypeBodyStmts::BinarySpecification(binary_specification)
-                        }
-*/
-                        panic!();
-                    }
-                    "pattern" => {
-                        panic!();
-                    }
-                    "enum" => {
-                        panic!();
-                    }
-                    "path" => {
-                        panic!();
-                    }
-                    "require-instance" => {
-                        panic!();
-                    }
-                    "base" => {
-                        panic!();
-                    }
-                    "bit" => {
-                        panic!();
-                    }
-                    "type" => {
-                        panic!();
-                    }
-                    "binary" => {
-                        panic!();
-                    }
-                    _ => return Err(YangError::UnexpectedStatement(parser.line())),
-                }
-            }
-            Token::BlockEnd => {
-                panic!();
-            }
-            _ => return Err(YangError::UnexpectedStatement(parser.line())),
-        };
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
-        // numerical restrictions		[range-stmt]
-        // decimal64 specification		fraction-digits-stmt [range-stmt]	(any order)
-        // string restrictions			[length-stmt] *pattern-stmt		(any order)
-        // enum specification			1*enum-stmt
-        // leafref-specification		path-stmt [require-instance-stmt]	(any order)
-        // identityref-specification		1*base-stmt
-        // instance-identifier-specpfication	[require-instance-stmt]
-        // bits-specification			1*bit-stmt
-        // union-specification			1*type-stmt
-        // binary-specification			[length-stmt]
+        let type_body =
+            if let Ok(fraction_digits) = collect_a_stmt!(stmts, FractionDigitsStmt) {
+                let range = if let Ok(range) = collect_a_stmt!(stmts, RangeStmt) {
+                    Some(range)
+                } else {
+                    None
+                };
 
-//        let stmts = TypeBodyStmts::NumericalRestrictions(NumericalRestrictions { range: None });
+                TypeBodyStmts::Decimal64Specification(
+                    Decimal64Specification { fraction_digits, range })
+            } else if let Ok(range) = collect_a_stmt!(stmts, RangeStmt) {
+                TypeBodyStmts::NumericalRestrictions(
+                    NumericalRestrictions { range: Some(range) })
+            } else if let Ok(pattern) = collect_vec_stmt!(stmts, PatternStmt) {
+                // TBD: need check pattern.len()
+                let length = if let Ok(length) = collect_a_stmt!(stmts, LengthStmt) {
+                    Some(length)
+                } else {
+                    None
+                };
 
-        Ok(stmts)
+                TypeBodyStmts::StringRestrictions(
+                    StringRestrictions { pattern, length })
+            } else if let Ok(length) = collect_a_stmt!(stmts, LengthStmt) {
+                TypeBodyStmts::BinarySpecification(
+                    BinarySpecification { length: Some(length) })
+            } else if let Ok(path) = collect_a_stmt!(stmts, PathStmt) {
+                let require_instance = if let Ok(require_instance) = collect_a_stmt!(stmts, RequireInstanceStmt) {
+                    Some(require_instance)
+                } else {
+                    None
+                };
+
+                TypeBodyStmts::LeafrefSpecification(
+                    LeafrefSpecification { path, require_instance })
+            } else if let Ok(require_instance) = collect_a_stmt!(stmts, RequireInstanceStmt) {
+                TypeBodyStmts::InstanceIdentifierSpecification(
+                    InstanceIdentifierSpecification { require_instance: Some(require_instance) })
+            } else if let Ok(enum_) = collect_vec_stmt!(stmts, EnumStmt) {
+                TypeBodyStmts::EnumSpecification(
+                    EnumSpecification { enum_ })
+            } else if let Ok(base) = collect_vec_stmt!(stmts, BaseStmt) {
+                TypeBodyStmts::IdentityrefSpecification(
+                    IdentityrefSpecification { base })
+            } else if let Ok(bit) = collect_vec_stmt!(stmts, BitStmt) {
+                TypeBodyStmts::BitsSpecification(
+                    BitsSpecification { bit })
+            } else if let Ok(type_) = collect_vec_stmt!(stmts, TypeStmt) {
+                TypeBodyStmts::UnionSpecification(
+                    UnionSpecification { type_ })
+            } else {
+                return Err(YangError::MissingStatement(""))
+            };
+
+        Ok(type_body)
     }
 }
