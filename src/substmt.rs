@@ -6,8 +6,6 @@
 use std::collections::HashMap;
 
 use super::core::*;
-//use super::stmt::*;
-//use super::arg::*;
 use super::parser::*;
 use super::error::*;
 
@@ -131,72 +129,3 @@ println!("*** [DEBUG] parse_substmts_default {:?}", token);
     }
 }
 
-/*
-pub struct Grouping {
-}
-
-impl Grouping {
-    pub fn keyword() -> Keyword {
-        "grouping"
-    }
-}
-
-pub struct TypedefStmt {
-}
-
-impl TypedefStmt {
-    pub fn keyword() -> Keyword {
-        "typedef"
-    }
-}
-
-pub struct TypedefAndGrouping {
-
-}
-
-impl Compound for TypedefAndGrouping {
-    fn keywords() -> Vec<Keyword> {
-        vec![TypedefStmt::keyword(), Grouping::keyword()]
-    }
-}
-
-
-pub fn parse_tmp() {
-    let vec = [
-        SubStmtDef::HaveOne(SubStmtWith::Stmt(PrefixStmt::keyword)),
-        SubStmtDef::Optional(SubStmtWith::Stmt(RevisionDateStmt::keyword)),
-        SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
-        SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
-        SubStmtDef::ZeroOrMore(SubStmtWith::Compound(TypedefAndGrouping::keywords)),
-    ];
-}
-
-pub fn expand_def(vec: Vec<SubStmtDef>) {
-    let mut k2i = HashMap::new();
-    let mut i2rep = HashMap::new();
-
-    let mut i = 0;
-    for s in vec {
-        let (rep, ssw) = match s {
-            SubStmtDef::HaveOne(ssw) => ((0, 1, 1), ssw),
-            SubStmtDef::Optional(ssw) => ((0, 0, 1), ssw),
-            SubStmtDef::ZeroOrMore(ssw) => ((0, 0, usize::MAX), ssw),
-            SubStmtDef::OneOrMore(ssw) => ((0, 1, usize::MAX), ssw),
-        };
-        i2rep.insert(i, rep);
-
-        match ssw {
-            SubStmtWith::Stmt(func) => {
-                k2i.insert(func(), i);
-            }
-            SubStmtWith::Compound(func) => {
-                for k in func() {
-                    k2i.insert(k, i);
-                }
-            }
-        }
-
-        i += 0;
-    }
-}
-*/

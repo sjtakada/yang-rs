@@ -5,7 +5,6 @@
 
 use std::fmt;
 use std::collections::HashMap;
-//use std::collections::HashSet;
 
 use super::error::*;
 use super::parser::*;
@@ -38,7 +37,7 @@ lazy_static! {
         m.insert("base", BaseStmt::parse as StmtParserFn);
         m.insert("feature", FeatureStmt::parse as StmtParserFn);
         m.insert("if-feature", IfFeatureStmt::parse as StmtParserFn);
-//        m.insert("typedef", TypedefStmt::parse as StmtParserFn);
+        m.insert("typedef", TypedefStmt::parse as StmtParserFn);
         m.insert("type", TypeStmt::parse as StmtParserFn);
         m.insert("range", RangeStmt::parse as StmtParserFn);
         m.insert("fraction-digits", FractionDigitsStmt::parse as StmtParserFn);
@@ -150,7 +149,7 @@ pub enum StmtType {
     BaseStmt(BaseStmt),
     FeatureStmt(FeatureStmt),
     IfFeatureStmt(IfFeatureStmt),
-//    TypedefStmt(TypedefStmt),
+    TypedefStmt(TypedefStmt),
     TypeStmt(TypeStmt),
     RangeStmt(RangeStmt),
     FractionDigitsStmt(FractionDigitsStmt),
@@ -234,7 +233,7 @@ impl fmt::Debug for StmtType {
             StmtType::BaseStmt(stmt) => write!(f, "base-stmt {:?}", stmt),
             StmtType::FeatureStmt(stmt) => write!(f, "feature-stmt {:?}", stmt),
             StmtType::IfFeatureStmt(stmt) => write!(f, "if-feature-stmt {:?}", stmt),
-//            StmtType::TypedefStmt(stmt) => write!(f, "typedef-stmt {:?}", stmt),
+            StmtType::TypedefStmt(stmt) => write!(f, "typedef-stmt {:?}", stmt),
             StmtType::TypeStmt(stmt) => write!(f, "type-stmt {:?}", stmt),
             StmtType::RangeStmt(stmt) => write!(f, "range-stmt {:?}", stmt),
             StmtType::FractionDigitsStmt(stmt) => write!(f, "fraction-digits-stmt {:?}", stmt),

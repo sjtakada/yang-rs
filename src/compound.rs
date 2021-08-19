@@ -182,7 +182,16 @@ impl RevisionStmts {
 ///
 /// "data-def-stmt".
 ///
-
+pub struct DataDefStmt {
+//    container: Option<ContainerStmt>,
+//    leaf: Option<LeafStmt>,
+//    leaf_list: Option<LeafListStmt>,
+//    list: Option<ListStmt>,
+//    choice: Option<ChoiceStmt>,
+    anydata: Option<AnydataStmt>,
+    anyxml: Option<AnyxmlStmt>,
+    uses: Option<UsesStmt>,
+}
 
 ///
 /// "numerical-restrictions".
@@ -240,12 +249,86 @@ impl Decimal64Specification {
 }
 
 ///
+/// "string-restrictions".
+///
+#[derive(Debug, Clone)]
+pub struct StringRestrictions {
+    length: Option<LengthStmt>,
+    pattern: Vec<PatternStmt>,
+}
+
+///
+/// "enum-specification".
+///
+#[derive(Debug, Clone)]
+pub struct EnumSpecification {
+    enum_: Vec<EnumStmt>,
+}
+
+///
+/// "leafref-specification".
+///
+#[derive(Debug, Clone)]
+pub struct LeafrefSpecification {
+    path: PathStmt,
+    require_instance: Option<RequireInstanceStmt>,
+}
+
+///
+/// "identityref-specification".
+///
+#[derive(Debug, Clone)]
+pub struct IdentityrefSpecification {
+    base: Vec<BaseStmt>,
+}
+
+///
+/// "instance-identifier-specification".
+///
+#[derive(Debug, Clone)]
+pub struct InstanceIdentifierSpecification {
+    require_instance: Option<RequireInstanceStmt>,
+}
+
+///
+/// "bits-specification".
+///
+#[derive(Debug, Clone)]
+pub struct BitsSpecification {
+    bit: Vec<BitStmt>,
+}
+
+///
+/// "union-specification".
+///
+#[derive(Debug, Clone)]
+pub struct UnionSpecification {
+    type_: Vec<TypeStmt>,
+}
+
+///
+/// "binary-specification".
+///
+#[derive(Debug, Clone)]
+pub struct BinarySpecification {
+    length: Option<LengthStmt>,
+}
+
+///
 /// "type-body" Statements.
 ///
 #[derive(Debug, Clone)]
 pub enum TypeBodyStmts {
     NumericalRestrictions(NumericalRestrictions),
     Decimal64Specification(Decimal64Specification),
+    StringRestrictions(StringRestrictions),
+    EnumSpecification(EnumSpecification),
+    LeafrefSpecification(LeafrefSpecification),
+    IdentityrefSpecification(IdentityrefSpecification),
+    InstanceIdentifierSpecification(InstanceIdentifierSpecification),
+    BitsSpecification(BitsSpecification),
+    UnionSpecification(UnionSpecification),
+    BinarySpecification(BinarySpecification),
 }
 
 impl TypeBodyStmts {
@@ -284,6 +367,19 @@ impl TypeBodyStmts {
                         }
                     }
                     "length" => {
+/*
+                        let length = parse_a_stmt!(LengthStmt, parser)?;
+                        if parser.expect_keyword("pattern")? {
+                            let string_restrictions = StringRestrictions {
+                                length: parse_a_stmt!(LengthStmt, parser)?,
+                                pattern: parse_a_stmt!(PatternStmt, parser)?,
+                            };
+                            TypeBodyStmts::StringRestrictions(string_restrictions)
+                        } else {
+                            let binary_specification = BinarySpecification { length: Some(length) };
+                            TypeBodyStmts::BinarySpecification(binary_specification)
+                        }
+*/
                         panic!();
                     }
                     "pattern" => {
@@ -321,7 +417,7 @@ impl TypeBodyStmts {
 
         // numerical restrictions		[range-stmt]
         // decimal64 specification		fraction-digits-stmt [range-stmt]	(any order)
-        // string specification			[length-stmt] *pattern-stmt		(any order)
+        // string restrictions			[length-stmt] *pattern-stmt		(any order)
         // enum specification			1*enum-stmt
         // leafref-specification		path-stmt [require-instance-stmt]	(any order)
         // identityref-specification		1*base-stmt

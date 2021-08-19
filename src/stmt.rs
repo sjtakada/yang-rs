@@ -12,7 +12,6 @@ use super::arg::*;
 use super::substmt::*;
 use super::compound::*;
 
-//#[macro_use]
 use crate::collect_a_stmt;
 use crate::collect_vec_stmt;
 use crate::collect_opt_stmt;
@@ -1064,31 +1063,74 @@ impl Stmt for IfFeatureStmt {
     }
 }
 
-/*
-
 ///
 ///
 ///
 #[derive(Debug, Clone)]
 pub struct TypedefStmt {
+    arg: Identifier,
+    type_: TypeStmt,
+    units: Option<UnitsStmt>,
+    default: Option<DefaultStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
 }
 
 impl Stmt for TypedefStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
+
+    /// Sub Statements.
+    type SubStmts = (TypeStmt, Option<UnitsStmt>, Option<DefaultStmt>,
+                     Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "typedef"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has substatements.
+    fn has_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::HaveOne(SubStmtWith::Stmt(TypeStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(UnitsStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DefaultStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::TypedefStmt(TypedefStmt {
+            arg,
+            type_: substmts.0,
+            units: substmts.1,
+            default: substmts.2,
+            status: substmts.3,
+            description: substmts.4,
+            reference: substmts.5,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+        
+        Ok((collect_a_stmt!(stmts, TypeStmt)?,
+            collect_opt_stmt!(stmts, UnitsStmt)?,
+            collect_opt_stmt!(stmts, DefaultStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?))
     }
 }
-
-*/
 
 ///
 /// 7.4. The "type" Statement.
