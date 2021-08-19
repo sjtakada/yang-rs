@@ -94,11 +94,6 @@ pub trait Stmt {
         panic!();
     }
 
-    /// Parse substatements default.
-    fn parse_substmts_default(parser: &mut Parser) -> Result<StmtCollection, YangError> {
-        SubStmtUtil::parse_substmts(parser, Self::substmts_def())
-    }
-
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<StmtType, YangError>  where Self::Arg: StmtArg, Self: Sized {
         let arg = Self::Arg::parse_arg(parser)?;
@@ -325,6 +320,15 @@ impl Stmt for ImportStmt {
         true
     }
 
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::HaveOne(SubStmtWith::Stmt(PrefixStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(RevisionDateStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
         StmtType::ImportStmt(ImportStmt {
@@ -338,14 +342,7 @@ impl Stmt for ImportStmt {
 
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("prefix", Repeat::new(Some(1), Some(1))),
-            ("revision-date", Repeat::new(Some(0), Some(1))),
-            ("description", Repeat::new(Some(0), Some(1))),
-            ("reference", Repeat::new(Some(0), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok((collect_a_stmt!(stmts, PrefixStmt)?,
             collect_opt_stmt!(stmts, RevisionDateStmt)?,
@@ -382,6 +379,14 @@ impl Stmt for IncludeStmt {
         true
     }
 
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(RevisionDateStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::IncludeStmt(IncludeStmt {
@@ -404,13 +409,7 @@ impl Stmt for IncludeStmt {
 
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("revision-date", Repeat::new(Some(0), Some(1))),
-            ("description", Repeat::new(Some(0), Some(1))),
-            ("reference", Repeat::new(Some(0), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok((collect_opt_stmt!(stmts, RevisionDateStmt)?,
             collect_opt_stmt!(stmts, DescriptionStmt)?,
@@ -499,6 +498,12 @@ impl Stmt for BelongsToStmt {
         true
     }
 
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::HaveOne(SubStmtWith::Stmt(PrefixStmt::keyword)),
+        ]
+    }
+
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
         StmtType::BelongsToStmt(BelongsToStmt {
@@ -509,11 +514,7 @@ impl Stmt for BelongsToStmt {
 
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("prefix", Repeat::new(Some(1), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok((collect_a_stmt!(stmts, PrefixStmt)?,))
     }
@@ -681,6 +682,13 @@ impl Stmt for RevisionStmt {
         true
     }
 
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::RevisionStmt(RevisionStmt {
@@ -701,12 +709,7 @@ impl Stmt for RevisionStmt {
 
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("description", Repeat::new(Some(0), Some(1))),
-            ("reference", Repeat::new(Some(0), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
         
         Ok((collect_opt_stmt!(stmts, DescriptionStmt)?,
             collect_opt_stmt!(stmts, ReferenceStmt)?))
@@ -768,6 +771,15 @@ impl Stmt for ExtensionStmt {
         true
     }
 
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(ArgumentStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::ExtensionStmt(ExtensionStmt {
@@ -792,14 +804,7 @@ impl Stmt for ExtensionStmt {
 
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("argument", Repeat::new(Some(0), Some(1))),
-            ("status", Repeat::new(Some(0), Some(1))),
-            ("description", Repeat::new(Some(0), Some(1))),
-            ("reference", Repeat::new(Some(0), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok((collect_opt_stmt!(stmts, ArgumentStmt)?,
             collect_opt_stmt!(stmts, StatusStmt)?,
@@ -834,6 +839,12 @@ impl Stmt for ArgumentStmt {
         true
     }
 
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(YinElementStmt::keyword)),
+        ]
+    }
+
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::ArgumentStmt(ArgumentStmt {
@@ -852,11 +863,7 @@ impl Stmt for ArgumentStmt {
 
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("yin-element", Repeat::new(Some(0), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok((collect_opt_stmt!(stmts, YinElementStmt)?,))
     }
@@ -920,6 +927,16 @@ impl Stmt for IdentityStmt {
         true
     }
 
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(BaseStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::IdentityStmt(IdentityStmt {
@@ -946,15 +963,7 @@ impl Stmt for IdentityStmt {
 
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("if-feature", Repeat::new(Some(0), None)),
-            ("base", Repeat::new(Some(0), None)),
-            ("status", Repeat::new(Some(0), Some(1))),
-            ("description", Repeat::new(Some(0), Some(1))),
-            ("reference", Repeat::new(Some(0), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok((collect_vec_stmt!(stmts, IfFeatureStmt)?,
             collect_vec_stmt!(stmts, BaseStmt)?,
@@ -1021,6 +1030,15 @@ impl Stmt for FeatureStmt {
         true
     }
 
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::FeatureStmt(FeatureStmt {
@@ -1045,14 +1063,7 @@ impl Stmt for FeatureStmt {
 
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("if-feature", Repeat::new(Some(0), None)),
-            ("status", Repeat::new(Some(0), Some(1))),
-            ("description", Repeat::new(Some(0), Some(1))),
-            ("reference", Repeat::new(Some(0), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok((collect_vec_stmt!(stmts, IfFeatureStmt)?,
             collect_opt_stmt!(stmts, StatusStmt)?,
@@ -1182,6 +1193,15 @@ impl Stmt for RangeStmt {
         true
     }
 
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(ErrorMessageStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ErrorAppTagStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::RangeStmt(RangeStmt {
@@ -1206,14 +1226,7 @@ impl Stmt for RangeStmt {
 
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("error-message", Repeat::new(Some(0), Some(1))),
-            ("error-app-tag", Repeat::new(Some(0), Some(1))),
-            ("description", Repeat::new(Some(0), Some(1))),
-            ("reference", Repeat::new(Some(0), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok((collect_opt_stmt!(stmts, ErrorMessageStmt)?,
             collect_opt_stmt!(stmts, ErrorAppTagStmt)?,
@@ -1279,6 +1292,15 @@ impl Stmt for LengthStmt {
         true
     }
 
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(ErrorMessageStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ErrorAppTagStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::LengthStmt(LengthStmt {
@@ -1303,14 +1325,7 @@ impl Stmt for LengthStmt {
 
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("error-message", Repeat::new(Some(0), Some(1))),
-            ("error-app-tag", Repeat::new(Some(0), Some(1))),
-            ("description", Repeat::new(Some(0), Some(1))),
-            ("reference", Repeat::new(Some(0), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok((collect_opt_stmt!(stmts, ErrorMessageStmt)?,
             collect_opt_stmt!(stmts, ErrorAppTagStmt)?,
@@ -1350,6 +1365,16 @@ impl Stmt for PatternStmt {
         true
     }
 
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(ModifierStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ErrorMessageStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ErrorAppTagStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::PatternStmt(PatternStmt {
@@ -1376,15 +1401,7 @@ impl Stmt for PatternStmt {
 
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("modifier", Repeat::new(Some(0), Some(1))),
-            ("error-message", Repeat::new(Some(0), Some(1))),
-            ("error-app-tag", Repeat::new(Some(0), Some(1))),
-            ("description", Repeat::new(Some(0), Some(1))),
-            ("reference", Repeat::new(Some(0), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok((collect_opt_stmt!(stmts, ModifierStmt)?,
             collect_opt_stmt!(stmts, ErrorMessageStmt)?,
@@ -1480,6 +1497,16 @@ impl Stmt for EnumStmt {
         true
     }
 
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ValueStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::EnumStmt(EnumStmt {
@@ -1506,15 +1533,7 @@ impl Stmt for EnumStmt {
 
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("if-feature", Repeat::new(Some(0), None)),
-            ("value", Repeat::new(Some(0), Some(1))),
-            ("status", Repeat::new(Some(0), Some(1))),
-            ("description", Repeat::new(Some(0), Some(1))),
-            ("reference", Repeat::new(Some(0), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok((collect_vec_stmt!(stmts, IfFeatureStmt)?,
             collect_opt_stmt!(stmts, ValueStmt)?,
@@ -1610,6 +1629,16 @@ impl Stmt for BitStmt {
         true
     }
 
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(PositionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::BitStmt(BitStmt {
@@ -1636,15 +1665,7 @@ impl Stmt for BitStmt {
 
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("if-feature", Repeat::new(Some(0), None)),
-            ("position", Repeat::new(Some(0), Some(1))),
-            ("status", Repeat::new(Some(0), Some(1))),
-            ("description", Repeat::new(Some(0), Some(1))),
-            ("reference", Repeat::new(Some(0), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok((collect_vec_stmt!(stmts, IfFeatureStmt)?,
             collect_opt_stmt!(stmts, PositionStmt)?,
@@ -1852,6 +1873,15 @@ impl Stmt for MustStmt {
         true
     }
 
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(ErrorMessageStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ErrorAppTagStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::MustStmt(MustStmt {
@@ -1876,14 +1906,7 @@ impl Stmt for MustStmt {
 
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("error-message", Repeat::new(Some(0), Some(1))),
-            ("error-app-tag", Repeat::new(Some(0), Some(1))),
-            ("description", Repeat::new(Some(0), Some(1))),
-            ("reference", Repeat::new(Some(0), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok((collect_opt_stmt!(stmts, ErrorMessageStmt)?,
             collect_opt_stmt!(stmts, ErrorAppTagStmt)?,
@@ -2301,6 +2324,19 @@ impl Stmt for AnydataStmt {
         true
     }
 
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(WhenStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(MustStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ConfigStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MandatoryStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::AnydataStmt(AnydataStmt {
@@ -2333,18 +2369,7 @@ impl Stmt for AnydataStmt {
 
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("when", Repeat::new(Some(0), Some(1))),
-            ("if-feature", Repeat::new(Some(0), None)),
-            ("must", Repeat::new(Some(0), None)),
-            ("config", Repeat::new(Some(0), Some(1))),
-            ("mandatory", Repeat::new(Some(0), Some(1))),
-            ("status", Repeat::new(Some(0), Some(1))),
-            ("description", Repeat::new(Some(0), Some(1))),
-            ("reference", Repeat::new(Some(0), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok((collect_opt_stmt!(stmts, WhenStmt)?,
             collect_vec_stmt!(stmts, IfFeatureStmt)?,
@@ -2391,6 +2416,19 @@ impl Stmt for AnyxmlStmt {
         true
     }
 
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(WhenStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(MustStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ConfigStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MandatoryStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::AnyxmlStmt(AnyxmlStmt {
@@ -2423,18 +2461,7 @@ impl Stmt for AnyxmlStmt {
 
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("when", Repeat::new(Some(0), Some(1))),
-            ("if-feature", Repeat::new(Some(0), None)),
-            ("must", Repeat::new(Some(0), None)),
-            ("config", Repeat::new(Some(0), Some(1))),
-            ("mandatory", Repeat::new(Some(0), Some(1))),
-            ("status", Repeat::new(Some(0), Some(1))),
-            ("description", Repeat::new(Some(0), Some(1))),
-            ("reference", Repeat::new(Some(0), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok((collect_opt_stmt!(stmts, WhenStmt)?,
             collect_vec_stmt!(stmts, IfFeatureStmt)?,
@@ -2480,6 +2507,18 @@ impl Stmt for UsesStmt {
         true
     }
 
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(WhenStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(RefineStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(UsesAugmentStmt::keyword)),
+        ]
+    }
+
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::UsesStmt(UsesStmt {
@@ -2510,17 +2549,7 @@ impl Stmt for UsesStmt {
 
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("when", Repeat::new(Some(0), Some(1))),
-            ("if-feature", Repeat::new(Some(0), None)),
-            ("status", Repeat::new(Some(0), Some(1))),
-            ("description", Repeat::new(Some(0), Some(1))),
-            ("reference", Repeat::new(Some(0), Some(1))),
-            ("refine", Repeat::new(Some(0), None)),
-            ("uses-augument", Repeat::new(Some(0), None)),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok((collect_opt_stmt!(stmts, WhenStmt)?,
             collect_vec_stmt!(stmts, IfFeatureStmt)?,
@@ -2570,6 +2599,21 @@ impl Stmt for RefineStmt {
         true
     }
 
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(MustStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(PresenceStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(DefaultStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ConfigStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MandatoryStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MinElementsStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MaxElementsStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::RefineStmt(RefineStmt {
@@ -2606,20 +2650,7 @@ impl Stmt for RefineStmt {
 
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("if-feature", Repeat::new(Some(0), None)),
-            ("must", Repeat::new(Some(0), None)),
-            ("presence", Repeat::new(Some(0), Some(1))),
-            ("default", Repeat::new(Some(0), None)),
-            ("config", Repeat::new(Some(0), Some(1))),
-            ("mandatory", Repeat::new(Some(0), Some(1))),
-            ("min-elements", Repeat::new(Some(0), Some(1))),
-            ("max-elements", Repeat::new(Some(0), Some(1))),
-            ("description", Repeat::new(Some(0), Some(1))),
-            ("reference", Repeat::new(Some(0), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok((collect_vec_stmt!(stmts, IfFeatureStmt)?,
             collect_vec_stmt!(stmts, MustStmt)?,
@@ -2707,6 +2738,13 @@ impl Stmt for WhenStmt {
         true
     }
 
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
         StmtType::WhenStmt(WhenStmt {
@@ -2727,12 +2765,7 @@ impl Stmt for WhenStmt {
 
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("description", Repeat::new(Some(0), Some(1))),
-            ("reference", Repeat::new(Some(0), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok((collect_opt_stmt!(stmts, DescriptionStmt)?,
             collect_opt_stmt!(stmts, ReferenceStmt)?))

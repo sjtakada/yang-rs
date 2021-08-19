@@ -107,6 +107,7 @@ type StmtParserFn = fn(&mut Parser) -> Result<StmtType, YangError>;
 
 // TODO: To be deleted following two functions in the future.
 
+/*
 // Parse a single statement.
 fn call_stmt_parser(parser: &mut Parser, keyword: &str) -> Result<StmtType, YangError> {
     let f = STMT_PARSER.get(keyword).unwrap();
@@ -158,6 +159,7 @@ println!("*** parse_stmts {:?}", token);
 
     Ok(stmts)
 }
+*/
 
 /*  TBD maybe not needed.
 // Expect one of statements from given set.
