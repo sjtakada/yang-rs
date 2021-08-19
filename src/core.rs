@@ -5,7 +5,7 @@
 
 use std::fmt;
 use std::collections::HashMap;
-use std::collections::HashSet;
+//use std::collections::HashSet;
 
 use super::error::*;
 use super::parser::*;
@@ -13,7 +13,7 @@ use super::stmt::*;
 
 // Statement Parser initialization.
 lazy_static! {
-    static ref STMT_PARSER: HashMap<&'static str, StmtParserFn> = {
+    pub static ref STMT_PARSER: HashMap<Keyword, StmtParserFn> = {
         let mut m = HashMap::new();
 
         m.insert("module", ModuleStmt::parse as StmtParserFn);
@@ -99,66 +99,18 @@ lazy_static! {
     };
 }
 
+// Keyword.
+pub type Keyword = &'static str;
+
 // Statement collection.
-type StmtCollection = HashMap<String, Vec<StmtType>>;
+pub type StmtCollection = HashMap<String, Vec<StmtType>>;
 
 // Statement Parser callback type.
 type StmtParserFn = fn(&mut Parser) -> Result<StmtType, YangError>;
 
-// Parse a single statement.
-fn call_stmt_parser(parser: &mut Parser, keyword: &str) -> Result<StmtType, YangError> {
-    let f = STMT_PARSER.get(keyword).unwrap();
-    f(parser)
-}
-
-// Get a list of statements in any order.
-pub fn parse_stmt_in_any_order(parser: &mut Parser, map: HashMap<&'static str, Repeat>) -> Result<StmtCollection, YangError> {
-    let mut stmts: StmtCollection = HashMap::new();
-
-    loop {
-        let token = parser.get_token()?;
-println!("*** parse_stmts {:?}", token);
-        match token {
-            Token::Identifier(ref keyword) => {
-                if map.contains_key(keyword as &str) {
-                    let stmt = call_stmt_parser(parser, &keyword)?;
-                    let v =  match stmts.get_mut(keyword as &str) {
-                        Some(v) => v,
-                        None => {
-                            stmts.insert(keyword.to_string(), Vec::new());
-                            stmts.get_mut(keyword as &str).unwrap()
-                        }
-                    };
-                    v.push(stmt);
-                } else {
-                    parser.save_token(token);
-                    break;
-                }
-            }
-            _ => {
-                parser.save_token(token);
-                break;
-            }
-        }
-    }
-
-    // Validation against repetition.
-    for (k, rep) in map.iter() {
-        let n = match stmts.get(&k.to_string()) {
-            Some(v) => v.len(),
-            None => 0,
-        };
-
-        if !rep.validate(n) {
-            return Err(YangError::StatementMismatch(k));
-        }
-    }
-
-    Ok(stmts)
-}
-
+/*  TBD maybe not needed.
 // Expect one of statements from given set.
-pub fn expect_a_stmt(parser: &mut Parser, set: HashSet<&'static str>) -> Result<StmtType, YangError> {
+pub fn expect_a_stmt(parser: &mut Parser, set: HashSet<Keyword>) -> Result<StmtType, YangError> {
     let token = parser.get_token()?;
 println!("*** parse_stmts {:?}", token);
     match token {
@@ -172,6 +124,7 @@ println!("*** parse_stmts {:?}", token);
         _ => Err(YangError::UnexpectedStatement(parser.line())),
     }
 }
+*/
 
 // Yang Statement
 pub enum StmtType {

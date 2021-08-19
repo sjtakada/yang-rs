@@ -3,15 +3,12 @@
 //  Copyright (C) 2021 Toshiaki Takada
 //
 
-use std::collections::HashMap;
-
 use super::core::*;
 use super::error::*;
 use super::parser::*;
-use super::arg::*;
 use super::stmt::*;
+use super::substmt::*;
 
-#[macro_use]
 use crate::collect_a_stmt;
 use crate::collect_vec_stmt;
 use crate::collect_opt_stmt;
@@ -20,10 +17,13 @@ use crate::parse_a_stmt;
 //
 // Trait for compound of YANG statements.
 //
-//pub trait Compound {
-//    /// Return list fo statement keyword.
-//    fn keywords() -> Vec<&'static str>;
-//}
+pub trait Compound {
+    // Return list fo statement keyword.
+//    fn keywords() -> Vec<Keyword>;
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef>;
+}
 
 ///
 /// Module Header Statements.
@@ -35,15 +35,19 @@ pub struct ModuleHeaderStmts {
     prefix: PrefixStmt,
 }
 
+impl Compound for ModuleHeaderStmts {
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::HaveOne(SubStmtWith::Stmt(YangVersionStmt::keyword)),
+             SubStmtDef::HaveOne(SubStmtWith::Stmt(NamespaceStmt::keyword)),
+             SubStmtDef::HaveOne(SubStmtWith::Stmt(PrefixStmt::keyword)),
+        ]
+    }
+}
+
 impl ModuleHeaderStmts {
     pub fn parse(parser: &mut Parser) -> Result<ModuleHeaderStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("yang-version", Repeat::new(Some(1), Some(1))),
-            ("namespace", Repeat::new(Some(1), Some(1))),
-            ("prefix", Repeat::new(Some(1), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok(ModuleHeaderStmts {
             yang_version: collect_a_stmt!(stmts, YangVersionStmt)?,
@@ -63,14 +67,18 @@ pub struct SubmoduleHeaderStmts {
     belongs_to: BelongsToStmt,
 }
 
+impl Compound for SubmoduleHeaderStmts {
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::HaveOne(SubStmtWith::Stmt(YangVersionStmt::keyword)),
+             SubStmtDef::HaveOne(SubStmtWith::Stmt(BelongsToStmt::keyword)),
+        ]
+    }
+}
+
 impl SubmoduleHeaderStmts {
     pub fn parse(parser: &mut Parser) -> Result<SubmoduleHeaderStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("yang-version", Repeat::new(Some(1), Some(1))),
-            ("belongs-to", Repeat::new(Some(1), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok(SubmoduleHeaderStmts {
             yang_version: collect_a_stmt!(stmts, YangVersionStmt)?,
@@ -90,16 +98,20 @@ pub struct MetaStmts {
     reference: Option<ReferenceStmt>,
 }
 
+impl Compound for MetaStmts {
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(OrganizationStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ContactStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+}
+
 impl MetaStmts {
     pub fn parse(parser: &mut Parser) -> Result<MetaStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("organization", Repeat::new(Some(0), None)),
-            ("contact", Repeat::new(Some(0), None)),
-            ("description", Repeat::new(Some(0), None)),
-            ("reference", Repeat::new(Some(0), None)),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok(MetaStmts {
             organization: collect_opt_stmt!(stmts, OrganizationStmt)?,
@@ -119,14 +131,18 @@ pub struct LinkageStmts {
     include: Vec<IncludeStmt>,
 }
 
+impl Compound for LinkageStmts {
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(ImportStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IncludeStmt::keyword)),
+        ]
+    }
+}
+
 impl LinkageStmts {
     pub fn parse(parser: &mut Parser) -> Result<LinkageStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("import", Repeat::new(Some(0), None)),
-            ("include", Repeat::new(Some(0), None)),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok(LinkageStmts {
             import: collect_vec_stmt!(stmts, ImportStmt)?,
@@ -143,13 +159,17 @@ pub struct RevisionStmts {
     revision: Vec<RevisionStmt>
 }
 
+impl Compound for RevisionStmts {
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(RevisionStmt::keyword)),
+        ]
+    }
+}
+
 impl RevisionStmts {
     pub fn parse(parser: &mut Parser) -> Result<RevisionStmts, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("revision", Repeat::new(Some(0), None)),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok(RevisionStmts {
             revision: collect_vec_stmt!(stmts, RevisionStmt)?,
@@ -165,13 +185,17 @@ pub struct NumericalRestrictions {
     range: Option<RangeStmt>,
 }
 
+impl Compound for NumericalRestrictions {
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(RangeStmt::keyword)),
+        ]
+    }
+}
+
 impl NumericalRestrictions {
     pub fn parse(parser: &mut Parser) -> Result<NumericalRestrictions, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("range", Repeat::new(Some(0), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok(NumericalRestrictions {
             range: collect_opt_stmt!(stmts, RangeStmt)?,
@@ -188,14 +212,18 @@ pub struct Decimal64Specification {
     range: Option<RangeStmt>,
 }
 
+impl Compound for Decimal64Specification {
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::HaveOne(SubStmtWith::Stmt(FractionDigitsStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(RangeStmt::keyword)),
+        ]
+    }
+}
+
 impl Decimal64Specification {
     pub fn parse(parser: &mut Parser) -> Result<Decimal64Specification, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("fraction-digits", Repeat::new(Some(1), Some(1))),
-            ("range", Repeat::new(Some(0), Some(1))),
-        ].iter().cloned().collect();
-
-        let mut stmts = parse_stmt_in_any_order(parser, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok(Decimal64Specification {
             fraction_digits: collect_a_stmt!(stmts, FractionDigitsStmt)?,

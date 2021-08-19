@@ -10,6 +10,7 @@ pub mod error;
 pub mod parser;
 pub mod arg;
 pub mod stmt;
+pub mod substmt;
 pub mod compound;
 
 #[macro_use]

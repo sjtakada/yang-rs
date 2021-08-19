@@ -6,7 +6,6 @@
 //use std::mem::size_of;
 
 use std::cell::Cell;
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::Error;
@@ -16,8 +15,8 @@ use std::path::Path;
 use super::core::*;
 use super::error::*;
 use super::stmt::*;
+use super::substmt::*;
 
-#[macro_use]
 use crate::collect_a_stmt;
 
 /// Open and parse a YANG file.
@@ -446,16 +445,20 @@ impl Parser {
         }
     }
 
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(ModuleStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(SubmoduleStmt::keyword)),
+        ]
+    }
+
     /// Entry point of YANG parser. It will return a module or submodule statement.
     pub fn parse_yang(&mut self) -> Result<StmtType, YangError> {
-        let map: HashMap<&'static str, Repeat> = [
-            ("module", Repeat::new(Some(0), Some(1))),
-            ("submodule", Repeat::new(Some(0), Some(1))),
-        ].iter().cloned().collect();
 
 //        println!("*** size_of {}", size_of::<ModuleStmt>());
 
-        let mut stmts = parse_stmt_in_any_order(self, map)?;
+        let mut stmts = SubStmtUtil::parse_substmts(self, Self::substmts_def())?;
+
         if stmts.contains_key("module") {
             let module = collect_a_stmt!(stmts, ModuleStmt)?;
             Ok(StmtType::ModuleStmt(module))
