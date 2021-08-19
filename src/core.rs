@@ -13,7 +13,7 @@ use super::stmt::*;
 
 // Statement Parser initialization.
 lazy_static! {
-    pub static ref STMT_PARSER: HashMap<&'static str, StmtParserFn> = {
+    pub static ref STMT_PARSER: HashMap<Keyword, StmtParserFn> = {
         let mut m = HashMap::new();
 
         m.insert("module", ModuleStmt::parse as StmtParserFn);
@@ -110,7 +110,7 @@ type StmtParserFn = fn(&mut Parser) -> Result<StmtType, YangError>;
 
 /*  TBD maybe not needed.
 // Expect one of statements from given set.
-pub fn expect_a_stmt(parser: &mut Parser, set: HashSet<&'static str>) -> Result<StmtType, YangError> {
+pub fn expect_a_stmt(parser: &mut Parser, set: HashSet<Keyword>) -> Result<StmtType, YangError> {
     let token = parser.get_token()?;
 println!("*** parse_stmts {:?}", token);
     match token {

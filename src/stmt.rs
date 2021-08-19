@@ -28,7 +28,7 @@ pub trait Stmt {
     type SubStmts;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str;
+    fn keyword() -> Keyword;
 
     /// Return true if this statement has sub-statements.
     fn has_substmts() -> bool {
@@ -135,7 +135,7 @@ impl Stmt for ModuleStmt {
     type SubStmts = (ModuleHeaderStmts, LinkageStmts, MetaStmts, RevisionStmts);
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "module"
     }
 
@@ -197,7 +197,7 @@ impl Stmt for SubmoduleStmt {
     type SubStmts = (SubmoduleHeaderStmts, LinkageStmts, MetaStmts, RevisionStmts);
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "submodule"
     }
 
@@ -245,7 +245,7 @@ impl Stmt for YangVersionStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "yang-version"
     }
 
@@ -277,7 +277,7 @@ impl Stmt for ImportStmt {
     type SubStmts = (PrefixStmt, Option<RevisionDateStmt>,Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "import"
     }
 
@@ -336,7 +336,7 @@ impl Stmt for IncludeStmt {
     type SubStmts = (Option<RevisionDateStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "include"
     }
 
@@ -399,7 +399,7 @@ impl Stmt for NamespaceStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "namespace"
     }
 
@@ -425,7 +425,7 @@ impl Stmt for PrefixStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "prefix"
     }
 
@@ -455,7 +455,7 @@ impl Stmt for BelongsToStmt {
     type SubStmts = (PrefixStmt,);
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "belongs-to"
     }
 
@@ -502,7 +502,7 @@ impl Stmt for OrganizationStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "organization"
     }
 
@@ -528,7 +528,7 @@ impl Stmt for ContactStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "contact"
     }
 
@@ -554,7 +554,7 @@ impl Stmt for DescriptionStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "description"
     }
 
@@ -580,7 +580,7 @@ impl Stmt for ReferenceStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "reference"
     }
 
@@ -606,7 +606,7 @@ impl Stmt for UnitsStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "units"
     }
 
@@ -639,7 +639,7 @@ impl Stmt for RevisionStmt {
     type SubStmts = (Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "revision"
     }
 
@@ -698,7 +698,7 @@ impl Stmt for RevisionDateStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "revision-date"
     }
 
@@ -728,7 +728,7 @@ impl Stmt for ExtensionStmt {
     type SubStmts = (Option<ArgumentStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "extension"
     }
 
@@ -796,7 +796,7 @@ impl Stmt for ArgumentStmt {
     type SubStmts = (Option<YinElementStmt>,);
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "argument"
     }
 
@@ -851,7 +851,7 @@ impl Stmt for YinElementStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "yin-element"
     }
 
@@ -884,7 +884,7 @@ impl Stmt for IdentityStmt {
     type SubStmts = (Vec<IfFeatureStmt>, Vec<BaseStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "identity"
     }
 
@@ -955,7 +955,7 @@ impl Stmt for BaseStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "base"
     }
 
@@ -987,7 +987,7 @@ impl Stmt for FeatureStmt {
     type SubStmts = (Vec<IfFeatureStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "feature"
     }
 
@@ -1054,7 +1054,7 @@ impl Stmt for IfFeatureStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "if-feature"
     }
 
@@ -1078,7 +1078,7 @@ impl Stmt for TypedefStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "typedef"
     }
 
@@ -1107,7 +1107,7 @@ impl Stmt for TypeStmt {
     type SubStmts = Option<TypeBodyStmts>;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "type"
     }
 
@@ -1151,7 +1151,7 @@ impl Stmt for RangeStmt {
     type SubStmts = (Option<ErrorMessageStmt>, Option<ErrorAppTagStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "range"
     }
 
@@ -1218,7 +1218,7 @@ impl Stmt for FractionDigitsStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "fraction-digits"
     }
 
@@ -1250,7 +1250,7 @@ impl Stmt for LengthStmt {
     type SubStmts = (Option<ErrorMessageStmt>, Option<ErrorAppTagStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "length"
     }
 
@@ -1322,7 +1322,7 @@ impl Stmt for PatternStmt {
     type SubStmts = (Option<ModifierStmt>, Option<ErrorMessageStmt>, Option<ErrorAppTagStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "pattern"
     }
 
@@ -1394,7 +1394,7 @@ impl Stmt for ModifierStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "modifier"
     }
 
@@ -1422,7 +1422,7 @@ impl Stmt for DefaultStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "default"
     }
 
@@ -1455,7 +1455,7 @@ impl Stmt for EnumStmt {
     type SubStmts = (Vec<IfFeatureStmt>, Option<ValueStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "enum"
     }
 
@@ -1526,7 +1526,7 @@ impl Stmt for PathStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "path"
     }
 
@@ -1554,7 +1554,7 @@ impl Stmt for RequireInstanceStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "require-instance"
     }
 
@@ -1587,7 +1587,7 @@ impl Stmt for BitStmt {
     type SubStmts = (Vec<IfFeatureStmt>, Option<PositionStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "bit"
     }
 
@@ -1658,7 +1658,7 @@ impl Stmt for PositionStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "position"
     }
 
@@ -1686,7 +1686,7 @@ impl Stmt for StatusStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "status"
     }
 
@@ -1715,7 +1715,7 @@ impl Stmt for ConfigStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "config"
     }
 
@@ -1743,7 +1743,7 @@ impl Stmt for MandatoryStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "mandatory"
     }
 
@@ -1771,7 +1771,7 @@ impl Stmt for PresenceStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "presence"
     }
 
@@ -1799,7 +1799,7 @@ impl Stmt for OrderedByStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "ordered-by"
     }
 
@@ -1831,7 +1831,7 @@ impl Stmt for MustStmt {
     type SubStmts = (Option<ErrorMessageStmt>, Option<ErrorAppTagStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "must"
     }
 
@@ -1898,7 +1898,7 @@ impl Stmt for ErrorMessageStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "error-message"
     }
 
@@ -1926,7 +1926,7 @@ impl Stmt for ErrorAppTagStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "error-app-tag"
     }
 
@@ -1954,7 +1954,7 @@ impl Stmt for MinElementsStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "min-elements"
     }
 
@@ -1980,7 +1980,7 @@ impl Stmt for MaxElementsStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "max-elements"
     }
 
@@ -2006,7 +2006,7 @@ impl Stmt for ValueStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "value"
     }
 
@@ -2031,7 +2031,7 @@ impl Stmt for GroupingStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "grouping"
     }
 
@@ -2053,7 +2053,7 @@ impl Stmt for ContainerStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "container"
     }
 
@@ -2075,7 +2075,7 @@ impl Stmt for LeafStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "leaf"
     }
 
@@ -2097,7 +2097,7 @@ impl Stmt for LeafListStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "leaf-list"
     }
 
@@ -2119,7 +2119,7 @@ impl Stmt for ListStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "list"
     }
 
@@ -2147,7 +2147,7 @@ impl Stmt for KeyStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "key"
     }
 
@@ -2175,7 +2175,7 @@ impl Stmt for UniqueStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "unique"
     }
 
@@ -2201,7 +2201,7 @@ impl Stmt for ChoiceStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "choice"
     }
 
@@ -2223,7 +2223,7 @@ impl Stmt for ShortCaseStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "short-case"
     }
 
@@ -2245,7 +2245,7 @@ impl Stmt for CaseStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "case"
     }
 
@@ -2282,7 +2282,7 @@ impl Stmt for AnydataStmt {
                      Option<MandatoryStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "anydata"
     }
 
@@ -2374,7 +2374,7 @@ impl Stmt for AnyxmlStmt {
                      Option<MandatoryStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "anyxml"
     }
 
@@ -2465,7 +2465,7 @@ impl Stmt for UsesStmt {
                      Option<ReferenceStmt>, Vec<RefineStmt>, Vec<UsesAugmentStmt>);
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "uses"
     }
 
@@ -2557,7 +2557,7 @@ impl Stmt for RefineStmt {
                      Option<MinElementsStmt>, Option<MaxElementsStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "refine"
     }
 
@@ -2648,7 +2648,7 @@ impl Stmt for UsesAugmentStmt {
     type SubStmts = ();
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "uses-augment"
     }
 }
@@ -2667,7 +2667,7 @@ impl Stmt for AugmentStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "augment"
     }
 
@@ -2696,7 +2696,7 @@ impl Stmt for WhenStmt {
     type SubStmts = (Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "when"
     }
 
@@ -2753,7 +2753,7 @@ impl Stmt for RpcStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "rpc"
     }
 
@@ -2775,7 +2775,7 @@ impl Stmt for ActionStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "action"
     }
 
@@ -2797,7 +2797,7 @@ impl Stmt for InputStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "input"
     }
 
@@ -2819,7 +2819,7 @@ impl Stmt for OutputStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "output"
     }
 
@@ -2841,7 +2841,7 @@ impl Stmt for NotificationStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "notification"
     }
 
@@ -2863,7 +2863,7 @@ impl Stmt for DeviationStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "deviation"
     }
 
@@ -2885,7 +2885,7 @@ impl Stmt for DeviationNotSupportedStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "deviation-not-supported"
     }
 
@@ -2907,7 +2907,7 @@ impl Stmt for DeviateAddStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "deviate-add"
     }
 
@@ -2929,7 +2929,7 @@ impl Stmt for DeviateDeleteStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "deviate-delete"
     }
 
@@ -2951,7 +2951,7 @@ impl Stmt for DeviateReplaceStmt {
     type Arg = String;
 
     /// Return statement keyword in &str.
-    fn keyword() -> &'static str {
+    fn keyword() -> Keyword {
         "deviate-replace"
     }
 
