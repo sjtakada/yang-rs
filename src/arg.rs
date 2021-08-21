@@ -67,6 +67,18 @@ pub trait StmtArg {
 }
 
 ///
+/// No Arg (for "input-stmt", "output-stmt").
+///
+#[derive(Debug, Clone, PartialEq)]
+pub struct NoArg;
+
+impl StmtArg for NoArg {
+    fn parse_arg(_parser: &mut Parser) -> Result<Self, YangError> {
+        Ok(NoArg)
+    }
+}
+
+///
 /// Yang Identifier.
 ///
 #[derive(Debug, Clone, PartialEq)]
@@ -104,7 +116,7 @@ impl StmtArg for Identifier {
 }
 
 ///
-/// IdentifierRef.
+/// "identity-ref".
 ///
 #[derive(Clone, PartialEq)]
 pub struct IdentifierRef {

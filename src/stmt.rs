@@ -11,6 +11,7 @@ use super::parser::*;
 use super::arg::*;
 use super::substmt::*;
 use super::compound::*;
+use super::compound::Compound;
 
 use crate::collect_a_stmt;
 use crate::collect_vec_stmt;
@@ -2883,30 +2884,66 @@ impl Stmt for ActionStmt {
     }
 }
 
+*/
+
 ///
-///
+/// 7.14.2. The "input" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct InputStmt {
+    must: Vec<MustStmt>,
+    typedef: Vec<TypedefStmt>,
+    grouping: Vec<GroupingStmt>,
+//    data_def: Vec<DatadefStmt>,
 }
 
 impl Stmt for InputStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = NoArg;
+
+    /// Sub Statements.
+    type SubStmts = (Vec<MustStmt>, Vec<TypedefStmt>, Vec<GroupingStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "input"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has substatements.
+    fn has_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(MustStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Compound(TypedefOrGrouping::keywords)),
+        ]
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(_arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::InputStmt(InputStmt {
+            must: substmts.0,
+            typedef: substmts.1,
+            grouping: substmts.2,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_vec_stmt!(stmts, MustStmt)?,
+            collect_vec_stmt!(stmts, TypedefStmt)?,
+            collect_vec_stmt!(stmts, GroupingStmt)?,
+        ))
     }
 }
 
+/*
 ///
-///
+/// 7.14.3. The "output" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct OutputStmt {

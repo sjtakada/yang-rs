@@ -182,6 +182,7 @@ impl RevisionStmts {
 ///
 /// "data-def-stmt".
 ///
+#[derive(Debug, Clone)]
 pub struct DataDefStmt {
 //    container: Option<ContainerStmt>,
 //    leaf: Option<LeafStmt>,
@@ -192,6 +193,19 @@ pub struct DataDefStmt {
     anyxml: Option<AnyxmlStmt>,
     uses: Option<UsesStmt>,
 }
+
+impl Compound for DataDefStmt {
+    /// Return list fo statement keyword.
+    fn keywords() -> Vec<Keyword> {
+        vec![AnydataStmt::keyword(), AnyxmlStmt::keyword(), UsesStmt::keyword()]
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        Vec::new()
+    }
+}
+
 
 ///
 /// "numerical-restrictions".
@@ -416,5 +430,25 @@ impl TypeBodyStmts {
             };
 
         Ok(type_body)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct TypedefOrGrouping {
+//    typedef: Vec<TypedefStmt>,
+//    grouping: Vec<GroupingStmt>,
+}
+
+impl Compound for TypedefOrGrouping {
+    /// Return list fo statement keyword.
+    fn keywords() -> Vec<Keyword> {
+        vec![TypedefStmt::keyword(), GroupingStmt::keyword()]
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(TypedefStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(GroupingStmt::keyword)),
+             ]
     }
 }
