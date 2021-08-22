@@ -81,8 +81,8 @@ lazy_static! {
 //        m.insert("rpc", RpcStmt::parse as StmtParserFn);
         m.insert("action", ActionStmt::parse as StmtParserFn);
         m.insert("input", InputStmt::parse as StmtParserFn);
-/*
         m.insert("output", OutputStmt::parse as StmtParserFn);
+/*
         m.insert("notification", NotificationStmt::parse as StmtParserFn);
         m.insert("deviation", DeviationStmt::parse as StmtParserFn);
         m.insert("deviation-not-supported", DeviationNotSupportedStmt::parse as StmtParserFn);
@@ -189,8 +189,8 @@ pub enum StmtType {
 //    RpcStmt(RpcStmt),
     ActionStmt(ActionStmt),
     InputStmt(InputStmt),
-/*
     OutputStmt(OutputStmt),
+/*
     NotificationStmt(NotificationStmt),
     DeviationStmt(DeviationStmt),
     DeviationNotSupportedStmt(DeviationNotSupportedStmt),
@@ -269,8 +269,8 @@ impl fmt::Debug for StmtType {
 //            StmtType::RpcStmt(stmt) => write!(f, "rpc-stmt {:?}", stmt),
             StmtType::ActionStmt(stmt) => write!(f, "action-stmt {:?}", stmt),
             StmtType::InputStmt(stmt) => write!(f, "input-stmt {:?}", stmt),
-/*
             StmtType::OutputStmt(stmt) => write!(f, "output-stmt {:?}", stmt),
+/*
             StmtType::NotificationStmt(stmt) => write!(f, "notification-stmt {:?}", stmt),
             StmtType::DeviationStmt(stmt) => write!(f, "deviation-stmt {:?}", stmt),
             StmtType::DeviationNotSupportedStmt(stmt) => write!(f, "deviation-not-supported-stmt {:?}", stmt),

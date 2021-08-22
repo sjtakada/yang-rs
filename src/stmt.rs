@@ -2864,7 +2864,7 @@ impl Stmt for RpcStmt {
 */
 
 ///
-///
+/// 7.15. The "action" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ActionStmt {
@@ -2875,7 +2875,7 @@ pub struct ActionStmt {
     reference: Option<ReferenceStmt>,
     typedef_or_grouping: TypedefOrGrouping,
     input: Option<InputStmt>,
-//    ouptput: Option<OuptputStmt>,
+    output: Option<OutputStmt>,
 }
 
 impl Stmt for ActionStmt {
@@ -2884,7 +2884,7 @@ impl Stmt for ActionStmt {
 
     /// Sub Statements.
     type SubStmts = (Vec<IfFeatureStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>,
-                     TypedefOrGrouping, Option<InputStmt>, //Option<OutputStmt>,
+                     TypedefOrGrouping, Option<InputStmt>, Option<OutputStmt>,
     );
 
     /// Return statement keyword in &str.
@@ -2905,7 +2905,7 @@ impl Stmt for ActionStmt {
              SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Selection(TypedefOrGrouping::keywords)),
              SubStmtDef::Optional(SubStmtWith::Stmt(InputStmt::keyword)),
-//             SubStmtDef::Optional(SubStmtWith::Stmt(OutputStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(OutputStmt::keyword)),
         ]
     }
 
@@ -2919,7 +2919,7 @@ impl Stmt for ActionStmt {
             reference: None,
             typedef_or_grouping: TypedefOrGrouping::new(),
             input: None,
-//            output: None,
+            output: None,
         })
     }
 
@@ -2933,7 +2933,7 @@ impl Stmt for ActionStmt {
             reference: substmts.3,
             typedef_or_grouping: substmts.4,
             input: substmts.5,
-//            output: substmts.6,
+            output: substmts.6,
         })
     }
 
@@ -2950,7 +2950,7 @@ impl Stmt for ActionStmt {
                 collect_vec_stmt!(stmts, GroupingStmt)?,
             )),
             collect_opt_stmt!(stmts, InputStmt)?,
-//            collect_opt_stmt!(stmts, OutputStmt)?,
+            collect_opt_stmt!(stmts, OutputStmt)?,
         ))
     }
 }
@@ -3008,6 +3008,77 @@ impl Stmt for InputStmt {
                 collect_vec_stmt!(stmts, TypedefStmt)?,
                 collect_vec_stmt!(stmts, GroupingStmt)?,)),
             DataDefStmt::new_with_substmts((
+                // collect_vec_stmt!(stmts, ContainerStmt)?,
+                // collect_vec_stmt!(stmts, LeafStmt)?,
+                // collect_vec_stmt!(stmts, LeafListStmt)?,
+                // collect_vec_stmt!(stmts, ListStmt)?,
+                // collect_vec_stmt!(stmts, ChoiceStmt)?,
+                collect_vec_stmt!(stmts, AnydataStmt)?,
+                collect_vec_stmt!(stmts, AnyxmlStmt)?,
+                collect_vec_stmt!(stmts, UsesStmt)?,)),
+        ))
+    }
+}
+
+///
+/// 7.14.3. The "output" Statement.
+///
+#[derive(Debug, Clone)]
+pub struct OutputStmt {
+    must: Vec<MustStmt>,
+    typedef_or_grouping: TypedefOrGrouping,
+    data_def: DataDefStmt,
+}
+
+impl Stmt for OutputStmt {
+    /// Arg type.
+    type Arg = NoArg;
+
+    /// Sub Statements.
+    type SubStmts = (Vec<MustStmt>, TypedefOrGrouping, DataDefStmt);
+
+    /// Return statement keyword in &str.
+    fn keyword() -> Keyword {
+        "output"
+    }
+
+
+    /// Return true if this statement has substatements.
+    fn has_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(MustStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(TypedefOrGrouping::keywords)),
+             SubStmtDef::OneOrMore(SubStmtWith::Selection(DataDefStmt::keywords)),
+        ]
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(_arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::OutputStmt(OutputStmt {
+            must: substmts.0,
+            typedef_or_grouping: substmts.1,
+            data_def: substmts.2,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_vec_stmt!(stmts, MustStmt)?,
+            TypedefOrGrouping::new_with_substmts((
+                collect_vec_stmt!(stmts, TypedefStmt)?,
+                collect_vec_stmt!(stmts, GroupingStmt)?,)),
+            DataDefStmt::new_with_substmts((
+                // collect_vec_stmt!(stmts, ContainerStmt)?,
+                // collect_vec_stmt!(stmts, LeafStmt)?,
+                // collect_vec_stmt!(stmts, LeafListStmt)?,
+                // collect_vec_stmt!(stmts, ListStmt)?,
+                // collect_vec_stmt!(stmts, ChoiceStmt)?,
                 collect_vec_stmt!(stmts, AnydataStmt)?,
                 collect_vec_stmt!(stmts, AnyxmlStmt)?,
                 collect_vec_stmt!(stmts, UsesStmt)?,)),
@@ -3016,27 +3087,6 @@ impl Stmt for InputStmt {
 }
 
 /*
-///
-/// 7.14.3. The "output" Statement.
-///
-#[derive(Debug, Clone)]
-pub struct OutputStmt {
-}
-
-impl Stmt for OutputStmt {
-    /// Arg type.
-    type Arg = String;
-
-    /// Return statement keyword in &str.
-    fn keyword() -> Keyword {
-        "output"
-    }
-
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
-    }
-}
 
 ///
 ///
