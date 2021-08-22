@@ -11,7 +11,6 @@ use super::parser::*;
 use super::arg::*;
 use super::substmt::*;
 use super::compound::*;
-use super::compound::Compound;
 
 use crate::collect_a_stmt;
 use crate::collect_vec_stmt;
@@ -2917,7 +2916,7 @@ impl Stmt for InputStmt {
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
         vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(MustStmt::keyword)),
-             SubStmtDef::ZeroOrMore(SubStmtWith::Compound(TypedefOrGrouping::keywords)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(TypedefOrGrouping::keywords)),
         ]
     }
 

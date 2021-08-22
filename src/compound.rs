@@ -12,7 +12,7 @@ use super::substmt::*;
 use crate::collect_a_stmt;
 use crate::collect_vec_stmt;
 use crate::collect_opt_stmt;
-use crate::parse_a_stmt;
+//use crate::parse_a_stmt;
 
 //
 // Trait for compound YANG statements.
@@ -433,22 +433,44 @@ impl TypeBodyStmts {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct TypedefOrGrouping {
-//    typedef: Vec<TypedefStmt>,
-//    grouping: Vec<GroupingStmt>,
+//
+// Trait for selection of YANG statements.
+//
+pub trait Selection {
+    /// Sub Statements.
+    type SubStmts;
+
+    /// Return list fo statement keyword.
+    fn keywords() -> Vec<Keyword> {
+        panic!("undefined");
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(_substmts: Self::SubStmts) -> Self where Self: Sized {
+        panic!();
+    }
 }
 
-impl Compound for TypedefOrGrouping {
+#[derive(Debug, Clone)]
+pub struct TypedefOrGrouping {
+    typedef: Vec<TypedefStmt>,
+    grouping: Vec<GroupingStmt>,
+}
+
+impl Selection for TypedefOrGrouping {
+    /// Sub Statements.
+    type SubStmts = (Vec<TypedefStmt>, Vec<GroupingStmt>);
+
     /// Return list fo statement keyword.
     fn keywords() -> Vec<Keyword> {
         vec![TypedefStmt::keyword(), GroupingStmt::keyword()]
     }
 
-    /// Return substatements definition.
-    fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(TypedefStmt::keyword)),
-             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(GroupingStmt::keyword)),
-             ]
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(substmts: Self::SubStmts) -> Self where Self: Sized {
+        Self {
+            typedef: substmts.0,
+            grouping: substmts.1,
+        }
     }
 }

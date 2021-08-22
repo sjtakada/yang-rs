@@ -10,12 +10,12 @@ use super::parser::*;
 use super::error::*;
 
 pub type StmtKeywordFn = fn() -> Keyword;
-pub type CompoundKeywordFn = fn() -> Vec<Keyword>;
+pub type SelectionKeywordFn = fn() -> Vec<Keyword>;
 
 #[derive(Debug, Clone)]
 pub enum SubStmtWith {
     Stmt(StmtKeywordFn),
-    Compound(CompoundKeywordFn),
+    Selection(SelectionKeywordFn),
 }
 
 #[derive(Debug, Clone)]
@@ -80,7 +80,7 @@ impl SubStmtUtil {
                 SubStmtWith::Stmt(func) => {
                     k2i.insert(func(), i);
                 }
-                SubStmtWith::Compound(func) => {
+                SubStmtWith::Selection(func) => {
                     for k in func() {
                         k2i.insert(k, i);
                     }
