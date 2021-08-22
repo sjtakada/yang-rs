@@ -428,6 +428,9 @@ pub trait Selection {
     }
 }
 
+///
+/// "typedef-stmt" / "grouping-stmt"
+///
 #[derive(Debug, Clone)]
 pub struct TypedefOrGrouping {
     typedef: Vec<TypedefStmt>,
@@ -516,7 +519,73 @@ impl Selection for DataDefStmt {
 }
 
 ///
-/// "short-case-stmt" or "case-stmt".
+/// "data-def-stmt" / "case-stmt" / "action-stmt" / "notification-stmt".
+///
+#[derive(Debug, Clone)]
+pub struct DataDefOrElse {
+    container: Vec<ContainerStmt>,
+    leaf: Vec<LeafStmt>,
+    leaf_list: Vec<LeafListStmt>,
+    list: Vec<ListStmt>,
+    choice: Vec<ChoiceStmt>,
+    anydata: Vec<AnydataStmt>,
+    anyxml: Vec<AnyxmlStmt>,
+    uses: Vec<UsesStmt>,
+    case: Vec<CaseStmt>,
+    action: Vec<ActionStmt>,
+    notification: Vec<NotificationStmt>,
+}
+
+impl Selection for DataDefOrElse {
+    /// Sub Statements.
+    type SubStmts = (Vec<ContainerStmt>, Vec<LeafStmt>, Vec<LeafListStmt>, Vec<ListStmt>,
+                     Vec<ChoiceStmt>, Vec<AnydataStmt>, Vec<AnyxmlStmt>, Vec<UsesStmt>,
+                     Vec<CaseStmt>, Vec<ActionStmt>, Vec<NotificationStmt>);
+
+    /// Return list fo statement keyword.
+    fn keywords() -> Vec<Keyword> {
+        vec![ContainerStmt::keyword(), LeafStmt::keyword(), LeafListStmt::keyword(), ListStmt::keyword(),
+             ChoiceStmt::keyword(), AnydataStmt::keyword(), AnyxmlStmt::keyword(), UsesStmt::keyword(),
+             CaseStmt::keyword(), ActionStmt::keyword(), NotificationStmt::keyword()]
+    }
+
+    /// Constructor with empty substatements.
+    fn new() -> Self where Self: Sized {
+        Self {
+            container: Vec::new(),
+            leaf: Vec::new(),
+            leaf_list: Vec::new(),
+            list: Vec::new(),
+            choice: Vec::new(),
+            anydata: Vec::new(),
+            anyxml: Vec::new(),
+            uses: Vec::new(),
+            case: Vec::new(),
+            action: Vec::new(),
+            notification: Vec::new(),
+        }
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(substmts: Self::SubStmts) -> Self where Self: Sized {
+        Self {
+            container: substmts.0,
+            leaf: substmts.1,
+            leaf_list: substmts.2,
+            list: substmts.3,
+            choice: substmts.4,
+            anydata: substmts.5,
+            anyxml: substmts.6,
+            uses: substmts.7,
+            case: substmts.8,
+            action: substmts.9,
+            notification: substmts.10,
+        }
+    }
+}
+
+///
+/// "short-case-stmt" / "case-stmt".
 ///
 #[derive(Debug, Clone)]
 pub struct ShortCaseOrCaseStmt {

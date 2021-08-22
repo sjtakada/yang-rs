@@ -3233,7 +3233,7 @@ pub struct UsesAugmentStmt {
     status: Option<StatusStmt>,
     description: Option<DescriptionStmt>,
     reference: Option<ReferenceStmt>,
-    // data-def case etc
+    data_def_or_else: DataDefOrElse,
 }
 
 impl Stmt for UsesAugmentStmt {
@@ -3242,8 +3242,7 @@ impl Stmt for UsesAugmentStmt {
 
     /// Sub Statements.
     type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Option<StatusStmt>,
-                     Option<DescriptionStmt>, Option<ReferenceStmt>);
-    // data-def case etc
+                     Option<DescriptionStmt>, Option<ReferenceStmt>, DataDefOrElse);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
@@ -3262,7 +3261,7 @@ impl Stmt for UsesAugmentStmt {
              SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
-    // data-def case etc
+             SubStmtDef::OneOrMore(SubStmtWith::Selection(DataDefOrElse::keywords)),
         ]
     }
 
@@ -3275,7 +3274,7 @@ impl Stmt for UsesAugmentStmt {
             status: substmts.2,
             description: substmts.3,
             reference: substmts.4,
-            //data_def: substmts.5,
+            data_def_or_else: substmts.5,
         })
     }
 
@@ -3288,7 +3287,19 @@ impl Stmt for UsesAugmentStmt {
             collect_opt_stmt!(stmts, StatusStmt)?,
             collect_opt_stmt!(stmts, DescriptionStmt)?,
             collect_opt_stmt!(stmts, ReferenceStmt)?,
-            // data_def
+            DataDefOrElse::new_with_substmts((
+                collect_vec_stmt!(stmts, ContainerStmt)?,
+                collect_vec_stmt!(stmts, LeafStmt)?,
+                collect_vec_stmt!(stmts, LeafListStmt)?,
+                collect_vec_stmt!(stmts, ListStmt)?,
+                collect_vec_stmt!(stmts, ChoiceStmt)?,
+                collect_vec_stmt!(stmts, AnydataStmt)?,
+                collect_vec_stmt!(stmts, AnyxmlStmt)?,
+                collect_vec_stmt!(stmts, UsesStmt)?,
+                collect_vec_stmt!(stmts, CaseStmt)?,
+                collect_vec_stmt!(stmts, ActionStmt)?,
+                collect_vec_stmt!(stmts, NotificationStmt)?,
+            )),
         ))
     }
 }
@@ -3304,7 +3315,7 @@ pub struct AugmentStmt {
     status: Option<StatusStmt>,
     description: Option<DescriptionStmt>,
     reference: Option<ReferenceStmt>,
-    // data-def case etc
+    data_def_or_else: DataDefOrElse,
 }
 
 impl Stmt for AugmentStmt {
@@ -3313,8 +3324,7 @@ impl Stmt for AugmentStmt {
 
     /// Sub Statements.
     type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Option<StatusStmt>,
-                     Option<DescriptionStmt>, Option<ReferenceStmt>);
-    // data-def case etc
+                     Option<DescriptionStmt>, Option<ReferenceStmt>, DataDefOrElse);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
@@ -3333,7 +3343,7 @@ impl Stmt for AugmentStmt {
              SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
-    // data-def case etc
+             SubStmtDef::OneOrMore(SubStmtWith::Selection(DataDefOrElse::keywords)),
         ]
     }
 
@@ -3346,7 +3356,7 @@ impl Stmt for AugmentStmt {
             status: substmts.2,
             description: substmts.3,
             reference: substmts.4,
-            //data_def: substmts.5,
+            data_def_or_else: substmts.5,
         })
     }
 
@@ -3359,7 +3369,19 @@ impl Stmt for AugmentStmt {
             collect_opt_stmt!(stmts, StatusStmt)?,
             collect_opt_stmt!(stmts, DescriptionStmt)?,
             collect_opt_stmt!(stmts, ReferenceStmt)?,
-            // data_def
+            DataDefOrElse::new_with_substmts((
+                collect_vec_stmt!(stmts, ContainerStmt)?,
+                collect_vec_stmt!(stmts, LeafStmt)?,
+                collect_vec_stmt!(stmts, LeafListStmt)?,
+                collect_vec_stmt!(stmts, ListStmt)?,
+                collect_vec_stmt!(stmts, ChoiceStmt)?,
+                collect_vec_stmt!(stmts, AnydataStmt)?,
+                collect_vec_stmt!(stmts, AnyxmlStmt)?,
+                collect_vec_stmt!(stmts, UsesStmt)?,
+                collect_vec_stmt!(stmts, CaseStmt)?,
+                collect_vec_stmt!(stmts, ActionStmt)?,
+                collect_vec_stmt!(stmts, NotificationStmt)?,
+            )),
         ))
     }
 }
