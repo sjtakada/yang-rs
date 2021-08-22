@@ -2891,8 +2891,7 @@ impl Stmt for ActionStmt {
 #[derive(Debug, Clone)]
 pub struct InputStmt {
     must: Vec<MustStmt>,
-    typedef: Vec<TypedefStmt>,
-    grouping: Vec<GroupingStmt>,
+    typedef_or_grouping: TypedefOrGrouping,
 //    data_def: Vec<DatadefStmt>,
 }
 
@@ -2901,7 +2900,7 @@ impl Stmt for InputStmt {
     type Arg = NoArg;
 
     /// Sub Statements.
-    type SubStmts = (Vec<MustStmt>, Vec<TypedefStmt>, Vec<GroupingStmt>);
+    type SubStmts = (Vec<MustStmt>, TypedefOrGrouping);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
@@ -2924,8 +2923,7 @@ impl Stmt for InputStmt {
     fn new_with_substmts(_arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
         StmtType::InputStmt(InputStmt {
             must: substmts.0,
-            typedef: substmts.1,
-            grouping: substmts.2,
+            typedef_or_grouping: substmts.1,
         })
     }
 
@@ -2934,8 +2932,9 @@ impl Stmt for InputStmt {
         let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok((collect_vec_stmt!(stmts, MustStmt)?,
-            collect_vec_stmt!(stmts, TypedefStmt)?,
-            collect_vec_stmt!(stmts, GroupingStmt)?,
+            TypedefOrGrouping::new_with_substmts((
+                collect_vec_stmt!(stmts, TypedefStmt)?,
+                collect_vec_stmt!(stmts, GroupingStmt)?,)),
         ))
     }
 }
