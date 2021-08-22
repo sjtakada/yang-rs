@@ -486,6 +486,20 @@ impl Selection for DataDefStmt {
              ChoiceStmt::keyword(), AnydataStmt::keyword(), AnyxmlStmt::keyword(), UsesStmt::keyword()]
     }
 
+    /// Constructor with empty substatements.
+    fn new() -> Self where Self: Sized {
+        Self {
+            container: Vec::new(),
+            leaf: Vec::new(),
+            leaf_list: Vec::new(),
+            list: Vec::new(),
+            choice: Vec::new(),
+            anydata: Vec::new(),
+            anyxml: Vec::new(),
+            uses: Vec::new(),
+        }
+    }
+
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(substmts: Self::SubStmts) -> Self where Self: Sized {
         Self {
@@ -497,6 +511,61 @@ impl Selection for DataDefStmt {
             anydata: substmts.5,
             anyxml: substmts.6,
             uses: substmts.7,
+        }
+    }
+}
+
+///
+/// "short-case-stmt" or "case-stmt".
+///
+#[derive(Debug, Clone)]
+pub struct ShortCaseOrCaseStmt {
+    choice: Vec<ChoiceStmt>,
+    container: Vec<ContainerStmt>,
+    leaf: Vec<LeafStmt>,
+    leaf_list: Vec<LeafListStmt>,
+    list: Vec<ListStmt>,
+    anydata: Vec<AnydataStmt>,
+    anyxml: Vec<AnyxmlStmt>,
+    case: Vec<CaseStmt>,
+}
+
+impl Selection for ShortCaseOrCaseStmt {
+    /// Sub Statements.
+    type SubStmts = (Vec<ChoiceStmt>, Vec<ContainerStmt>, Vec<LeafStmt>, Vec<LeafListStmt>,
+                     Vec<ListStmt>, Vec<AnydataStmt>, Vec<AnyxmlStmt>, Vec<CaseStmt>);
+
+    /// Return list fo statement keyword.
+    fn keywords() -> Vec<Keyword> {
+        vec![ChoiceStmt::keyword(), ContainerStmt::keyword(), LeafStmt::keyword(), LeafListStmt::keyword(),
+             ListStmt::keyword(), AnydataStmt::keyword(), AnyxmlStmt::keyword(), CaseStmt::keyword()]
+    }
+
+    /// Constructor with empty substatements.
+    fn new() -> Self where Self: Sized {
+        Self {
+            choice: Vec::new(),
+            container: Vec::new(),
+            leaf: Vec::new(),
+            leaf_list: Vec::new(),
+            list: Vec::new(),
+            anydata: Vec::new(),
+            anyxml: Vec::new(),
+            case: Vec::new(),
+        }
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(substmts: Self::SubStmts) -> Self where Self: Sized {
+        Self {
+            choice: substmts.0,
+            container: substmts.1,
+            leaf: substmts.2,
+            leaf_list: substmts.3,
+            list: substmts.4,
+            anydata: substmts.5,
+            anyxml: substmts.6,
+            case: substmts.7,
         }
     }
 }

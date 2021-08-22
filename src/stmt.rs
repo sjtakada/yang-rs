@@ -2662,7 +2662,7 @@ pub struct ChoiceStmt {
     status: Option<StatusStmt>,
     description: Option<DescriptionStmt>,
     reference: Option<ReferenceStmt>,
-// short_case or case
+    short_case_or_case: ShortCaseOrCaseStmt,
 }
 
 impl Stmt for ChoiceStmt {
@@ -2677,8 +2677,7 @@ impl Stmt for ChoiceStmt {
     /// Sub Statements.
     type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Option<DefaultStmt>, Option<ConfigStmt>,
                      Option<MandatoryStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>,
-                     // ShortCase, Case
-    );
+                     ShortCaseOrCaseStmt);
 
     /// Return true if this statement has sub-statements optionally.
     fn opt_substmts() -> bool {
@@ -2695,7 +2694,7 @@ impl Stmt for ChoiceStmt {
              SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
-             //short case case
+             SubStmtDef::HasOne(SubStmtWith::Selection(ShortCaseOrCaseStmt::keywords)),
         ]
     }
 
@@ -2711,7 +2710,7 @@ impl Stmt for ChoiceStmt {
             status: None,
             description: None,
             reference: None,
-            // short case, case
+            short_case_or_case: ShortCaseOrCaseStmt::new(),
         })
     }
 
@@ -2727,7 +2726,7 @@ impl Stmt for ChoiceStmt {
             status: substmts.5,
             description: substmts.6,
             reference: substmts.7,
-            // short case, case
+            short_case_or_case: substmts.8,
         })
     }
 
@@ -2743,58 +2742,110 @@ impl Stmt for ChoiceStmt {
             collect_opt_stmt!(stmts, StatusStmt)?,
             collect_opt_stmt!(stmts, DescriptionStmt)?,
             collect_opt_stmt!(stmts, ReferenceStmt)?,
-            // short case case
+            ShortCaseOrCaseStmt::new_with_substmts((
+                collect_vec_stmt!(stmts, ChoiceStmt)?,
+                collect_vec_stmt!(stmts, ContainerStmt)?,
+                collect_vec_stmt!(stmts, LeafStmt)?,
+                collect_vec_stmt!(stmts, LeafListStmt)?,
+                collect_vec_stmt!(stmts, ListStmt)?,
+                collect_vec_stmt!(stmts, AnydataStmt)?,
+                collect_vec_stmt!(stmts, AnyxmlStmt)?,
+                collect_vec_stmt!(stmts, CaseStmt)?,
+            )),
         ))
     }
 }
 
-/*
-
 ///
-///
-///
-#[derive(Debug, Clone)]
-pub struct ShortCaseStmt {
-}
-
-impl Stmt for ShortCaseStmt {
-    /// Arg type.
-    type Arg = String;
-
-    /// Return statement keyword in &str.
-    fn keyword() -> Keyword {
-        "short-case"
-    }
-
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
-    }
-}
-
-///
-///
+/// 7.9.2. The choice's "case" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct CaseStmt {
+    arg: Identifier,
+    when: Option<WhenStmt>,
+    if_feature: Vec<IfFeatureStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+    data_def: DataDefStmt,
 }
 
 impl Stmt for CaseStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "case"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Sub Statements.
+    type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Option<StatusStmt>,
+                     Option<DescriptionStmt>, Option<ReferenceStmt>, DataDefStmt);
+
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(WhenStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(DataDefStmt::keywords)),
+        ]
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::CaseStmt(CaseStmt {
+            arg,
+            when: None,
+            if_feature: Vec::new(),
+            status: None,
+            description: None,
+            reference: None,
+            data_def: DataDefStmt::new(),
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::CaseStmt(CaseStmt {
+            arg,
+            when: substmts.0,
+            if_feature: substmts.1,
+            status: substmts.2,
+            description: substmts.3,
+            reference: substmts.4,
+            data_def: substmts.5,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_opt_stmt!(stmts, WhenStmt)?,
+            collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+            DataDefStmt::new_with_substmts((
+                collect_vec_stmt!(stmts, ContainerStmt)?,
+                collect_vec_stmt!(stmts, LeafStmt)?,
+                collect_vec_stmt!(stmts, LeafListStmt)?,
+                collect_vec_stmt!(stmts, ListStmt)?,
+                collect_vec_stmt!(stmts, ChoiceStmt)?,
+                collect_vec_stmt!(stmts, AnydataStmt)?,
+                collect_vec_stmt!(stmts, AnyxmlStmt)?,
+                collect_vec_stmt!(stmts, UsesStmt)?,)),
+        ))
     }
 }
-
-*/
 
 ///
 /// 7.10. The "anydata" Statement.
