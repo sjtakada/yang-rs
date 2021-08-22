@@ -2208,46 +2208,162 @@ impl Stmt for LeafStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct LeafListStmt {
+    arg: Identifier,
+    when: Option<WhenStmt>,
+    if_feature: Vec<IfFeatureStmt>,
+    must: Vec<MustStmt>,
+    key: Option<KeyStmt>,
+    unique: Vec<UniqueStmt>,
+    config: Option<ConfigStmt>,
+    min_elements: Option<MinElementsStmt>,
+    max_elements: Option<MaxElementsStmt>,
+    ordered_by: Option<OrderedByStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+    typedef_or_grouping: TypedefOrGrouping,
+    data_def: DataDefStmt,
+    action: Vec<ActionStmt>,
+    notification: Vec<NotificationStmt>,
 }
 
 impl Stmt for LeafListStmt {
     /// Arg type.
     type Arg = String;
 
+    /// Sub Statements.
+    type SubStmts = ();
+
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "leaf-list"
     }
-
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
-    }
 }
 
+*/
+
+
 ///
-///
+/// 7.8. The "list" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ListStmt {
+    arg: Identifier,
+    when: Option<WhenStmt>,
+    if_feature: Vec<IfFeatureStmt>,
+    must: Vec<MustStmt>,
+    key: Option<KeyStmt>,
+    unique: Vec<UniqueStmt>,
+    config: Option<ConfigStmt>,
+    min_elements: Option<MinElementsStmt>,
+    max_elements: Option<MaxElementsStmt>,
+    ordered_by: Option<OrderedByStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+    typedef_or_grouping: TypedefOrGrouping,
+    data_def: DataDefStmt,
+    action: Vec<ActionStmt>,
+    notification: Vec<NotificationStmt>,
 }
 
 impl Stmt for ListStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
+
+    /// Sub Statements.
+    type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Vec<MustStmt>, Option<KeyStmt>,
+                     Vec<UniqueStmt>, Option<ConfigStmt>, Option<MinElementsStmt>, Option<MaxElementsStmt>,
+                     Option<OrderedByStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>,
+                     TypedefOrGrouping, DataDefStmt, Vec<ActionStmt>, Vec<NotificationStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "list"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has substatements.
+    fn has_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(WhenStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(MustStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(KeyStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(UniqueStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ConfigStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MinElementsStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MaxElementsStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(OrderedByStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(TypedefOrGrouping::keywords)),
+             SubStmtDef::OneOrMore(SubStmtWith::Selection(DataDefStmt::keywords)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(ActionStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(NotificationStmt::keyword)),
+        ]
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::ListStmt(ListStmt {
+            arg,
+            when: substmts.0,
+            if_feature: substmts.1,
+            must: substmts.2,
+            key: substmts.3,
+            unique: substmts.4,
+            config: substmts.5,
+            min_elements: substmts.6,
+            max_elements: substmts.7,
+            ordered_by: substmts.8,
+            status: substmts.9,
+            description: substmts.10,
+            reference: substmts.11,
+            typedef_or_grouping: substmts.12,
+            data_def: substmts.13,
+            action: substmts.14,
+            notification: substmts.15,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_opt_stmt!(stmts, WhenStmt)?,
+            collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_vec_stmt!(stmts, MustStmt)?,
+            collect_opt_stmt!(stmts, KeyStmt)?,
+            collect_vec_stmt!(stmts, UniqueStmt)?,
+            collect_opt_stmt!(stmts, ConfigStmt)?,
+            collect_opt_stmt!(stmts, MinElementsStmt)?,
+            collect_opt_stmt!(stmts, MaxElementsStmt)?,
+            collect_opt_stmt!(stmts, OrderedByStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+            TypedefOrGrouping::new_with_substmts((
+                collect_vec_stmt!(stmts, TypedefStmt)?,
+                collect_vec_stmt!(stmts, GroupingStmt)?,)),
+            DataDefStmt::new_with_substmts((
+                // collect_vec_stmt!(stmts, ContainerStmt)?,
+                // collect_vec_stmt!(stmts, LeafStmt)?,
+                // collect_vec_stmt!(stmts, LeafListStmt)?,
+                // collect_vec_stmt!(stmts, ListStmt)?,
+                // collect_vec_stmt!(stmts, ChoiceStmt)?,
+                collect_vec_stmt!(stmts, AnydataStmt)?,
+                collect_vec_stmt!(stmts, AnyxmlStmt)?,
+                collect_vec_stmt!(stmts, UsesStmt)?,)),
+            collect_vec_stmt!(stmts, ActionStmt)?,
+            collect_vec_stmt!(stmts, NotificationStmt)?,
+        ))
     }
 }
-
-*/
 
 ///
 /// 7.8.2. The list's "key" Statement.

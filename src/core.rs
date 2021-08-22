@@ -65,7 +65,7 @@ lazy_static! {
 //        m.insert("container", ContainerStmt::parse as StmtParserFn);
 //        m.insert("leaf", LeafStmt::parse as StmtParserFn);
 //        m.insert("leaf-list", LeafListStmt::parse as StmtParserFn);
-//        m.insert("list", ListStmt::parse as StmtParserFn);
+        m.insert("list", ListStmt::parse as StmtParserFn);
         m.insert("key", KeyStmt::parse as StmtParserFn);
         m.insert("unique", UniqueStmt::parse as StmtParserFn);
 //        m.insert("choice", ChoiceStmt::parse as StmtParserFn);
@@ -173,7 +173,7 @@ pub enum StmtType {
 //    ContainerStmt(ContainerStmt),
 //    LeafStmt(LeafStmt),
 //    LeafListStmt(LeafListStmt),
-//    ListStmt(ListStmt),
+    ListStmt(ListStmt),
     KeyStmt(KeyStmt),
     UniqueStmt(UniqueStmt),
 //    ChoiceStmt(ChoiceStmt),
@@ -253,7 +253,7 @@ impl fmt::Debug for StmtType {
 //            StmtType::ContainerStmt(stmt) => write!(f, "container-stmt {:?}", stmt),
 //            StmtType::LeafStmt(stmt) => write!(f, "leaf-stmt {:?}", stmt),
 //            StmtType::LeafListStmt(stmt) => write!(f, "leaf-list-stmt {:?}", stmt),
-//            StmtType::ListStmt(stmt) => write!(f, "list-stmt {:?}", stmt),
+            StmtType::ListStmt(stmt) => write!(f, "list-stmt {:?}", stmt),
             StmtType::KeyStmt(stmt) => write!(f, "key-stmt {:?}", stmt),
             StmtType::UniqueStmt(stmt) => write!(f, "unique-stmt {:?}", stmt),
 //            StmtType::ChoiceStmt(stmt) => write!(f, "choice-stmt {:?}", stmt),
