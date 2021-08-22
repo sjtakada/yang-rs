@@ -62,7 +62,7 @@ lazy_static! {
         m.insert("max-elements", MaxElementsStmt::parse as StmtParserFn);
         m.insert("value", ValueStmt::parse as StmtParserFn);
         m.insert("grouping", GroupingStmt::parse as StmtParserFn);
-//        m.insert("container", ContainerStmt::parse as StmtParserFn);
+        m.insert("container", ContainerStmt::parse as StmtParserFn);
         m.insert("leaf", LeafStmt::parse as StmtParserFn);
         m.insert("leaf-list", LeafListStmt::parse as StmtParserFn);
         m.insert("list", ListStmt::parse as StmtParserFn);
@@ -170,7 +170,7 @@ pub enum StmtType {
     MaxElementsStmt(MaxElementsStmt),
     ValueStmt(ValueStmt),
     GroupingStmt(GroupingStmt),
-//    ContainerStmt(ContainerStmt),
+    ContainerStmt(ContainerStmt),
     LeafStmt(LeafStmt),
     LeafListStmt(LeafListStmt),
     ListStmt(ListStmt),
@@ -250,7 +250,7 @@ impl fmt::Debug for StmtType {
             StmtType::MaxElementsStmt(stmt) => write!(f, "max-elements-stmt {:?}", stmt),
             StmtType::ValueStmt(stmt) => write!(f, "value-stmt {:?}", stmt),
             StmtType::GroupingStmt(stmt) => write!(f, "grouping-stmt {:?}", stmt),
-//            StmtType::ContainerStmt(stmt) => write!(f, "container-stmt {:?}", stmt),
+            StmtType::ContainerStmt(stmt) => write!(f, "container-stmt {:?}", stmt),
             StmtType::LeafStmt(stmt) => write!(f, "leaf-stmt {:?}", stmt),
             StmtType::LeafListStmt(stmt) => write!(f, "leaf-list-stmt {:?}", stmt),
             StmtType::ListStmt(stmt) => write!(f, "list-stmt {:?}", stmt),

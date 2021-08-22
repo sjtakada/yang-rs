@@ -2156,32 +2156,129 @@ impl Stmt for GroupingStmt {
     }
 }
 
-
-/*
-
 ///
-///
+/// 7.5. The "container" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ContainerStmt {
+    arg: Identifier,
+    when: Option<WhenStmt>,
+    if_feature: Vec<IfFeatureStmt>,
+    must: Vec<MustStmt>,
+    presence: Option<PresenceStmt>,
+    config: Option<ConfigStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+    typedef_or_grouping: TypedefOrGrouping,
+    data_def: DataDefStmt,
+    action: Vec<ActionStmt>,
+    notification: Vec<NotificationStmt>,
 }
 
 impl Stmt for ContainerStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
+
+    /// Sub Statements.
+    type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Vec<MustStmt>, Option<PresenceStmt>,
+                     Option<ConfigStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>,
+                     TypedefOrGrouping, DataDefStmt, Vec<ActionStmt>, Vec<NotificationStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "container"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(WhenStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(MustStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(PresenceStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ConfigStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(TypedefOrGrouping::keywords)),
+             SubStmtDef::OneOrMore(SubStmtWith::Selection(DataDefStmt::keywords)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(ActionStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(NotificationStmt::keyword)),
+        ]
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::ContainerStmt(ContainerStmt {
+            arg,
+            when: None,
+            if_feature: Vec::new(),
+            must: Vec::new(),
+            presence: None,
+            config: None,
+            status: None,
+            description: None,
+            reference: None,
+            typedef_or_grouping: TypedefOrGrouping::new(),
+            data_def: DataDefStmt::new(),
+            action: Vec::new(),
+            notification: Vec::new(),
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::ContainerStmt(ContainerStmt {
+            arg,
+            when: substmts.0,
+            if_feature: substmts.1,
+            must: substmts.2,
+            presence: substmts.3,
+            config: substmts.4,
+            status: substmts.5,
+            description: substmts.6,
+            reference: substmts.7,
+            typedef_or_grouping: substmts.8,
+            data_def: substmts.9,
+            action: substmts.10,
+            notification: substmts.11,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_opt_stmt!(stmts, WhenStmt)?,
+            collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_vec_stmt!(stmts, MustStmt)?,
+            collect_opt_stmt!(stmts, PresenceStmt)?,
+            collect_opt_stmt!(stmts, ConfigStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+            TypedefOrGrouping::new_with_substmts((
+                collect_vec_stmt!(stmts, TypedefStmt)?,
+                collect_vec_stmt!(stmts, GroupingStmt)?,)),
+            DataDefStmt::new_with_substmts((
+                // collect_vec_stmt!(stmts, ContainerStmt)?,
+                // collect_vec_stmt!(stmts, LeafStmt)?,
+                // collect_vec_stmt!(stmts, LeafListStmt)?,
+                // collect_vec_stmt!(stmts, ListStmt)?,
+                // collect_vec_stmt!(stmts, ChoiceStmt)?,
+                collect_vec_stmt!(stmts, AnydataStmt)?,
+                collect_vec_stmt!(stmts, AnyxmlStmt)?,
+                collect_vec_stmt!(stmts, UsesStmt)?,)),
+            collect_vec_stmt!(stmts, ActionStmt)?,
+            collect_vec_stmt!(stmts, NotificationStmt)?,
+        ))
     }
 }
-
-*/
 
 ///
 /// 7.6. The "leaf" Statement.
