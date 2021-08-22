@@ -2181,29 +2181,98 @@ impl Stmt for ContainerStmt {
     }
 }
 
+*/
+
 ///
-///
+/// 7.6. The "leaf" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct LeafStmt {
+    arg: Identifier,
+    when: Option<WhenStmt>,
+    if_feature: Vec<IfFeatureStmt>,
+    type_: TypeStmt,
+    units: Option<UnitsStmt>,
+    must: Vec<MustStmt>,
+    default: Option<DefaultStmt>,
+    config: Option<ConfigStmt>,
+    mandatory: Option<MandatoryStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
 }
 
 impl Stmt for LeafStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
+
+    /// Sub Statements.
+    type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, TypeStmt, Option<UnitsStmt>, Vec<MustStmt>,
+                     Option<DefaultStmt>, Option<ConfigStmt>, Option<MandatoryStmt>, Option<StatusStmt>,
+                     Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "leaf"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has substatements.
+    fn has_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(WhenStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::HasOne(SubStmtWith::Stmt(TypeStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(UnitsStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(MustStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DefaultStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ConfigStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MandatoryStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::LeafStmt(LeafStmt {
+            arg,
+            when: substmts.0,
+            if_feature: substmts.1,
+            type_: substmts.2,
+            units: substmts.3,
+            must: substmts.4,
+            default: substmts.5,
+            config: substmts.6,
+            mandatory: substmts.7,
+            status: substmts.8,
+            description: substmts.9,
+            reference: substmts.10,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_opt_stmt!(stmts, WhenStmt)?,
+            collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_a_stmt!(stmts, TypeStmt)?,
+            collect_opt_stmt!(stmts, UnitsStmt)?,
+            collect_vec_stmt!(stmts, MustStmt)?,
+            collect_opt_stmt!(stmts, DefaultStmt)?,
+            collect_opt_stmt!(stmts, ConfigStmt)?,
+            collect_opt_stmt!(stmts, MandatoryStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+        ))
     }
 }
-
-*/
 
 ///
 /// 7.7. The "leaf-list" Statement.
