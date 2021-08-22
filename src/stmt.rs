@@ -2892,7 +2892,7 @@ impl Stmt for ActionStmt {
 pub struct InputStmt {
     must: Vec<MustStmt>,
     typedef_or_grouping: TypedefOrGrouping,
-//    data_def: Vec<DatadefStmt>,
+    data_def: DataDefStmt,
 }
 
 impl Stmt for InputStmt {
@@ -2900,7 +2900,7 @@ impl Stmt for InputStmt {
     type Arg = NoArg;
 
     /// Sub Statements.
-    type SubStmts = (Vec<MustStmt>, TypedefOrGrouping);
+    type SubStmts = (Vec<MustStmt>, TypedefOrGrouping, DataDefStmt);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
@@ -2916,6 +2916,7 @@ impl Stmt for InputStmt {
     fn substmts_def() -> Vec<SubStmtDef> {
         vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(MustStmt::keyword)),
              SubStmtDef::ZeroOrMore(SubStmtWith::Selection(TypedefOrGrouping::keywords)),
+             SubStmtDef::OneOrMore(SubStmtWith::Selection(DataDefStmt::keywords)),
         ]
     }
 
@@ -2924,6 +2925,7 @@ impl Stmt for InputStmt {
         StmtType::InputStmt(InputStmt {
             must: substmts.0,
             typedef_or_grouping: substmts.1,
+            data_def: substmts.2,
         })
     }
 
@@ -2935,6 +2937,10 @@ impl Stmt for InputStmt {
             TypedefOrGrouping::new_with_substmts((
                 collect_vec_stmt!(stmts, TypedefStmt)?,
                 collect_vec_stmt!(stmts, GroupingStmt)?,)),
+            DataDefStmt::new_with_substmts((
+                collect_vec_stmt!(stmts, AnydataStmt)?,
+                collect_vec_stmt!(stmts, AnyxmlStmt)?,
+                collect_vec_stmt!(stmts, UsesStmt)?,)),
         ))
     }
 }
