@@ -3949,10 +3949,18 @@ impl Stmt for DeviateDeleteStmt {
 }
 
 ///
-///
+/// The "deviate-replace" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct DeviateReplaceStmt {
+    arg: String,
+    type_: Option<TypeStmt>,
+    units: Option<UnitsStmt>,
+    default: Option<DefaultStmt>,
+    config: Option<ConfigStmt>,
+    mandatory: Option<MandatoryStmt>,
+    min_elements: Option<MinElementsStmt>,
+    max_elements: Option<MaxElementsStmt>,
 }
 
 impl Stmt for DeviateReplaceStmt {
@@ -3963,13 +3971,8 @@ impl Stmt for DeviateReplaceStmt {
     fn keyword() -> Keyword {
         "deviate-replace"
     }
-
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
-    }
 }
 
-TBD */
+*/
 
 

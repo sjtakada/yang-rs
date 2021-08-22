@@ -1415,7 +1415,7 @@ pub type UsesAugmentArg = DescendantSchemaNodeid;
 pub type AugmentArg = AbsoluteSchemaNodeid;
 
 /// "deviation-arg".
-pub type DevicationArg = AbsoluteSchemaNodeid;
+pub type DeviationArg = AbsoluteSchemaNodeid;
 
 #[cfg(test)]
 mod tests {
