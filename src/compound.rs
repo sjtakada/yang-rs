@@ -180,34 +180,6 @@ impl RevisionStmts {
 }
 
 ///
-/// "data-def-stmt".
-///
-#[derive(Debug, Clone)]
-pub struct DataDefStmt {
-//    container: Option<ContainerStmt>,
-//    leaf: Option<LeafStmt>,
-//    leaf_list: Option<LeafListStmt>,
-//    list: Option<ListStmt>,
-//    choice: Option<ChoiceStmt>,
-    anydata: Option<AnydataStmt>,
-    anyxml: Option<AnyxmlStmt>,
-    uses: Option<UsesStmt>,
-}
-
-impl Compound for DataDefStmt {
-    /// Return list fo statement keyword.
-    fn keywords() -> Vec<Keyword> {
-        vec![AnydataStmt::keyword(), AnyxmlStmt::keyword(), UsesStmt::keyword()]
-    }
-
-    /// Return substatements definition.
-    fn substmts_def() -> Vec<SubStmtDef> {
-        Vec::new()
-    }
-}
-
-
-///
 /// "numerical-restrictions".
 ///
 #[derive(Debug, Clone)]
@@ -474,3 +446,39 @@ impl Selection for TypedefOrGrouping {
         }
     }
 }
+
+///
+/// "data-def-stmt".
+///
+#[derive(Debug, Clone)]
+pub struct DataDefStmt {
+//    container: Option<ContainerStmt>,
+//    leaf: Option<LeafStmt>,
+//    leaf_list: Option<LeafListStmt>,
+//    list: Option<ListStmt>,
+//    choice: Option<ChoiceStmt>,
+    anydata: Vec<AnydataStmt>,
+    anyxml: Vec<AnyxmlStmt>,
+    uses: Vec<UsesStmt>,
+}
+
+impl Selection for DataDefStmt {
+    /// Sub Statements.
+    type SubStmts = (Vec<AnydataStmt>, Vec<AnyxmlStmt>, Vec<UsesStmt>);
+
+    /// Return list fo statement keyword.
+    fn keywords() -> Vec<Keyword> {
+        vec![AnydataStmt::keyword(), AnyxmlStmt::keyword(), UsesStmt::keyword()]
+    }
+
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(substmts: Self::SubStmts) -> Self where Self: Sized {
+        Self {
+            anydata: substmts.0,
+            anyxml: substmts.1,
+            uses: substmts.2,
+        }
+    }
+}
+
