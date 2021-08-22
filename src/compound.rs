@@ -465,11 +465,11 @@ impl Selection for TypedefOrGrouping {
 ///
 #[derive(Debug, Clone)]
 pub struct DataDefStmt {
-//    container: Option<ContainerStmt>,
-//    leaf: Option<LeafStmt>,
-//    leaf_list: Option<LeafListStmt>,
-//    list: Option<ListStmt>,
-//    choice: Option<ChoiceStmt>,
+    container: Vec<ContainerStmt>,
+    leaf: Vec<LeafStmt>,
+    leaf_list: Vec<LeafListStmt>,
+    list: Vec<ListStmt>,
+    choice: Vec<ChoiceStmt>,
     anydata: Vec<AnydataStmt>,
     anyxml: Vec<AnyxmlStmt>,
     uses: Vec<UsesStmt>,
@@ -477,19 +477,26 @@ pub struct DataDefStmt {
 
 impl Selection for DataDefStmt {
     /// Sub Statements.
-    type SubStmts = (Vec<AnydataStmt>, Vec<AnyxmlStmt>, Vec<UsesStmt>);
+    type SubStmts = (Vec<ContainerStmt>, Vec<LeafStmt>, Vec<LeafListStmt>, Vec<ListStmt>,
+                     Vec<ChoiceStmt>, Vec<AnydataStmt>, Vec<AnyxmlStmt>, Vec<UsesStmt>);
 
     /// Return list fo statement keyword.
     fn keywords() -> Vec<Keyword> {
-        vec![AnydataStmt::keyword(), AnyxmlStmt::keyword(), UsesStmt::keyword()]
+        vec![ContainerStmt::keyword(), LeafStmt::keyword(), LeafListStmt::keyword(), ListStmt::keyword(),
+             ChoiceStmt::keyword(), AnydataStmt::keyword(), AnyxmlStmt::keyword(), UsesStmt::keyword()]
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(substmts: Self::SubStmts) -> Self where Self: Sized {
         Self {
-            anydata: substmts.0,
-            anyxml: substmts.1,
-            uses: substmts.2,
+            container: substmts.0,
+            leaf: substmts.1,
+            leaf_list: substmts.2,
+            list: substmts.3,
+            choice: substmts.4,
+            anydata: substmts.5,
+            anyxml: substmts.6,
+            uses: substmts.7,
         }
     }
 }
