@@ -3278,31 +3278,96 @@ impl Stmt for WhenStmt {
     }
 }
 
-/*
-
 ///
-///
+/// 7.14. The "rpc" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct RpcStmt {
+    arg: Identifier,
+    if_feature: Vec<IfFeatureStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+    typedef_or_grouping: TypedefOrGrouping,
+    input: Option<InputStmt>,
+    output: Option<OutputStmt>,
 }
 
 impl Stmt for RpcStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
+
+    /// Sub Statements.
+    type SubStmts = (Vec<IfFeatureStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>,
+                     TypedefOrGrouping, Option<InputStmt>, Option<OutputStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "rpc"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(TypedefOrGrouping::keywords)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(InputStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(OutputStmt::keyword)),
+        ]
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::RpcStmt(RpcStmt {
+            arg,
+            if_feature: Vec::new(),
+            status: None,
+            description: None,
+            reference: None,
+            typedef_or_grouping: TypedefOrGrouping::new(),
+            input: None,
+            output: None,
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::RpcStmt(RpcStmt {
+            arg,
+            if_feature: substmts.0,
+            status: substmts.1,
+            description: substmts.2,
+            reference: substmts.3,
+            typedef_or_grouping: substmts.4,
+            input: substmts.5,
+            output: substmts.6,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+            TypedefOrGrouping::new_with_substmts((
+                collect_vec_stmt!(stmts, TypedefStmt)?,
+                collect_vec_stmt!(stmts, GroupingStmt)?,
+            )),
+            collect_opt_stmt!(stmts, InputStmt)?,
+            collect_opt_stmt!(stmts, OutputStmt)?,
+        ))
     }
 }
-
-*/
 
 ///
 /// 7.15. The "action" Statement.
@@ -3325,8 +3390,7 @@ impl Stmt for ActionStmt {
 
     /// Sub Statements.
     type SubStmts = (Vec<IfFeatureStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>,
-                     TypedefOrGrouping, Option<InputStmt>, Option<OutputStmt>,
-    );
+                     TypedefOrGrouping, Option<InputStmt>, Option<OutputStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
@@ -3344,7 +3408,7 @@ impl Stmt for ActionStmt {
              SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
-             SubStmtDef::Optional(SubStmtWith::Selection(TypedefOrGrouping::keywords)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(TypedefOrGrouping::keywords)),
              SubStmtDef::Optional(SubStmtWith::Stmt(InputStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(OutputStmt::keyword)),
         ]
