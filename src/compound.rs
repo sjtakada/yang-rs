@@ -417,6 +417,11 @@ pub trait Selection {
         panic!("undefined");
     }
 
+    /// Constructor with empty substatements.
+    fn new() -> Self where Self: Sized {
+        panic!();
+    }
+
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(_substmts: Self::SubStmts) -> Self where Self: Sized {
         panic!();
@@ -436,6 +441,14 @@ impl Selection for TypedefOrGrouping {
     /// Return list fo statement keyword.
     fn keywords() -> Vec<Keyword> {
         vec![TypedefStmt::keyword(), GroupingStmt::keyword()]
+    }
+
+    /// Constructor with empty substatements.
+    fn new() -> Self where Self: Sized {
+        Self {
+            typedef: Vec::new(),
+            grouping: Vec::new(),
+        }
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
@@ -470,7 +483,6 @@ impl Selection for DataDefStmt {
     fn keywords() -> Vec<Keyword> {
         vec![AnydataStmt::keyword(), AnyxmlStmt::keyword(), UsesStmt::keyword()]
     }
-
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(substmts: Self::SubStmts) -> Self where Self: Sized {

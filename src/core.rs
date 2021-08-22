@@ -79,7 +79,7 @@ lazy_static! {
 //        m.insert("augment", AugmentStmt::parse as StmtParserFn);
         m.insert("when", WhenStmt::parse as StmtParserFn);
 //        m.insert("rpc", RpcStmt::parse as StmtParserFn);
-//        m.insert("action", ActionStmt::parse as StmtParserFn);
+        m.insert("action", ActionStmt::parse as StmtParserFn);
         m.insert("input", InputStmt::parse as StmtParserFn);
 /*
         m.insert("output", OutputStmt::parse as StmtParserFn);
@@ -187,7 +187,7 @@ pub enum StmtType {
 //    AugmentStmt(AugmentStmt),
     WhenStmt(WhenStmt),
 //    RpcStmt(RpcStmt),
-//    ActionStmt(ActionStmt),
+    ActionStmt(ActionStmt),
     InputStmt(InputStmt),
 /*
     OutputStmt(OutputStmt),
@@ -267,7 +267,7 @@ impl fmt::Debug for StmtType {
 //            StmtType::AugmentStmt(stmt) => write!(f, "augment-stmt {:?}", stmt),
             StmtType::WhenStmt(stmt) => write!(f, "when-stmt {:?}", stmt),
 //            StmtType::RpcStmt(stmt) => write!(f, "rpc-stmt {:?}", stmt),
-//            StmtType::ActionStmt(stmt) => write!(f, "action-stmt {:?}", stmt),
+            StmtType::ActionStmt(stmt) => write!(f, "action-stmt {:?}", stmt),
             StmtType::InputStmt(stmt) => write!(f, "input-stmt {:?}", stmt),
 /*
             StmtType::OutputStmt(stmt) => write!(f, "output-stmt {:?}", stmt),
