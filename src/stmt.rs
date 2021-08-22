@@ -2648,29 +2648,107 @@ impl Stmt for UniqueStmt {
     }
 }
 
-/*
-
 ///
-///
+/// 7.9. The "choice" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ChoiceStmt {
+    arg: Identifier,
+    when: Option<WhenStmt>,
+    if_feature: Vec<IfFeatureStmt>,
+    default: Option<DefaultStmt>,
+    config: Option<ConfigStmt>,
+    mandatory: Option<MandatoryStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+// short_case or case
 }
 
 impl Stmt for ChoiceStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "choice"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Sub Statements.
+    type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Option<DefaultStmt>, Option<ConfigStmt>,
+                     Option<MandatoryStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>,
+                     // ShortCase, Case
+    );
+
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(WhenStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DefaultStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ConfigStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MandatoryStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+             //short case case
+        ]
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::ChoiceStmt(ChoiceStmt {
+            arg,
+            when: None,
+            if_feature: Vec::new(),
+            default: None,
+            config: None,
+            mandatory: None,
+            status: None,
+            description: None,
+            reference: None,
+            // short case, case
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::ChoiceStmt(ChoiceStmt {
+            arg,
+            when: substmts.0,
+            if_feature: substmts.1,
+            default: substmts.2,
+            config: substmts.3,
+            mandatory: substmts.4,
+            status: substmts.5,
+            description: substmts.6,
+            reference: substmts.7,
+            // short case, case
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_opt_stmt!(stmts, WhenStmt)?,
+            collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_opt_stmt!(stmts, DefaultStmt)?,
+            collect_opt_stmt!(stmts, ConfigStmt)?,
+            collect_opt_stmt!(stmts, MandatoryStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+            // short case case
+        ))
     }
 }
+
+/*
 
 ///
 ///
