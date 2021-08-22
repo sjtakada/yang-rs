@@ -3227,19 +3227,69 @@ impl Stmt for RefineStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct UsesAugmentStmt {
-    arg: String,
+    arg: UsesAugmentArg,
+    when: Option<WhenStmt>,
+    if_feature: Vec<IfFeatureStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+    // data-def case etc
 }
 
 impl Stmt for UsesAugmentStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = UsesAugmentArg;
 
     /// Sub Statements.
-    type SubStmts = ();
+    type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Option<StatusStmt>,
+                     Option<DescriptionStmt>, Option<ReferenceStmt>);
+    // data-def case etc
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "uses-augment"
+    }
+
+    /// Return true if this statement has substatements.
+    fn has_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(WhenStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+    // data-def case etc
+        ]
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::UsesAugmentStmt(UsesAugmentStmt {
+            arg,
+            when: substmts.0,
+            if_feature: substmts.1,
+            status: substmts.2,
+            description: substmts.3,
+            reference: substmts.4,
+            //data_def: substmts.5,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_opt_stmt!(stmts, WhenStmt)?,
+            collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+            // data_def
+        ))
     }
 }
 
