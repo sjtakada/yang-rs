@@ -82,11 +82,8 @@ lazy_static! {
         m.insert("input", InputStmt::parse as StmtParserFn);
         m.insert("output", OutputStmt::parse as StmtParserFn);
         m.insert("notification", NotificationStmt::parse as StmtParserFn);
-//        m.insert("deviation", DeviationStmt::parse as StmtParserFn);
-//        m.insert("deviation-not-supported", DeviationNotSupportedStmt::parse as StmtParserFn);
-//        m.insert("deviate-add", DeviateAddStmt::parse as StmtParserFn);
-//        m.insert("deviate-delete", DeviateDeleteStmt::parse as StmtParserFn);
-//        m.insert("deviata-replace", DeviateReplaceStmt::parse as StmtParserFn);
+        m.insert("deviation", DeviationStmt::parse as StmtParserFn);
+        m.insert("deviate", DeviateStmt::parse as StmtParserFn);
         m
     };
 }
@@ -187,11 +184,8 @@ pub enum StmtType {
     InputStmt(InputStmt),
     OutputStmt(OutputStmt),
     NotificationStmt(NotificationStmt),
-//    DeviationStmt(DeviationStmt),
-//    DeviationNotSupportedStmt(DeviationNotSupportedStmt),
-//    DeviateAddStmt(DeviateAddStmt),
-//    DeviateDeleteStmt(DeviateDeleteStmt),
-//    DeviateReplaceStmt(DeviateReplaceStmt),
+    DeviationStmt(DeviationStmt),
+    DeviateStmt(DeviateStmt),
 }
 
 impl fmt::Debug for StmtType {
@@ -264,11 +258,8 @@ impl fmt::Debug for StmtType {
             StmtType::InputStmt(stmt) => write!(f, "input-stmt {:?}", stmt),
             StmtType::OutputStmt(stmt) => write!(f, "output-stmt {:?}", stmt),
             StmtType::NotificationStmt(stmt) => write!(f, "notification-stmt {:?}", stmt),
-//            StmtType::DeviationStmt(stmt) => write!(f, "deviation-stmt {:?}", stmt),
-//            StmtType::DeviationNotSupportedStmt(stmt) => write!(f, "deviation-not-supported-stmt {:?}", stmt),
-//            StmtType::DeviateAddStmt(stmt) => write!(f, "deviate-add-stmt {:?}", stmt),
-//            StmtType::DeviateDeleteStmt(stmt) => write!(f, "deviate-delete-stmt {:?}", stmt),
-//            StmtType::DeviateReplaceStmt(stmt) => write!(f, "deviate-replace-stmt {:?}", stmt),
+            StmtType::DeviationStmt(stmt) => write!(f, "deviation-stmt {:?}", stmt),
+            StmtType::DeviateStmt(stmt) => write!(f, "deviate-stmt {:?}", stmt),
         }
     }
 }

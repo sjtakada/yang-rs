@@ -11,6 +11,7 @@ use super::parser::*;
 use super::arg::*;
 use super::substmt::*;
 use super::compound::*;
+use super::compound::Compound;
 
 use crate::collect_a_stmt;
 use crate::collect_vec_stmt;
@@ -3858,102 +3859,207 @@ impl Stmt for NotificationStmt {
     }
 }
 
-/*
-
 ///
-///
+/// 7.20.3. The "deviation" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct DeviationStmt {
+    arg: DeviationArg,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+    deviate: Vec<DeviateStmt>,
 }
 
 impl Stmt for DeviationStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = DeviationArg;
+
+    /// Sub Statements.
+    type SubStmts = (Option<DescriptionStmt>, Option<ReferenceStmt>, Vec<DeviateStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "deviation"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has substatements.
+    fn has_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+             SubStmtDef::OneOrMore(SubStmtWith::Stmt(DeviateStmt::keyword)),
+        ]
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::DeviationStmt(DeviationStmt {
+            arg,
+            description: substmts.0,
+            reference: substmts.1,
+            deviate: substmts.2,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+            collect_vec_stmt!(stmts, DeviateStmt)?,))
     }
 }
 
 ///
-///
+/// The "deviate" Statement.
 ///
 #[derive(Debug, Clone)]
-pub struct DeviationNotSupportedStmt {
+pub enum DeviateStmt {
+    NotSupported,
+    Add(DeviateAddStmt),
+    Replace(DeviateReplaceStmt),
+    Delete(DeviateDeleteStmt),
 }
 
-impl Stmt for DeviationNotSupportedStmt {
+impl Stmt for DeviateStmt {
     /// Arg type.
     type Arg = String;
 
+    /// Sub Statements.
+    type SubStmts = ();
+
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
-        "deviation-not-supported"
+        "deviate"
     }
 
     /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError>  where Self::Arg: StmtArg, Self: Sized {
+        let arg = Self::Arg::parse_arg(parser)?;
+
+        match &arg as &str {
+            "add" => {
+                let stmt = DeviateAddStmt::parse(parser)?;
+                Ok(StmtType::DeviateStmt(DeviateStmt::Add(stmt)))
+            }
+            "replace" => {
+                let stmt = DeviateDeleteStmt::parse(parser)?;
+                Ok(StmtType::DeviateStmt(DeviateStmt::Delete(stmt)))
+            }
+            "delete" => {
+                let stmt = DeviateReplaceStmt::parse(parser)?;
+                Ok(StmtType::DeviateStmt(DeviateStmt::Replace(stmt)))
+            }
+            "not-supported" => {
+                Ok(StmtType::DeviateStmt(DeviateStmt::NotSupported))
+            }
+            _ => Err(YangError::UnexpectedToken(parser.line()))
+        }
     }
 }
 
+/*
 ///
+/// "deviate" ("add" / "replace" / "delete").
 ///
+#[derive(Debug, Clone)]
+pub enum DeviateOp {
+}
+*/
+
+///
+/// The "deviate add" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct DeviateAddStmt {
+    units: Option<UnitsStmt>,
+    must: Vec<MustStmt>,
+    unqiue: Vec<UniqueStmt>,
+    default: Vec<DefaultStmt>,
+    config: Option<ConfigStmt>,
+    mandatory: Option<MandatoryStmt>,
+    min_elements: Option<MinElementsStmt>,
+    max_elements: Option<MaxElementsStmt>,
 }
 
-impl Stmt for DeviateAddStmt {
-    /// Arg type.
-    type Arg = String;
-
-    /// Return statement keyword in &str.
-    fn keyword() -> Keyword {
-        "deviate-add"
+impl Compound for DeviateAddStmt {
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(UnitsStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(MustStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(UniqueStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(DefaultStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ConfigStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MandatoryStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MinElementsStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MaxElementsStmt::keyword)),
+        ]
     }
+}
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+impl DeviateAddStmt {
+    pub fn parse(parser: &mut Parser) -> Result<DeviateAddStmt, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok(DeviateAddStmt {
+            units: collect_opt_stmt!(stmts, UnitsStmt)?,
+            must: collect_vec_stmt!(stmts, MustStmt)?,
+            unqiue: collect_vec_stmt!(stmts, UniqueStmt)?,
+            default: collect_vec_stmt!(stmts, DefaultStmt)?,
+            config: collect_opt_stmt!(stmts, ConfigStmt)?,
+            mandatory: collect_opt_stmt!(stmts, MandatoryStmt)?,
+            min_elements: collect_opt_stmt!(stmts, MinElementsStmt)?,
+            max_elements: collect_opt_stmt!(stmts, MaxElementsStmt)?,
+        })
     }
 }
 
 ///
-///
+/// The "deviate delete" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct DeviateDeleteStmt {
+    units: Option<UnitsStmt>,
+    must: Vec<MustStmt>,
+    unqiue: Vec<UniqueStmt>,
+    default: Vec<DefaultStmt>,
 }
 
-impl Stmt for DeviateDeleteStmt {
-    /// Arg type.
-    type Arg = String;
-
-    /// Return statement keyword in &str.
-    fn keyword() -> Keyword {
-        "deviate-delete"
+impl Compound for DeviateDeleteStmt {
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(UnitsStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(MustStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(UniqueStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(DefaultStmt::keyword)),
+        ]
     }
+}
 
+impl DeviateDeleteStmt {
     /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    fn parse(parser: &mut Parser) -> Result<DeviateDeleteStmt, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok(DeviateDeleteStmt {
+            units: collect_opt_stmt!(stmts, UnitsStmt)?,
+            must: collect_vec_stmt!(stmts, MustStmt)?,
+            unqiue: collect_vec_stmt!(stmts, UniqueStmt)?,
+            default: collect_vec_stmt!(stmts, DefaultStmt)?,
+        })
     }
 }
 
 ///
-/// The "deviate-replace" Statement.
+/// The "deviate replace" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct DeviateReplaceStmt {
-    arg: String,
     type_: Option<TypeStmt>,
     units: Option<UnitsStmt>,
     default: Option<DefaultStmt>,
@@ -3963,16 +4069,32 @@ pub struct DeviateReplaceStmt {
     max_elements: Option<MaxElementsStmt>,
 }
 
-impl Stmt for DeviateReplaceStmt {
-    /// Arg type.
-    type Arg = String;
-
-    /// Return statement keyword in &str.
-    fn keyword() -> Keyword {
-        "deviate-replace"
+impl Compound for DeviateReplaceStmt {
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(TypeStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(UnitsStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DefaultStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ConfigStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MandatoryStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MinElementsStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MaxElementsStmt::keyword)),
+        ]
     }
 }
 
-*/
+impl DeviateReplaceStmt {
+    pub fn parse(parser: &mut Parser) -> Result<DeviateReplaceStmt, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
-
+        Ok(DeviateReplaceStmt {
+            type_: collect_opt_stmt!(stmts, TypeStmt)?,
+            units: collect_opt_stmt!(stmts, UnitsStmt)?,
+            default: collect_opt_stmt!(stmts, DefaultStmt)?,
+            config: collect_opt_stmt!(stmts, ConfigStmt)?,
+            mandatory: collect_opt_stmt!(stmts, MandatoryStmt)?,
+            min_elements: collect_opt_stmt!(stmts, MinElementsStmt)?,
+            max_elements: collect_opt_stmt!(stmts, MaxElementsStmt)?,
+        })
+    }
+}

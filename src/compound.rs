@@ -12,7 +12,6 @@ use super::substmt::*;
 use crate::collect_a_stmt;
 use crate::collect_vec_stmt;
 use crate::collect_opt_stmt;
-//use crate::parse_a_stmt;
 
 //
 // Trait for compound YANG statements.
