@@ -2067,10 +2067,10 @@ pub struct GroupingStmt {
     status: Option<StatusStmt>,
     description: Option<DescriptionStmt>,
     reference: Option<ReferenceStmt>,
-    //typedef_grouping
-    //data_def
-//    action: Vec<ActionStmt>,
-    //notification: Vec<NotificationStmt>,
+    typedef_or_grouping: TypedefOrGrouping,
+    data_def: DataDefStmt,
+    action: Vec<ActionStmt>,
+    notification: Vec<NotificationStmt>,
 }
 
 impl Stmt for GroupingStmt {
@@ -2079,9 +2079,7 @@ impl Stmt for GroupingStmt {
 
     /// Sub Statements.
     type SubStmts = (Option<StatusStmt>,Option<DescriptionStmt>, Option<ReferenceStmt>,
-                     //Type Grouping, DataDef,
-//                     Vec<ActionStmt>, //Vec<NotificationStmt>,
-    );
+                     TypedefOrGrouping, DataDefStmt, Vec<ActionStmt>, Vec<NotificationStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
@@ -2098,7 +2096,10 @@ impl Stmt for GroupingStmt {
         vec![SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
-//             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(ActionStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(TypedefOrGrouping::keywords)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(DataDefStmt::keywords)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(ActionStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(NotificationStmt::keyword)),
         ]
     }
 
@@ -2109,7 +2110,10 @@ impl Stmt for GroupingStmt {
             status: None,
             description: None,
             reference: None,
-//            action: Vec::new(),
+            typedef_or_grouping: TypedefOrGrouping::new(),
+            data_def: DataDefStmt::new(),
+            action: Vec::new(),
+            notification: Vec::new(),
         })
     }
 
@@ -2120,7 +2124,10 @@ impl Stmt for GroupingStmt {
             status: substmts.0,
             description: substmts.1,
             reference: substmts.2,
-//            action: substmts.3,
+            typedef_or_grouping: substmts.3,
+            data_def: substmts.4,
+            action: substmts.5,
+            notification: substmts.6,
         })
     }
 
@@ -2131,7 +2138,20 @@ impl Stmt for GroupingStmt {
         Ok((collect_opt_stmt!(stmts, StatusStmt)?,
             collect_opt_stmt!(stmts, DescriptionStmt)?,
             collect_opt_stmt!(stmts, ReferenceStmt)?,
-//            collect_vec_stmt!(stmts, ActionStmt)?
+            TypedefOrGrouping::new_with_substmts((
+                collect_vec_stmt!(stmts, TypedefStmt)?,
+                collect_vec_stmt!(stmts, GroupingStmt)?,)),
+            DataDefStmt::new_with_substmts((
+                // collect_vec_stmt!(stmts, ContainerStmt)?,
+                // collect_vec_stmt!(stmts, LeafStmt)?,
+                // collect_vec_stmt!(stmts, LeafListStmt)?,
+                // collect_vec_stmt!(stmts, ListStmt)?,
+                // collect_vec_stmt!(stmts, ChoiceStmt)?,
+                collect_vec_stmt!(stmts, AnydataStmt)?,
+                collect_vec_stmt!(stmts, AnyxmlStmt)?,
+                collect_vec_stmt!(stmts, UsesStmt)?,)),
+            collect_vec_stmt!(stmts, ActionStmt)?,
+            collect_vec_stmt!(stmts, NotificationStmt)?,
         ))
     }
 }
