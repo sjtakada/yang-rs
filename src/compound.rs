@@ -89,6 +89,67 @@ impl SubmoduleHeaderStmts {
 }
 
 ///
+/// Body Statements.
+///
+#[derive(Debug, Clone)]
+pub struct BodyStmts {
+    extension: Vec<ExtensionStmt>,
+    feature: Vec<FeatureStmt>,
+    identity: Vec<IdentityStmt>,
+    typedef: Vec<TypedefStmt>,
+    grouping: Vec<GroupingStmt>,
+    data_def: DataDefStmt,
+    augment: Vec<AugmentStmt>,
+    rpc: Vec<RpcStmt>,
+    notification: Vec<NotificationStmt>,
+    deviation: Vec<DeviationStmt>,
+}
+
+impl Compound for BodyStmts {
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(ExtensionStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(FeatureStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IdentityStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(TypedefStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(GroupingStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(DataDefStmt::keywords)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(AugmentStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(RpcStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(NotificationStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(DeviationStmt::keyword)),
+        ]
+    }
+}
+
+impl BodyStmts {
+    pub fn parse(parser: &mut Parser) -> Result<BodyStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok(BodyStmts {
+            extension: collect_vec_stmt!(stmts, ExtensionStmt)?,
+            feature: collect_vec_stmt!(stmts, FeatureStmt)?,
+            identity: collect_vec_stmt!(stmts, IdentityStmt)?,
+            typedef: collect_vec_stmt!(stmts, TypedefStmt)?,
+            grouping: collect_vec_stmt!(stmts, GroupingStmt)?,
+            data_def: DataDefStmt::new_with_substmts((
+                collect_vec_stmt!(stmts, ContainerStmt)?,
+                collect_vec_stmt!(stmts, LeafStmt)?,
+                collect_vec_stmt!(stmts, LeafListStmt)?,
+                collect_vec_stmt!(stmts, ListStmt)?,
+                collect_vec_stmt!(stmts, ChoiceStmt)?,
+                collect_vec_stmt!(stmts, AnydataStmt)?,
+                collect_vec_stmt!(stmts, AnyxmlStmt)?,
+                collect_vec_stmt!(stmts, UsesStmt)?,)),
+            augment: collect_vec_stmt!(stmts, AugmentStmt)?,
+            rpc: collect_vec_stmt!(stmts, RpcStmt)?,
+            notification: collect_vec_stmt!(stmts, NotificationStmt)?,
+            deviation: collect_vec_stmt!(stmts, DeviationStmt)?,
+        })
+    }
+}
+
+///
 /// Meta Statements.
 ///
 #[derive(Debug, Clone)]

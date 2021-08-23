@@ -124,7 +124,8 @@ pub struct ModuleStmt {
     /// Revision statements.
     revision: RevisionStmts,
 
-//    body: BodyStmts,
+    /// Body statements.
+    body: BodyStmts,
 }
 
 impl Stmt for ModuleStmt {
@@ -132,7 +133,7 @@ impl Stmt for ModuleStmt {
     type Arg = Identifier;
 
     /// Sub Statements.
-    type SubStmts = (ModuleHeaderStmts, LinkageStmts, MetaStmts, RevisionStmts);
+    type SubStmts = (ModuleHeaderStmts, LinkageStmts, MetaStmts, RevisionStmts, BodyStmts);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
@@ -152,7 +153,7 @@ impl Stmt for ModuleStmt {
             linkage: substmts.1,
             meta: substmts.2,
             revision: substmts.3,
-//            body: substmts.4,
+            body: substmts.4,
         })
     }
 
@@ -162,8 +163,9 @@ impl Stmt for ModuleStmt {
         let linkage = LinkageStmts::parse(parser)?;
         let meta = MetaStmts::parse(parser)?;
         let revision = RevisionStmts::parse(parser)?;
+        let body = BodyStmts::parse(parser)?;
 
-        Ok((module_header, linkage, meta, revision))
+        Ok((module_header, linkage, meta, revision, body))
     }
 }
 
@@ -186,7 +188,9 @@ pub struct SubmoduleStmt {
 
     /// Revision statements.
     revision: RevisionStmts,
-//    body: BodyStmts,
+
+    /// Body statements.
+    body: BodyStmts,
 }
 
 impl Stmt for SubmoduleStmt {
@@ -194,7 +198,7 @@ impl Stmt for SubmoduleStmt {
     type Arg = Identifier;
 
     /// Sub Statements.
-    type SubStmts = (SubmoduleHeaderStmts, LinkageStmts, MetaStmts, RevisionStmts);
+    type SubStmts = (SubmoduleHeaderStmts, LinkageStmts, MetaStmts, RevisionStmts, BodyStmts);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
@@ -214,7 +218,7 @@ impl Stmt for SubmoduleStmt {
             linkage: substmts.1,
             meta: substmts.2,
             revision: substmts.3,
-//            body: substmts.4,
+            body: substmts.4,
         })
     }
 
@@ -224,8 +228,9 @@ impl Stmt for SubmoduleStmt {
         let linkage = LinkageStmts::parse(parser)?;
         let meta = MetaStmts::parse(parser)?;
         let revision = RevisionStmts::parse(parser)?;
+        let body = BodyStmts::parse(parser)?;
 
-        Ok((submodule_header, linkage, meta, revision))
+        Ok((submodule_header, linkage, meta, revision, body))
     }
 }
 
