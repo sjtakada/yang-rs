@@ -31,7 +31,7 @@ pub trait Compound {
 ///
 #[derive(Debug, Clone)]
 pub struct ModuleHeaderStmts {
-    yang_version: YangVersionStmt,
+    yang_version: Option<YangVersionStmt>,
     namespace: NamespaceStmt,
     prefix: PrefixStmt,
 }
@@ -39,7 +39,7 @@ pub struct ModuleHeaderStmts {
 impl Compound for ModuleHeaderStmts {
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::HasOne(SubStmtWith::Stmt(YangVersionStmt::keyword)),
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(YangVersionStmt::keyword)),
              SubStmtDef::HasOne(SubStmtWith::Stmt(NamespaceStmt::keyword)),
              SubStmtDef::HasOne(SubStmtWith::Stmt(PrefixStmt::keyword)),
         ]
@@ -51,7 +51,7 @@ impl ModuleHeaderStmts {
         let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok(ModuleHeaderStmts {
-            yang_version: collect_a_stmt!(stmts, YangVersionStmt)?,
+            yang_version: collect_opt_stmt!(stmts, YangVersionStmt)?,
             namespace: collect_a_stmt!(stmts, NamespaceStmt)?,
             prefix: collect_a_stmt!(stmts, PrefixStmt)?,
         })
