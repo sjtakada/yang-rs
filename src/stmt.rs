@@ -42,22 +42,22 @@ pub trait Stmt {
 
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        panic!();
+        panic!("{:?}", Self::keyword());
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(_arg: Self::Arg) -> StmtType where Self: Sized {
-        panic!();
+        panic!("{:?}", Self::keyword());
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(_arg: Self::Arg, _substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        panic!();
+        panic!("{:?}", Self::keyword());
     }
 
     /// Parse substatements.
     fn parse_substmts(_parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        panic!();
+        panic!("{:?}", Self::keyword());
     }
 
     /// Parse a statement and return the object wrapped in enum.
@@ -1164,9 +1164,27 @@ impl Stmt for TypeStmt {
         true
     }
 
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::TypeStmt(TypeStmt {
+            arg,
+            type_body: None,
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::TypeStmt(TypeStmt {
+            arg,
+            type_body: substmts,
+        })
+    }
+
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        Ok(Some(TypeBodyStmts::parse(parser)?))
+        let type_body = TypeBodyStmts::parse(parser)?;
+
+        Ok(Some(type_body))
     }
 }
 
@@ -4101,5 +4119,32 @@ impl DeviateReplaceStmt {
             min_elements: collect_opt_stmt!(stmts, MinElementsStmt)?,
             max_elements: collect_opt_stmt!(stmts, MaxElementsStmt)?,
         })
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    pub fn test_typedef_stmt() {
+        let s = r#"area-id {
+	type union {
+
+            type ipv4-address {
+
+            }
+
+            type uint32 {
+		range "0..4294967295";
+            }
+	}
+    }"#;
+
+        let mut parser = Parser::new(s.to_string());
+
+        let res = TypedefStmt::parse(&mut parser);
+        println!("{:?}", res);
     }
 }
