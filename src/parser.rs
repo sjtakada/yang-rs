@@ -29,7 +29,7 @@ pub fn parse_file(filename: &str) -> std::io::Result<()> {
     let n1 = p
         .to_str()
         .ok_or(Error::new(ErrorKind::Other, "Invalid filename"))?;
-    let n2 = str::replace(n1, ".", "_");
+    let _n2 = str::replace(n1, ".", "_");
 
     f.read_to_string(&mut s)?;
     let mut parser = Parser::new(s);

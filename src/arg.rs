@@ -67,6 +67,18 @@ pub trait StmtArg {
 }
 
 ///
+/// No Arg (for "input-stmt", "output-stmt").
+///
+#[derive(Debug, Clone, PartialEq)]
+pub struct NoArg;
+
+impl StmtArg for NoArg {
+    fn parse_arg(_parser: &mut Parser) -> Result<Self, YangError> {
+        Ok(NoArg)
+    }
+}
+
+///
 /// Yang Identifier.
 ///
 #[derive(Debug, Clone, PartialEq)]
@@ -104,7 +116,7 @@ impl StmtArg for Identifier {
 }
 
 ///
-/// IdentifierRef.
+/// "identity-ref".
 ///
 #[derive(Clone, PartialEq)]
 pub struct IdentifierRef {
@@ -231,7 +243,7 @@ impl StmtArg for Url {
 }
 
 ///
-/// The "yang-version-arg".
+/// "yang-version-arg".
 ///
 #[derive(Debug, Clone)]
 pub struct YangVersionArg {
@@ -251,7 +263,7 @@ impl StmtArg for YangVersionArg {
 }
 
 ///
-/// Date arg. 
+/// "date-arg".
 ///
 #[derive(Debug, Clone)]
 pub struct DateArg {
@@ -289,7 +301,7 @@ impl StmtArg for DateArg {
 }
 
 ///
-/// Yin Element arg. 
+/// "yin-element-arg". 
 ///
 #[derive(Debug, Clone)]
 pub struct YinElementArg {
@@ -310,7 +322,7 @@ impl StmtArg for YinElementArg {
 }
 
 ///
-/// Fraction Digits arg.
+/// "fraction-digits-arg".
 ///
 #[derive(Debug, Clone)]
 pub struct FractionDigitsArg {
@@ -326,7 +338,7 @@ impl FractionDigitsArg {
 
 impl ToString for FractionDigitsArg {
     fn to_string(&self) -> String {
-        format!("{}", self.digits)
+        format!("{}", self.digits())
     }
 }
 
@@ -349,7 +361,7 @@ pub enum Status {
 }
 
 ///
-/// Status arg.
+/// "status-arg".
 ///
 #[derive(Debug, Clone)]
 pub struct StatusArg {
@@ -372,7 +384,7 @@ impl StmtArg for StatusArg {
 }
 
 ///
-/// Config Arg.
+/// "config-arg".
 ///
 #[derive(Debug, Clone)]
 pub struct ConfigArg {
@@ -393,7 +405,7 @@ impl StmtArg for ConfigArg {
 }
 
 ///
-/// Mandatory Arg.
+/// "mandatory-arg".
 ///
 #[derive(Debug, Clone)]
 pub struct MandatoryArg {
@@ -420,7 +432,7 @@ pub enum OrderedBy {
 }
 
 ///
-/// Ordered-By arg.
+/// "order-by-arg".
 ///
 #[derive(Debug, Clone)]
 pub struct OrderedByArg {
@@ -441,7 +453,7 @@ impl StmtArg for OrderedByArg {
 }
 
 ///
-/// Min Value arg.
+/// "min-value-arg".
 ///
 #[derive(Debug, Clone)]
 pub struct MinValueArg {
@@ -478,7 +490,7 @@ impl fmt::Debug for MaxValue {
 }
 
 ///
-/// Max Value arg.
+/// "max-value-arg".
 ///
 #[derive(Debug, Clone)]
 pub struct MaxValueArg {
@@ -503,7 +515,7 @@ impl StmtArg for MaxValueArg {
 }
 
 ///
-/// Integer Value str.
+/// "integer-value".
 ///
 #[derive(Debug, Clone)]
 pub struct IntegerValue {
@@ -561,7 +573,7 @@ impl FromStr for RangeBoundary {
 pub type RangePart = (RangeBoundary, Option<RangeBoundary>);
 
 ///
-/// The "range-arg".
+/// "range-arg".
 ///
 #[derive(Debug, Clone, PartialEq)]
 pub struct RangeArg {
@@ -634,7 +646,7 @@ impl FromStr for LengthBoundary {
 pub type LengthPart = (LengthBoundary, Option<LengthBoundary>);
 
 ///
-/// The "length-arg".
+/// "length-arg".
 ///
 #[derive(Debug, Clone, PartialEq)]
 pub struct LengthArg {
@@ -677,7 +689,7 @@ impl StmtArg for LengthArg {
 }
 
 ///
-/// The "modifier-arg".
+/// "modifier-arg".
 ///
 #[derive(Debug, Clone, PartialEq)]
 pub struct ModifierArg {
@@ -695,7 +707,7 @@ impl StmtArg for ModifierArg {
 }
 
 ///
-/// The "position-value-arg".
+/// "position-value-arg".
 ///
 #[derive(Debug, Clone, PartialEq)]
 pub struct PositionValueArg {
@@ -718,7 +730,7 @@ impl StmtArg for PositionValueArg {
 
 
 ///
-/// The "path-arg".
+/// "path-arg".
 ///
 #[derive(Debug, Clone, PartialEq)]
 pub enum PathArg {
@@ -1231,7 +1243,7 @@ impl ToString for IfFeatureFactor {
 }
 
 ///
-/// Require Instance Arg.
+/// "require-instance-arg".
 ///
 #[derive(Debug, Clone)]
 pub struct RequireInstanceArg {
@@ -1253,7 +1265,7 @@ impl StmtArg for RequireInstanceArg {
 
 
 ///
-/// Key Arg.
+/// "key-arg".
 ///
 #[derive(Debug, Clone, PartialEq)]
 pub struct KeyArg {
@@ -1284,7 +1296,7 @@ impl StmtArg for KeyArg {
 }
 
 ///
-/// Schema Nodeid.  TODO - may consolidate.
+/// "schema-nodeid".  TODO - may consolidate.
 ///
 #[derive(Debug, Clone)]
 pub struct AbsoluteSchemaNodeid {
@@ -1365,7 +1377,7 @@ impl ToString for DescendantSchemaNodeid {
 }
 
 ///
-/// Unique Arg.
+/// "unique-arg".
 ///
 #[derive(Debug, Clone)]
 pub struct UniqueArg {
@@ -1393,17 +1405,17 @@ impl FromStr for UniqueArg {
     }
 }
 
-/// Refine Arg.
+/// "refine-arg".
 pub type RefineArg = DescendantSchemaNodeid;
 
-/// Uses Augment Arg.
+/// "uses-augment-arg".
 pub type UsesAugmentArg = DescendantSchemaNodeid;
 
-/// Augment Arg.
+/// "augment-arg".
 pub type AugmentArg = AbsoluteSchemaNodeid;
 
-/// Deviation Arg.
-pub type DevicationArg = AbsoluteSchemaNodeid;
+/// "deviation-arg".
+pub type DeviationArg = AbsoluteSchemaNodeid;
 
 #[cfg(test)]
 mod tests {
@@ -1764,7 +1776,7 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match IfFeatureExpr::parse_arg(&mut parser) {
-            Ok(expr) => panic!(),
+            Ok(expr) => panic!("{:?}", expr),
             Err(err) => assert_eq!(err.to_string(), "Argument parse error: if-feature-expr at line 0"),
 
         }
@@ -1783,7 +1795,7 @@ mod tests {
                            NodeIdentifier::from_str("id4").unwrap(),
                            NodeIdentifier::from_str("id5").unwrap(),
             ] }),
-            Err(err) => panic!(err.to_string()),
+            Err(err) => panic!("{}", err.to_string()),
         }
     }
 
@@ -1797,7 +1809,7 @@ mod tests {
                 assert_eq!(arg.to_string(), "/id1/id2/id3");
                 assert_eq!(arg.nodes.len(), 3);
             }
-            Err(err) => panic!(err.to_string()),
+            Err(err) => panic!("{}", err.to_string()),
         }
     }
 
@@ -1811,7 +1823,7 @@ mod tests {
                 assert_eq!(arg.to_string(), "id1/id2/id3");
                 assert_eq!(arg.nodes.len(), 3);
             }
-            Err(err) => panic!(err.to_string()),
+            Err(err) => panic!("{}", err.to_string()),
         }
     }
 }

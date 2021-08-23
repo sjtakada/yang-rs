@@ -5,7 +5,6 @@
 
 use std::fmt;
 use std::collections::HashMap;
-//use std::collections::HashSet;
 
 use super::error::*;
 use super::parser::*;
@@ -38,7 +37,7 @@ lazy_static! {
         m.insert("base", BaseStmt::parse as StmtParserFn);
         m.insert("feature", FeatureStmt::parse as StmtParserFn);
         m.insert("if-feature", IfFeatureStmt::parse as StmtParserFn);
-//        m.insert("typedef", TypedefStmt::parse as StmtParserFn);
+        m.insert("typedef", TypedefStmt::parse as StmtParserFn);
         m.insert("type", TypeStmt::parse as StmtParserFn);
         m.insert("range", RangeStmt::parse as StmtParserFn);
         m.insert("fraction-digits", FractionDigitsStmt::parse as StmtParserFn);
@@ -62,39 +61,29 @@ lazy_static! {
         m.insert("min-elements", MinElementsStmt::parse as StmtParserFn);
         m.insert("max-elements", MaxElementsStmt::parse as StmtParserFn);
         m.insert("value", ValueStmt::parse as StmtParserFn);
-/*
         m.insert("grouping", GroupingStmt::parse as StmtParserFn);
         m.insert("container", ContainerStmt::parse as StmtParserFn);
         m.insert("leaf", LeafStmt::parse as StmtParserFn);
         m.insert("leaf-list", LeafListStmt::parse as StmtParserFn);
         m.insert("list", ListStmt::parse as StmtParserFn);
-*/
         m.insert("key", KeyStmt::parse as StmtParserFn);
         m.insert("unique", UniqueStmt::parse as StmtParserFn);
-/*
         m.insert("choice", ChoiceStmt::parse as StmtParserFn);
-        m.insert("short-case", ShortCaseStmt::parse as StmtParserFn);
         m.insert("case", CaseStmt::parse as StmtParserFn);
-*/
         m.insert("anydata", AnydataStmt::parse as StmtParserFn);
         m.insert("anyxml", AnyxmlStmt::parse as StmtParserFn);
         m.insert("uses", UsesStmt::parse as StmtParserFn);
         m.insert("refine", RefineStmt::parse as StmtParserFn);
         m.insert("uses-augment", UsesAugmentStmt::parse as StmtParserFn);
-//        m.insert("augment", AugmentStmt::parse as StmtParserFn);
+        m.insert("augment", AugmentStmt::parse as StmtParserFn);
         m.insert("when", WhenStmt::parse as StmtParserFn);
-/*
         m.insert("rpc", RpcStmt::parse as StmtParserFn);
         m.insert("action", ActionStmt::parse as StmtParserFn);
         m.insert("input", InputStmt::parse as StmtParserFn);
         m.insert("output", OutputStmt::parse as StmtParserFn);
         m.insert("notification", NotificationStmt::parse as StmtParserFn);
         m.insert("deviation", DeviationStmt::parse as StmtParserFn);
-        m.insert("deviation-not-supported", DeviationNotSupportedStmt::parse as StmtParserFn);
-        m.insert("deviate-add", DeviateAddStmt::parse as StmtParserFn);
-        m.insert("deviate-delete", DeviateDeleteStmt::parse as StmtParserFn);
-        m.insert("deviata-replace", DeviateReplaceStmt::parse as StmtParserFn);
-*/
+        m.insert("deviate", DeviateStmt::parse as StmtParserFn);
         m
     };
 }
@@ -150,7 +139,7 @@ pub enum StmtType {
     BaseStmt(BaseStmt),
     FeatureStmt(FeatureStmt),
     IfFeatureStmt(IfFeatureStmt),
-//    TypedefStmt(TypedefStmt),
+    TypedefStmt(TypedefStmt),
     TypeStmt(TypeStmt),
     RangeStmt(RangeStmt),
     FractionDigitsStmt(FractionDigitsStmt),
@@ -174,39 +163,29 @@ pub enum StmtType {
     MinElementsStmt(MinElementsStmt),
     MaxElementsStmt(MaxElementsStmt),
     ValueStmt(ValueStmt),
-/*
     GroupingStmt(GroupingStmt),
     ContainerStmt(ContainerStmt),
     LeafStmt(LeafStmt),
     LeafListStmt(LeafListStmt),
     ListStmt(ListStmt),
-*/
     KeyStmt(KeyStmt),
     UniqueStmt(UniqueStmt),
-/*
     ChoiceStmt(ChoiceStmt),
-    ShortCaseStmt(ShortCaseStmt),
     CaseStmt(CaseStmt),
-*/
     AnydataStmt(AnydataStmt),
     AnyxmlStmt(AnyxmlStmt),
     UsesStmt(UsesStmt),
     RefineStmt(RefineStmt),
     UsesAugmentStmt(UsesAugmentStmt),
-//    AugmentStmt(AugmentStmt),
+    AugmentStmt(AugmentStmt),
     WhenStmt(WhenStmt),
-/*
     RpcStmt(RpcStmt),
     ActionStmt(ActionStmt),
     InputStmt(InputStmt),
     OutputStmt(OutputStmt),
     NotificationStmt(NotificationStmt),
     DeviationStmt(DeviationStmt),
-    DeviationNotSupportedStmt(DeviationNotSupportedStmt),
-    DeviateAddStmt(DeviateAddStmt),
-    DeviateDeleteStmt(DeviateDeleteStmt),
-    DeviateReplaceStmt(DeviateReplaceStmt),
-*/
+    DeviateStmt(DeviateStmt),
 }
 
 impl fmt::Debug for StmtType {
@@ -234,7 +213,7 @@ impl fmt::Debug for StmtType {
             StmtType::BaseStmt(stmt) => write!(f, "base-stmt {:?}", stmt),
             StmtType::FeatureStmt(stmt) => write!(f, "feature-stmt {:?}", stmt),
             StmtType::IfFeatureStmt(stmt) => write!(f, "if-feature-stmt {:?}", stmt),
-//            StmtType::TypedefStmt(stmt) => write!(f, "typedef-stmt {:?}", stmt),
+            StmtType::TypedefStmt(stmt) => write!(f, "typedef-stmt {:?}", stmt),
             StmtType::TypeStmt(stmt) => write!(f, "type-stmt {:?}", stmt),
             StmtType::RangeStmt(stmt) => write!(f, "range-stmt {:?}", stmt),
             StmtType::FractionDigitsStmt(stmt) => write!(f, "fraction-digits-stmt {:?}", stmt),
@@ -258,39 +237,29 @@ impl fmt::Debug for StmtType {
             StmtType::MinElementsStmt(stmt) => write!(f, "min-elements-stmt {:?}", stmt),
             StmtType::MaxElementsStmt(stmt) => write!(f, "max-elements-stmt {:?}", stmt),
             StmtType::ValueStmt(stmt) => write!(f, "value-stmt {:?}", stmt),
-/*
             StmtType::GroupingStmt(stmt) => write!(f, "grouping-stmt {:?}", stmt),
             StmtType::ContainerStmt(stmt) => write!(f, "container-stmt {:?}", stmt),
             StmtType::LeafStmt(stmt) => write!(f, "leaf-stmt {:?}", stmt),
             StmtType::LeafListStmt(stmt) => write!(f, "leaf-list-stmt {:?}", stmt),
             StmtType::ListStmt(stmt) => write!(f, "list-stmt {:?}", stmt),
-*/
             StmtType::KeyStmt(stmt) => write!(f, "key-stmt {:?}", stmt),
             StmtType::UniqueStmt(stmt) => write!(f, "unique-stmt {:?}", stmt),
-/*
             StmtType::ChoiceStmt(stmt) => write!(f, "choice-stmt {:?}", stmt),
-            StmtType::ShortCaseStmt(stmt) => write!(f, "short-case-stmt {:?}", stmt),
             StmtType::CaseStmt(stmt) => write!(f, "case-stmt {:?}", stmt),
-*/
             StmtType::AnydataStmt(stmt) => write!(f, "anydata-stmt {:?}", stmt),
             StmtType::AnyxmlStmt(stmt) => write!(f, "anyxml-stmt {:?}", stmt),
             StmtType::UsesStmt(stmt) => write!(f, "uses-stmt {:?}", stmt),
             StmtType::RefineStmt(stmt) => write!(f, "refine-stmt {:?}", stmt),
             StmtType::UsesAugmentStmt(stmt) => write!(f, "uses-augment-stmt {:?}", stmt),
-//            StmtType::AugmentStmt(stmt) => write!(f, "augment-stmt {:?}", stmt),
+            StmtType::AugmentStmt(stmt) => write!(f, "augment-stmt {:?}", stmt),
             StmtType::WhenStmt(stmt) => write!(f, "when-stmt {:?}", stmt),
-/*
             StmtType::RpcStmt(stmt) => write!(f, "rpc-stmt {:?}", stmt),
             StmtType::ActionStmt(stmt) => write!(f, "action-stmt {:?}", stmt),
             StmtType::InputStmt(stmt) => write!(f, "input-stmt {:?}", stmt),
             StmtType::OutputStmt(stmt) => write!(f, "output-stmt {:?}", stmt),
             StmtType::NotificationStmt(stmt) => write!(f, "notification-stmt {:?}", stmt),
             StmtType::DeviationStmt(stmt) => write!(f, "deviation-stmt {:?}", stmt),
-            StmtType::DeviationNotSupportedStmt(stmt) => write!(f, "deviation-not-supported-stmt {:?}", stmt),
-            StmtType::DeviateAddStmt(stmt) => write!(f, "deviate-add-stmt {:?}", stmt),
-            StmtType::DeviateDeleteStmt(stmt) => write!(f, "deviate-delete-stmt {:?}", stmt),
-            StmtType::DeviateReplaceStmt(stmt) => write!(f, "deviate-replace-stmt {:?}", stmt),
-*/
+            StmtType::DeviateStmt(stmt) => write!(f, "deviate-stmt {:?}", stmt),
         }
     }
 }

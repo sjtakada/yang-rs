@@ -11,8 +11,8 @@ use super::parser::*;
 use super::arg::*;
 use super::substmt::*;
 use super::compound::*;
+use super::compound::Compound;
 
-//#[macro_use]
 use crate::collect_a_stmt;
 use crate::collect_vec_stmt;
 use crate::collect_opt_stmt;
@@ -42,22 +42,22 @@ pub trait Stmt {
 
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        panic!();
+        panic!("{:?}", Self::keyword());
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
     fn new_with_arg(_arg: Self::Arg) -> StmtType where Self: Sized {
-        panic!();
+        panic!("{:?}", Self::keyword());
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(_arg: Self::Arg, _substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        panic!();
+        panic!("{:?}", Self::keyword());
     }
 
     /// Parse substatements.
     fn parse_substmts(_parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        panic!();
+        panic!("{:?}", Self::keyword());
     }
 
     /// Parse a statement and return the object wrapped in enum.
@@ -124,7 +124,8 @@ pub struct ModuleStmt {
     /// Revision statements.
     revision: RevisionStmts,
 
-//    body: BodyStmts,
+    /// Body statements.
+    body: BodyStmts,
 }
 
 impl Stmt for ModuleStmt {
@@ -132,7 +133,7 @@ impl Stmt for ModuleStmt {
     type Arg = Identifier;
 
     /// Sub Statements.
-    type SubStmts = (ModuleHeaderStmts, LinkageStmts, MetaStmts, RevisionStmts);
+    type SubStmts = (ModuleHeaderStmts, LinkageStmts, MetaStmts, RevisionStmts, BodyStmts);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
@@ -152,7 +153,7 @@ impl Stmt for ModuleStmt {
             linkage: substmts.1,
             meta: substmts.2,
             revision: substmts.3,
-//            body: substmts.4,
+            body: substmts.4,
         })
     }
 
@@ -162,8 +163,9 @@ impl Stmt for ModuleStmt {
         let linkage = LinkageStmts::parse(parser)?;
         let meta = MetaStmts::parse(parser)?;
         let revision = RevisionStmts::parse(parser)?;
+        let body = BodyStmts::parse(parser)?;
 
-        Ok((module_header, linkage, meta, revision))
+        Ok((module_header, linkage, meta, revision, body))
     }
 }
 
@@ -186,7 +188,9 @@ pub struct SubmoduleStmt {
 
     /// Revision statements.
     revision: RevisionStmts,
-//    body: BodyStmts,
+
+    /// Body statements.
+    body: BodyStmts,
 }
 
 impl Stmt for SubmoduleStmt {
@@ -194,7 +198,7 @@ impl Stmt for SubmoduleStmt {
     type Arg = Identifier;
 
     /// Sub Statements.
-    type SubStmts = (SubmoduleHeaderStmts, LinkageStmts, MetaStmts, RevisionStmts);
+    type SubStmts = (SubmoduleHeaderStmts, LinkageStmts, MetaStmts, RevisionStmts, BodyStmts);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
@@ -214,7 +218,7 @@ impl Stmt for SubmoduleStmt {
             linkage: substmts.1,
             meta: substmts.2,
             revision: substmts.3,
-//            body: substmts.4,
+            body: substmts.4,
         })
     }
 
@@ -224,8 +228,9 @@ impl Stmt for SubmoduleStmt {
         let linkage = LinkageStmts::parse(parser)?;
         let meta = MetaStmts::parse(parser)?;
         let revision = RevisionStmts::parse(parser)?;
+        let body = BodyStmts::parse(parser)?;
 
-        Ok((submodule_header, linkage, meta, revision))
+        Ok((submodule_header, linkage, meta, revision, body))
     }
 }
 
@@ -288,7 +293,7 @@ impl Stmt for ImportStmt {
 
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::HaveOne(SubStmtWith::Stmt(PrefixStmt::keyword)),
+        vec![SubStmtDef::HasOne(SubStmtWith::Stmt(PrefixStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(RevisionDateStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
@@ -466,7 +471,7 @@ impl Stmt for BelongsToStmt {
 
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::HaveOne(SubStmtWith::Stmt(PrefixStmt::keyword)),
+        vec![SubStmtDef::HasOne(SubStmtWith::Stmt(PrefixStmt::keyword)),
         ]
     }
 
@@ -1064,31 +1069,74 @@ impl Stmt for IfFeatureStmt {
     }
 }
 
-/*
-
 ///
-///
+/// 7.3. The "typedef" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct TypedefStmt {
+    arg: Identifier,
+    type_: TypeStmt,
+    units: Option<UnitsStmt>,
+    default: Option<DefaultStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
 }
 
 impl Stmt for TypedefStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
+
+    /// Sub Statements.
+    type SubStmts = (TypeStmt, Option<UnitsStmt>, Option<DefaultStmt>,
+                     Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "typedef"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has substatements.
+    fn has_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::HasOne(SubStmtWith::Stmt(TypeStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(UnitsStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DefaultStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::TypedefStmt(TypedefStmt {
+            arg,
+            type_: substmts.0,
+            units: substmts.1,
+            default: substmts.2,
+            status: substmts.3,
+            description: substmts.4,
+            reference: substmts.5,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+        
+        Ok((collect_a_stmt!(stmts, TypeStmt)?,
+            collect_opt_stmt!(stmts, UnitsStmt)?,
+            collect_opt_stmt!(stmts, DefaultStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?))
     }
 }
-
-*/
 
 ///
 /// 7.4. The "type" Statement.
@@ -1116,9 +1164,27 @@ impl Stmt for TypeStmt {
         true
     }
 
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::TypeStmt(TypeStmt {
+            arg,
+            type_body: None,
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::TypeStmt(TypeStmt {
+            arg,
+            type_body: substmts,
+        })
+    }
+
     /// Parse substatements.
     fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        Ok(Some(TypeBodyStmts::parse(parser)?))
+        let type_body = TypeBodyStmts::parse(parser)?;
+
+        Ok(Some(type_body))
     }
 }
 
@@ -2016,120 +2082,539 @@ impl Stmt for ValueStmt {
     }
 }
 
-
-/*
-
 ///
-///
+/// 7.12. The "grouping" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct GroupingStmt {
+    arg: Identifier,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+    typedef_or_grouping: TypedefOrGrouping,
+    data_def: DataDefStmt,
+    action: Vec<ActionStmt>,
+    notification: Vec<NotificationStmt>,
 }
 
 impl Stmt for GroupingStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
+
+    /// Sub Statements.
+    type SubStmts = (Option<StatusStmt>,Option<DescriptionStmt>, Option<ReferenceStmt>,
+                     TypedefOrGrouping, DataDefStmt, Vec<ActionStmt>, Vec<NotificationStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "grouping"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(TypedefOrGrouping::keywords)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(DataDefStmt::keywords)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(ActionStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(NotificationStmt::keyword)),
+        ]
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::GroupingStmt(GroupingStmt {
+            arg,
+            status: None,
+            description: None,
+            reference: None,
+            typedef_or_grouping: TypedefOrGrouping::new(),
+            data_def: DataDefStmt::new(),
+            action: Vec::new(),
+            notification: Vec::new(),
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::GroupingStmt(GroupingStmt {
+            arg,
+            status: substmts.0,
+            description: substmts.1,
+            reference: substmts.2,
+            typedef_or_grouping: substmts.3,
+            data_def: substmts.4,
+            action: substmts.5,
+            notification: substmts.6,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+            TypedefOrGrouping::new_with_substmts((
+                collect_vec_stmt!(stmts, TypedefStmt)?,
+                collect_vec_stmt!(stmts, GroupingStmt)?,)),
+            DataDefStmt::new_with_substmts((
+                collect_vec_stmt!(stmts, ContainerStmt)?,
+                collect_vec_stmt!(stmts, LeafStmt)?,
+                collect_vec_stmt!(stmts, LeafListStmt)?,
+                collect_vec_stmt!(stmts, ListStmt)?,
+                collect_vec_stmt!(stmts, ChoiceStmt)?,
+                collect_vec_stmt!(stmts, AnydataStmt)?,
+                collect_vec_stmt!(stmts, AnyxmlStmt)?,
+                collect_vec_stmt!(stmts, UsesStmt)?,)),
+            collect_vec_stmt!(stmts, ActionStmt)?,
+            collect_vec_stmt!(stmts, NotificationStmt)?,
+        ))
     }
 }
 
 ///
-///
+/// 7.5. The "container" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ContainerStmt {
+    arg: Identifier,
+    when: Option<WhenStmt>,
+    if_feature: Vec<IfFeatureStmt>,
+    must: Vec<MustStmt>,
+    presence: Option<PresenceStmt>,
+    config: Option<ConfigStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+    typedef_or_grouping: TypedefOrGrouping,
+    data_def: DataDefStmt,
+    action: Vec<ActionStmt>,
+    notification: Vec<NotificationStmt>,
 }
 
 impl Stmt for ContainerStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
+
+    /// Sub Statements.
+    type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Vec<MustStmt>, Option<PresenceStmt>,
+                     Option<ConfigStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>,
+                     TypedefOrGrouping, DataDefStmt, Vec<ActionStmt>, Vec<NotificationStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "container"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(WhenStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(MustStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(PresenceStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ConfigStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(TypedefOrGrouping::keywords)),
+             SubStmtDef::OneOrMore(SubStmtWith::Selection(DataDefStmt::keywords)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(ActionStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(NotificationStmt::keyword)),
+        ]
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::ContainerStmt(ContainerStmt {
+            arg,
+            when: None,
+            if_feature: Vec::new(),
+            must: Vec::new(),
+            presence: None,
+            config: None,
+            status: None,
+            description: None,
+            reference: None,
+            typedef_or_grouping: TypedefOrGrouping::new(),
+            data_def: DataDefStmt::new(),
+            action: Vec::new(),
+            notification: Vec::new(),
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::ContainerStmt(ContainerStmt {
+            arg,
+            when: substmts.0,
+            if_feature: substmts.1,
+            must: substmts.2,
+            presence: substmts.3,
+            config: substmts.4,
+            status: substmts.5,
+            description: substmts.6,
+            reference: substmts.7,
+            typedef_or_grouping: substmts.8,
+            data_def: substmts.9,
+            action: substmts.10,
+            notification: substmts.11,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_opt_stmt!(stmts, WhenStmt)?,
+            collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_vec_stmt!(stmts, MustStmt)?,
+            collect_opt_stmt!(stmts, PresenceStmt)?,
+            collect_opt_stmt!(stmts, ConfigStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+            TypedefOrGrouping::new_with_substmts((
+                collect_vec_stmt!(stmts, TypedefStmt)?,
+                collect_vec_stmt!(stmts, GroupingStmt)?,)),
+            DataDefStmt::new_with_substmts((
+                collect_vec_stmt!(stmts, ContainerStmt)?,
+                collect_vec_stmt!(stmts, LeafStmt)?,
+                collect_vec_stmt!(stmts, LeafListStmt)?,
+                collect_vec_stmt!(stmts, ListStmt)?,
+                collect_vec_stmt!(stmts, ChoiceStmt)?,
+                collect_vec_stmt!(stmts, AnydataStmt)?,
+                collect_vec_stmt!(stmts, AnyxmlStmt)?,
+                collect_vec_stmt!(stmts, UsesStmt)?,)),
+            collect_vec_stmt!(stmts, ActionStmt)?,
+            collect_vec_stmt!(stmts, NotificationStmt)?,
+        ))
     }
 }
 
 ///
-///
+/// 7.6. The "leaf" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct LeafStmt {
+    arg: Identifier,
+    when: Option<WhenStmt>,
+    if_feature: Vec<IfFeatureStmt>,
+    type_: TypeStmt,
+    units: Option<UnitsStmt>,
+    must: Vec<MustStmt>,
+    default: Option<DefaultStmt>,
+    config: Option<ConfigStmt>,
+    mandatory: Option<MandatoryStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
 }
 
 impl Stmt for LeafStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
+
+    /// Sub Statements.
+    type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, TypeStmt, Option<UnitsStmt>, Vec<MustStmt>,
+                     Option<DefaultStmt>, Option<ConfigStmt>, Option<MandatoryStmt>, Option<StatusStmt>,
+                     Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "leaf"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has substatements.
+    fn has_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(WhenStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::HasOne(SubStmtWith::Stmt(TypeStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(UnitsStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(MustStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DefaultStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ConfigStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MandatoryStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::LeafStmt(LeafStmt {
+            arg,
+            when: substmts.0,
+            if_feature: substmts.1,
+            type_: substmts.2,
+            units: substmts.3,
+            must: substmts.4,
+            default: substmts.5,
+            config: substmts.6,
+            mandatory: substmts.7,
+            status: substmts.8,
+            description: substmts.9,
+            reference: substmts.10,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_opt_stmt!(stmts, WhenStmt)?,
+            collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_a_stmt!(stmts, TypeStmt)?,
+            collect_opt_stmt!(stmts, UnitsStmt)?,
+            collect_vec_stmt!(stmts, MustStmt)?,
+            collect_opt_stmt!(stmts, DefaultStmt)?,
+            collect_opt_stmt!(stmts, ConfigStmt)?,
+            collect_opt_stmt!(stmts, MandatoryStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+        ))
     }
 }
 
 ///
-///
+/// 7.7. The "leaf-list" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct LeafListStmt {
+    arg: Identifier,
+    when: Option<WhenStmt>,
+    if_feature: Vec<IfFeatureStmt>,
+    type_: TypeStmt,
+    units: Option<UnitsStmt>,
+    must: Vec<MustStmt>,
+    default: Vec<DefaultStmt>,
+    config: Option<ConfigStmt>,
+    min_elements: Option<MinElementsStmt>,
+    max_elements: Option<MaxElementsStmt>,
+    ordered_by: Option<OrderedByStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
 }
 
 impl Stmt for LeafListStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
+
+    /// Sub Statements.
+    type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, TypeStmt, Option<UnitsStmt>, Vec<MustStmt>,
+                     Vec<DefaultStmt>, Option<ConfigStmt>, Option<MinElementsStmt>, Option<MaxElementsStmt>,
+                     Option<OrderedByStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "leaf-list"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has substatements.
+    fn has_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(WhenStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::HasOne(SubStmtWith::Stmt(TypeStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(UnitsStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(MustStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(DefaultStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ConfigStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MinElementsStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MaxElementsStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(OrderedByStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        ]
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::LeafListStmt(LeafListStmt {
+            arg,
+            when: substmts.0,
+            if_feature: substmts.1,
+            type_: substmts.2,
+            units: substmts.3,
+            must: substmts.4,
+            default: substmts.5,
+            config: substmts.6,
+            min_elements: substmts.7,
+            max_elements: substmts.8,
+            ordered_by: substmts.9,
+            status: substmts.10,
+            description: substmts.11,
+            reference: substmts.12,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_opt_stmt!(stmts, WhenStmt)?,
+            collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_a_stmt!(stmts, TypeStmt)?,
+            collect_opt_stmt!(stmts, UnitsStmt)?,
+            collect_vec_stmt!(stmts, MustStmt)?,
+            collect_vec_stmt!(stmts, DefaultStmt)?,
+            collect_opt_stmt!(stmts, ConfigStmt)?,
+            collect_opt_stmt!(stmts, MinElementsStmt)?,
+            collect_opt_stmt!(stmts, MaxElementsStmt)?,
+            collect_opt_stmt!(stmts, OrderedByStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+        ))
     }
 }
 
 ///
-///
+/// 7.8. The "list" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ListStmt {
+    arg: Identifier,
+    when: Option<WhenStmt>,
+    if_feature: Vec<IfFeatureStmt>,
+    must: Vec<MustStmt>,
+    key: Option<KeyStmt>,
+    unique: Vec<UniqueStmt>,
+    config: Option<ConfigStmt>,
+    min_elements: Option<MinElementsStmt>,
+    max_elements: Option<MaxElementsStmt>,
+    ordered_by: Option<OrderedByStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+    typedef_or_grouping: TypedefOrGrouping,
+    data_def: DataDefStmt,
+    action: Vec<ActionStmt>,
+    notification: Vec<NotificationStmt>,
 }
 
 impl Stmt for ListStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
+
+    /// Sub Statements.
+    type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Vec<MustStmt>, Option<KeyStmt>,
+                     Vec<UniqueStmt>, Option<ConfigStmt>, Option<MinElementsStmt>, Option<MaxElementsStmt>,
+                     Option<OrderedByStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>,
+                     TypedefOrGrouping, DataDefStmt, Vec<ActionStmt>, Vec<NotificationStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "list"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has substatements.
+    fn has_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(WhenStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(MustStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(KeyStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(UniqueStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ConfigStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MinElementsStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MaxElementsStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(OrderedByStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(TypedefOrGrouping::keywords)),
+             SubStmtDef::OneOrMore(SubStmtWith::Selection(DataDefStmt::keywords)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(ActionStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(NotificationStmt::keyword)),
+        ]
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::ListStmt(ListStmt {
+            arg,
+            when: substmts.0,
+            if_feature: substmts.1,
+            must: substmts.2,
+            key: substmts.3,
+            unique: substmts.4,
+            config: substmts.5,
+            min_elements: substmts.6,
+            max_elements: substmts.7,
+            ordered_by: substmts.8,
+            status: substmts.9,
+            description: substmts.10,
+            reference: substmts.11,
+            typedef_or_grouping: substmts.12,
+            data_def: substmts.13,
+            action: substmts.14,
+            notification: substmts.15,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_opt_stmt!(stmts, WhenStmt)?,
+            collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_vec_stmt!(stmts, MustStmt)?,
+            collect_opt_stmt!(stmts, KeyStmt)?,
+            collect_vec_stmt!(stmts, UniqueStmt)?,
+            collect_opt_stmt!(stmts, ConfigStmt)?,
+            collect_opt_stmt!(stmts, MinElementsStmt)?,
+            collect_opt_stmt!(stmts, MaxElementsStmt)?,
+            collect_opt_stmt!(stmts, OrderedByStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+            TypedefOrGrouping::new_with_substmts((
+                collect_vec_stmt!(stmts, TypedefStmt)?,
+                collect_vec_stmt!(stmts, GroupingStmt)?,)),
+            DataDefStmt::new_with_substmts((
+                collect_vec_stmt!(stmts, ContainerStmt)?,
+                collect_vec_stmt!(stmts, LeafStmt)?,
+                collect_vec_stmt!(stmts, LeafListStmt)?,
+                collect_vec_stmt!(stmts, ListStmt)?,
+                collect_vec_stmt!(stmts, ChoiceStmt)?,
+                collect_vec_stmt!(stmts, AnydataStmt)?,
+                collect_vec_stmt!(stmts, AnyxmlStmt)?,
+                collect_vec_stmt!(stmts, UsesStmt)?,)),
+            collect_vec_stmt!(stmts, ActionStmt)?,
+            collect_vec_stmt!(stmts, NotificationStmt)?,
+        ))
     }
 }
-
-*/
 
 ///
 /// 7.8.2. The list's "key" Statement.
@@ -2187,75 +2672,204 @@ impl Stmt for UniqueStmt {
     }
 }
 
-/*
-
 ///
-///
+/// 7.9. The "choice" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ChoiceStmt {
+    arg: Identifier,
+    when: Option<WhenStmt>,
+    if_feature: Vec<IfFeatureStmt>,
+    default: Option<DefaultStmt>,
+    config: Option<ConfigStmt>,
+    mandatory: Option<MandatoryStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+    short_case_or_case: ShortCaseOrCaseStmt,
 }
 
 impl Stmt for ChoiceStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "choice"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Sub Statements.
+    type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Option<DefaultStmt>, Option<ConfigStmt>,
+                     Option<MandatoryStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>,
+                     ShortCaseOrCaseStmt);
+
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(WhenStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DefaultStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ConfigStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MandatoryStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+             SubStmtDef::HasOne(SubStmtWith::Selection(ShortCaseOrCaseStmt::keywords)),
+        ]
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::ChoiceStmt(ChoiceStmt {
+            arg,
+            when: None,
+            if_feature: Vec::new(),
+            default: None,
+            config: None,
+            mandatory: None,
+            status: None,
+            description: None,
+            reference: None,
+            short_case_or_case: ShortCaseOrCaseStmt::new(),
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::ChoiceStmt(ChoiceStmt {
+            arg,
+            when: substmts.0,
+            if_feature: substmts.1,
+            default: substmts.2,
+            config: substmts.3,
+            mandatory: substmts.4,
+            status: substmts.5,
+            description: substmts.6,
+            reference: substmts.7,
+            short_case_or_case: substmts.8,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_opt_stmt!(stmts, WhenStmt)?,
+            collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_opt_stmt!(stmts, DefaultStmt)?,
+            collect_opt_stmt!(stmts, ConfigStmt)?,
+            collect_opt_stmt!(stmts, MandatoryStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+            ShortCaseOrCaseStmt::new_with_substmts((
+                collect_vec_stmt!(stmts, ChoiceStmt)?,
+                collect_vec_stmt!(stmts, ContainerStmt)?,
+                collect_vec_stmt!(stmts, LeafStmt)?,
+                collect_vec_stmt!(stmts, LeafListStmt)?,
+                collect_vec_stmt!(stmts, ListStmt)?,
+                collect_vec_stmt!(stmts, AnydataStmt)?,
+                collect_vec_stmt!(stmts, AnyxmlStmt)?,
+                collect_vec_stmt!(stmts, CaseStmt)?,
+            )),
+        ))
     }
 }
 
 ///
-///
-///
-#[derive(Debug, Clone)]
-pub struct ShortCaseStmt {
-}
-
-impl Stmt for ShortCaseStmt {
-    /// Arg type.
-    type Arg = String;
-
-    /// Return statement keyword in &str.
-    fn keyword() -> Keyword {
-        "short-case"
-    }
-
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
-    }
-}
-
-///
-///
+/// 7.9.2. The choice's "case" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct CaseStmt {
+    arg: Identifier,
+    when: Option<WhenStmt>,
+    if_feature: Vec<IfFeatureStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+    data_def: DataDefStmt,
 }
 
 impl Stmt for CaseStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "case"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Sub Statements.
+    type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Option<StatusStmt>,
+                     Option<DescriptionStmt>, Option<ReferenceStmt>, DataDefStmt);
+
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(WhenStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(DataDefStmt::keywords)),
+        ]
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::CaseStmt(CaseStmt {
+            arg,
+            when: None,
+            if_feature: Vec::new(),
+            status: None,
+            description: None,
+            reference: None,
+            data_def: DataDefStmt::new(),
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::CaseStmt(CaseStmt {
+            arg,
+            when: substmts.0,
+            if_feature: substmts.1,
+            status: substmts.2,
+            description: substmts.3,
+            reference: substmts.4,
+            data_def: substmts.5,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_opt_stmt!(stmts, WhenStmt)?,
+            collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+            DataDefStmt::new_with_substmts((
+                collect_vec_stmt!(stmts, ContainerStmt)?,
+                collect_vec_stmt!(stmts, LeafStmt)?,
+                collect_vec_stmt!(stmts, LeafListStmt)?,
+                collect_vec_stmt!(stmts, ListStmt)?,
+                collect_vec_stmt!(stmts, ChoiceStmt)?,
+                collect_vec_stmt!(stmts, AnydataStmt)?,
+                collect_vec_stmt!(stmts, AnyxmlStmt)?,
+                collect_vec_stmt!(stmts, UsesStmt)?,)),
+        ))
     }
 }
-
-*/
 
 ///
 /// 7.10. The "anydata" Statement.
@@ -2633,53 +3247,171 @@ impl Stmt for RefineStmt {
 }
 
 ///
-///
+/// The "uses-augment" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct UsesAugmentStmt {
-    arg: String,
+    arg: UsesAugmentArg,
+    when: Option<WhenStmt>,
+    if_feature: Vec<IfFeatureStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+    data_def_or_else: DataDefOrElse,
 }
 
 impl Stmt for UsesAugmentStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = UsesAugmentArg;
 
     /// Sub Statements.
-    type SubStmts = ();
+    type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Option<StatusStmt>,
+                     Option<DescriptionStmt>, Option<ReferenceStmt>, DataDefOrElse);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "uses-augment"
     }
+
+    /// Return true if this statement has substatements.
+    fn has_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(WhenStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+             SubStmtDef::OneOrMore(SubStmtWith::Selection(DataDefOrElse::keywords)),
+        ]
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::UsesAugmentStmt(UsesAugmentStmt {
+            arg,
+            when: substmts.0,
+            if_feature: substmts.1,
+            status: substmts.2,
+            description: substmts.3,
+            reference: substmts.4,
+            data_def_or_else: substmts.5,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_opt_stmt!(stmts, WhenStmt)?,
+            collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+            DataDefOrElse::new_with_substmts((
+                collect_vec_stmt!(stmts, ContainerStmt)?,
+                collect_vec_stmt!(stmts, LeafStmt)?,
+                collect_vec_stmt!(stmts, LeafListStmt)?,
+                collect_vec_stmt!(stmts, ListStmt)?,
+                collect_vec_stmt!(stmts, ChoiceStmt)?,
+                collect_vec_stmt!(stmts, AnydataStmt)?,
+                collect_vec_stmt!(stmts, AnyxmlStmt)?,
+                collect_vec_stmt!(stmts, UsesStmt)?,
+                collect_vec_stmt!(stmts, CaseStmt)?,
+                collect_vec_stmt!(stmts, ActionStmt)?,
+                collect_vec_stmt!(stmts, NotificationStmt)?,
+            )),
+        ))
+    }
 }
 
-/*
-
 ///
-///
+/// 7.17. The "augment" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct AugmentStmt {
+    arg: AugmentArg,
+    when: Option<WhenStmt>,
+    if_feature: Vec<IfFeatureStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+    data_def_or_else: DataDefOrElse,
 }
 
 impl Stmt for AugmentStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = AugmentArg;
+
+    /// Sub Statements.
+    type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Option<StatusStmt>,
+                     Option<DescriptionStmt>, Option<ReferenceStmt>, DataDefOrElse);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "augment"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has substatements.
+    fn has_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(WhenStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+             SubStmtDef::OneOrMore(SubStmtWith::Selection(DataDefOrElse::keywords)),
+        ]
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::AugmentStmt(AugmentStmt {
+            arg,
+            when: substmts.0,
+            if_feature: substmts.1,
+            status: substmts.2,
+            description: substmts.3,
+            reference: substmts.4,
+            data_def_or_else: substmts.5,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_opt_stmt!(stmts, WhenStmt)?,
+            collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+            DataDefOrElse::new_with_substmts((
+                collect_vec_stmt!(stmts, ContainerStmt)?,
+                collect_vec_stmt!(stmts, LeafStmt)?,
+                collect_vec_stmt!(stmts, LeafListStmt)?,
+                collect_vec_stmt!(stmts, ListStmt)?,
+                collect_vec_stmt!(stmts, ChoiceStmt)?,
+                collect_vec_stmt!(stmts, AnydataStmt)?,
+                collect_vec_stmt!(stmts, AnyxmlStmt)?,
+                collect_vec_stmt!(stmts, UsesStmt)?,
+                collect_vec_stmt!(stmts, CaseStmt)?,
+                collect_vec_stmt!(stmts, ActionStmt)?,
+                collect_vec_stmt!(stmts, NotificationStmt)?,
+            )),
+        ))
     }
 }
 
-*/
 ///
-///
+/// 7.21.5. The "when" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct WhenStmt {
@@ -2739,93 +3471,316 @@ impl Stmt for WhenStmt {
     }
 }
 
-/*
-
 ///
-///
+/// 7.14. The "rpc" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct RpcStmt {
+    arg: Identifier,
+    if_feature: Vec<IfFeatureStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+    typedef_or_grouping: TypedefOrGrouping,
+    input: Option<InputStmt>,
+    output: Option<OutputStmt>,
 }
 
 impl Stmt for RpcStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
+
+    /// Sub Statements.
+    type SubStmts = (Vec<IfFeatureStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>,
+                     TypedefOrGrouping, Option<InputStmt>, Option<OutputStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "rpc"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(TypedefOrGrouping::keywords)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(InputStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(OutputStmt::keyword)),
+        ]
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::RpcStmt(RpcStmt {
+            arg,
+            if_feature: Vec::new(),
+            status: None,
+            description: None,
+            reference: None,
+            typedef_or_grouping: TypedefOrGrouping::new(),
+            input: None,
+            output: None,
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::RpcStmt(RpcStmt {
+            arg,
+            if_feature: substmts.0,
+            status: substmts.1,
+            description: substmts.2,
+            reference: substmts.3,
+            typedef_or_grouping: substmts.4,
+            input: substmts.5,
+            output: substmts.6,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+            TypedefOrGrouping::new_with_substmts((
+                collect_vec_stmt!(stmts, TypedefStmt)?,
+                collect_vec_stmt!(stmts, GroupingStmt)?,
+            )),
+            collect_opt_stmt!(stmts, InputStmt)?,
+            collect_opt_stmt!(stmts, OutputStmt)?,
+        ))
     }
 }
 
 ///
-///
+/// 7.15. The "action" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ActionStmt {
+    arg: Identifier,
+    if_feature: Vec<IfFeatureStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+    typedef_or_grouping: TypedefOrGrouping,
+    input: Option<InputStmt>,
+    output: Option<OutputStmt>,
 }
 
 impl Stmt for ActionStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
+
+    /// Sub Statements.
+    type SubStmts = (Vec<IfFeatureStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>,
+                     TypedefOrGrouping, Option<InputStmt>, Option<OutputStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "action"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(TypedefOrGrouping::keywords)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(InputStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(OutputStmt::keyword)),
+        ]
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::ActionStmt(ActionStmt {
+            arg,
+            if_feature: Vec::new(),
+            status: None,
+            description: None,
+            reference: None,
+            typedef_or_grouping: TypedefOrGrouping::new(),
+            input: None,
+            output: None,
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::ActionStmt(ActionStmt {
+            arg,
+            if_feature: substmts.0,
+            status: substmts.1,
+            description: substmts.2,
+            reference: substmts.3,
+            typedef_or_grouping: substmts.4,
+            input: substmts.5,
+            output: substmts.6,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+            TypedefOrGrouping::new_with_substmts((
+                collect_vec_stmt!(stmts, TypedefStmt)?,
+                collect_vec_stmt!(stmts, GroupingStmt)?,
+            )),
+            collect_opt_stmt!(stmts, InputStmt)?,
+            collect_opt_stmt!(stmts, OutputStmt)?,
+        ))
     }
 }
 
 ///
-///
+/// 7.14.2. The "input" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct InputStmt {
+    must: Vec<MustStmt>,
+    typedef_or_grouping: TypedefOrGrouping,
+    data_def: DataDefStmt,
 }
 
 impl Stmt for InputStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = NoArg;
+
+    /// Sub Statements.
+    type SubStmts = (Vec<MustStmt>, TypedefOrGrouping, DataDefStmt);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "input"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has substatements.
+    fn has_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(MustStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(TypedefOrGrouping::keywords)),
+             SubStmtDef::OneOrMore(SubStmtWith::Selection(DataDefStmt::keywords)),
+        ]
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(_arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::InputStmt(InputStmt {
+            must: substmts.0,
+            typedef_or_grouping: substmts.1,
+            data_def: substmts.2,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_vec_stmt!(stmts, MustStmt)?,
+            TypedefOrGrouping::new_with_substmts((
+                collect_vec_stmt!(stmts, TypedefStmt)?,
+                collect_vec_stmt!(stmts, GroupingStmt)?,)),
+            DataDefStmt::new_with_substmts((
+                collect_vec_stmt!(stmts, ContainerStmt)?,
+                collect_vec_stmt!(stmts, LeafStmt)?,
+                collect_vec_stmt!(stmts, LeafListStmt)?,
+                collect_vec_stmt!(stmts, ListStmt)?,
+                collect_vec_stmt!(stmts, ChoiceStmt)?,
+                collect_vec_stmt!(stmts, AnydataStmt)?,
+                collect_vec_stmt!(stmts, AnyxmlStmt)?,
+                collect_vec_stmt!(stmts, UsesStmt)?,)),
+        ))
     }
 }
 
 ///
-///
+/// 7.14.3. The "output" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct OutputStmt {
+    must: Vec<MustStmt>,
+    typedef_or_grouping: TypedefOrGrouping,
+    data_def: DataDefStmt,
 }
 
 impl Stmt for OutputStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = NoArg;
+
+    /// Sub Statements.
+    type SubStmts = (Vec<MustStmt>, TypedefOrGrouping, DataDefStmt);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "output"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+
+    /// Return true if this statement has substatements.
+    fn has_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(MustStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(TypedefOrGrouping::keywords)),
+             SubStmtDef::OneOrMore(SubStmtWith::Selection(DataDefStmt::keywords)),
+        ]
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(_arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::OutputStmt(OutputStmt {
+            must: substmts.0,
+            typedef_or_grouping: substmts.1,
+            data_def: substmts.2,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_vec_stmt!(stmts, MustStmt)?,
+            TypedefOrGrouping::new_with_substmts((
+                collect_vec_stmt!(stmts, TypedefStmt)?,
+                collect_vec_stmt!(stmts, GroupingStmt)?,)),
+            DataDefStmt::new_with_substmts((
+                collect_vec_stmt!(stmts, ContainerStmt)?,
+                collect_vec_stmt!(stmts, LeafStmt)?,
+                collect_vec_stmt!(stmts, LeafListStmt)?,
+                collect_vec_stmt!(stmts, ListStmt)?,
+                collect_vec_stmt!(stmts, ChoiceStmt)?,
+                collect_vec_stmt!(stmts, AnydataStmt)?,
+                collect_vec_stmt!(stmts, AnyxmlStmt)?,
+                collect_vec_stmt!(stmts, UsesStmt)?,)),
+        ))
     }
 }
 
@@ -2834,133 +3789,362 @@ impl Stmt for OutputStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct NotificationStmt {
+    arg: Identifier,
+    if_feature: Vec<IfFeatureStmt>,
+    must: Vec<MustStmt>,
+    status: Option<StatusStmt>,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+    typedef_or_grouping: TypedefOrGrouping,
+    data_def: DataDefStmt,
 }
 
 impl Stmt for NotificationStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = Identifier;
+
+    /// Sub Statements.
+    type SubStmts = (Vec<IfFeatureStmt>, Vec<MustStmt>, Option<StatusStmt>, Option<DescriptionStmt>,
+                     Option<ReferenceStmt>, TypedefOrGrouping, DataDefStmt);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "notification"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has sub-statements optionally.
+    fn opt_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(MustStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(TypedefOrGrouping::keywords)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(DataDefStmt::keywords)),
+        ]
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
+        StmtType::NotificationStmt(NotificationStmt {
+            arg,
+            if_feature: Vec::new(),
+            must: Vec::new(),
+            status: None,
+            description: None,
+            reference: None,
+            typedef_or_grouping: TypedefOrGrouping::new(),
+            data_def: DataDefStmt::new(),
+        })
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::NotificationStmt(NotificationStmt {
+            arg,
+            if_feature: substmts.0,
+            must: substmts.1,
+            status: substmts.2,
+            description: substmts.3,
+            reference: substmts.4,
+            typedef_or_grouping: substmts.5,
+            data_def: substmts.6,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_vec_stmt!(stmts, IfFeatureStmt)?,
+            collect_vec_stmt!(stmts, MustStmt)?,
+            collect_opt_stmt!(stmts, StatusStmt)?,
+            collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+            TypedefOrGrouping::new_with_substmts((
+                collect_vec_stmt!(stmts, TypedefStmt)?,
+                collect_vec_stmt!(stmts, GroupingStmt)?,)),
+            DataDefStmt::new_with_substmts((
+                collect_vec_stmt!(stmts, ContainerStmt)?,
+                collect_vec_stmt!(stmts, LeafStmt)?,
+                collect_vec_stmt!(stmts, LeafListStmt)?,
+                collect_vec_stmt!(stmts, ListStmt)?,
+                collect_vec_stmt!(stmts, ChoiceStmt)?,
+                collect_vec_stmt!(stmts, AnydataStmt)?,
+                collect_vec_stmt!(stmts, AnyxmlStmt)?,
+                collect_vec_stmt!(stmts, UsesStmt)?,)),
+        ))
     }
 }
 
 ///
-///
+/// 7.20.3. The "deviation" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct DeviationStmt {
+    arg: DeviationArg,
+    description: Option<DescriptionStmt>,
+    reference: Option<ReferenceStmt>,
+    deviate: Vec<DeviateStmt>,
 }
 
 impl Stmt for DeviationStmt {
     /// Arg type.
-    type Arg = String;
+    type Arg = DeviationArg;
+
+    /// Sub Statements.
+    type SubStmts = (Option<DescriptionStmt>, Option<ReferenceStmt>, Vec<DeviateStmt>);
 
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
         "deviation"
     }
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    /// Return true if this statement has substatements.
+    fn has_substmts() -> bool {
+        true
+    }
+
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+             SubStmtDef::OneOrMore(SubStmtWith::Stmt(DeviateStmt::keyword)),
+        ]
+    }
+
+    /// Constructor with tuple of substatements. Panic if it is not defined.
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
+        StmtType::DeviationStmt(DeviationStmt {
+            arg,
+            description: substmts.0,
+            reference: substmts.1,
+            deviate: substmts.2,
+        })
+    }
+
+    /// Parse substatements.
+    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok((collect_opt_stmt!(stmts, DescriptionStmt)?,
+            collect_opt_stmt!(stmts, ReferenceStmt)?,
+            collect_vec_stmt!(stmts, DeviateStmt)?,))
     }
 }
 
 ///
-///
+/// The "deviate" Statement.
 ///
 #[derive(Debug, Clone)]
-pub struct DeviationNotSupportedStmt {
+pub enum DeviateStmt {
+    NotSupported,
+    Add(DeviateAddStmt),
+    Replace(DeviateReplaceStmt),
+    Delete(DeviateDeleteStmt),
 }
 
-impl Stmt for DeviationNotSupportedStmt {
+impl Stmt for DeviateStmt {
     /// Arg type.
     type Arg = String;
 
+    /// Sub Statements.
+    type SubStmts = ();
+
     /// Return statement keyword in &str.
     fn keyword() -> Keyword {
-        "deviation-not-supported"
+        "deviate"
     }
 
     /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError>  where Self::Arg: StmtArg, Self: Sized {
+        let arg = Self::Arg::parse_arg(parser)?;
+
+        match &arg as &str {
+            "add" => {
+                let stmt = DeviateAddStmt::parse(parser)?;
+                Ok(StmtType::DeviateStmt(DeviateStmt::Add(stmt)))
+            }
+            "replace" => {
+                let stmt = DeviateDeleteStmt::parse(parser)?;
+                Ok(StmtType::DeviateStmt(DeviateStmt::Delete(stmt)))
+            }
+            "delete" => {
+                let stmt = DeviateReplaceStmt::parse(parser)?;
+                Ok(StmtType::DeviateStmt(DeviateStmt::Replace(stmt)))
+            }
+            "not-supported" => {
+                Ok(StmtType::DeviateStmt(DeviateStmt::NotSupported))
+            }
+            _ => Err(YangError::UnexpectedToken(parser.line()))
+        }
     }
 }
 
+/*
 ///
+/// "deviate" ("add" / "replace" / "delete").
 ///
+#[derive(Debug, Clone)]
+pub enum DeviateOp {
+}
+*/
+
+///
+/// The "deviate add" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct DeviateAddStmt {
+    units: Option<UnitsStmt>,
+    must: Vec<MustStmt>,
+    unqiue: Vec<UniqueStmt>,
+    default: Vec<DefaultStmt>,
+    config: Option<ConfigStmt>,
+    mandatory: Option<MandatoryStmt>,
+    min_elements: Option<MinElementsStmt>,
+    max_elements: Option<MaxElementsStmt>,
 }
 
-impl Stmt for DeviateAddStmt {
-    /// Arg type.
-    type Arg = String;
-
-    /// Return statement keyword in &str.
-    fn keyword() -> Keyword {
-        "deviate-add"
+impl Compound for DeviateAddStmt {
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(UnitsStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(MustStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(UniqueStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(DefaultStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ConfigStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MandatoryStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MinElementsStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MaxElementsStmt::keyword)),
+        ]
     }
+}
 
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+impl DeviateAddStmt {
+    pub fn parse(parser: &mut Parser) -> Result<DeviateAddStmt, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok(DeviateAddStmt {
+            units: collect_opt_stmt!(stmts, UnitsStmt)?,
+            must: collect_vec_stmt!(stmts, MustStmt)?,
+            unqiue: collect_vec_stmt!(stmts, UniqueStmt)?,
+            default: collect_vec_stmt!(stmts, DefaultStmt)?,
+            config: collect_opt_stmt!(stmts, ConfigStmt)?,
+            mandatory: collect_opt_stmt!(stmts, MandatoryStmt)?,
+            min_elements: collect_opt_stmt!(stmts, MinElementsStmt)?,
+            max_elements: collect_opt_stmt!(stmts, MaxElementsStmt)?,
+        })
     }
 }
 
 ///
-///
+/// The "deviate delete" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct DeviateDeleteStmt {
+    units: Option<UnitsStmt>,
+    must: Vec<MustStmt>,
+    unqiue: Vec<UniqueStmt>,
+    default: Vec<DefaultStmt>,
 }
 
-impl Stmt for DeviateDeleteStmt {
-    /// Arg type.
-    type Arg = String;
-
-    /// Return statement keyword in &str.
-    fn keyword() -> Keyword {
-        "deviate-delete"
+impl Compound for DeviateDeleteStmt {
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(UnitsStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(MustStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(UniqueStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(DefaultStmt::keyword)),
+        ]
     }
+}
 
+impl DeviateDeleteStmt {
     /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+    fn parse(parser: &mut Parser) -> Result<DeviateDeleteStmt, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok(DeviateDeleteStmt {
+            units: collect_opt_stmt!(stmts, UnitsStmt)?,
+            must: collect_vec_stmt!(stmts, MustStmt)?,
+            unqiue: collect_vec_stmt!(stmts, UniqueStmt)?,
+            default: collect_vec_stmt!(stmts, DefaultStmt)?,
+        })
     }
 }
 
 ///
-///
+/// The "deviate replace" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct DeviateReplaceStmt {
+    type_: Option<TypeStmt>,
+    units: Option<UnitsStmt>,
+    default: Option<DefaultStmt>,
+    config: Option<ConfigStmt>,
+    mandatory: Option<MandatoryStmt>,
+    min_elements: Option<MinElementsStmt>,
+    max_elements: Option<MaxElementsStmt>,
 }
 
-impl Stmt for DeviateReplaceStmt {
-    /// Arg type.
-    type Arg = String;
-
-    /// Return statement keyword in &str.
-    fn keyword() -> Keyword {
-        "deviate-replace"
-    }
-
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError> {
-        Err(YangError::PlaceHolder)
+impl Compound for DeviateReplaceStmt {
+    /// Return substatements definition.
+    fn substmts_def() -> Vec<SubStmtDef> {
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(TypeStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(UnitsStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(DefaultStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(ConfigStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MandatoryStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MinElementsStmt::keyword)),
+             SubStmtDef::Optional(SubStmtWith::Stmt(MaxElementsStmt::keyword)),
+        ]
     }
 }
 
-TBD */
+impl DeviateReplaceStmt {
+    pub fn parse(parser: &mut Parser) -> Result<DeviateReplaceStmt, YangError> {
+        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+
+        Ok(DeviateReplaceStmt {
+            type_: collect_opt_stmt!(stmts, TypeStmt)?,
+            units: collect_opt_stmt!(stmts, UnitsStmt)?,
+            default: collect_opt_stmt!(stmts, DefaultStmt)?,
+            config: collect_opt_stmt!(stmts, ConfigStmt)?,
+            mandatory: collect_opt_stmt!(stmts, MandatoryStmt)?,
+            min_elements: collect_opt_stmt!(stmts, MinElementsStmt)?,
+            max_elements: collect_opt_stmt!(stmts, MaxElementsStmt)?,
+        })
+    }
+}
 
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    pub fn test_typedef_stmt() {
+        let s = r#"area-id {
+	type union {
+
+            type ipv4-address {
+
+            }
+
+            type uint32 {
+		range "0..4294967295";
+            }
+	}
+    }"#;
+
+        let mut parser = Parser::new(s.to_string());
+
+        let res = TypedefStmt::parse(&mut parser);
+        println!("{:?}", res);
+    }
+}
