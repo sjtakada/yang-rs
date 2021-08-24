@@ -245,7 +245,7 @@ impl StmtArg for Url {
 ///
 /// "yang-version-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct YangVersionArg {
     str: String,
 }
@@ -265,7 +265,7 @@ impl StmtArg for YangVersionArg {
 ///
 /// "date-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DateArg {
     str: String,
 }
@@ -273,6 +273,14 @@ pub struct DateArg {
 impl ToString for DateArg {
     fn to_string(&self) -> String {
         self.str.clone()
+    }
+}
+
+impl FromStr for DateArg {
+    type Err = ArgError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(DateArg { str: s.to_string() })
     }
 }
 
@@ -303,7 +311,7 @@ impl StmtArg for DateArg {
 ///
 /// "yin-element-arg". 
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct YinElementArg {
     arg: bool,
 }
@@ -324,7 +332,7 @@ impl StmtArg for YinElementArg {
 ///
 /// "fraction-digits-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct FractionDigitsArg {
     digits: u8,
 }
@@ -363,7 +371,7 @@ pub enum Status {
 ///
 /// "status-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StatusArg {
     arg: Status,
 }
@@ -386,7 +394,7 @@ impl StmtArg for StatusArg {
 ///
 /// "config-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ConfigArg {
     arg: bool,
 }
@@ -407,7 +415,7 @@ impl StmtArg for ConfigArg {
 ///
 /// "mandatory-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct MandatoryArg {
     arg: bool,
 }
@@ -434,7 +442,7 @@ pub enum OrderedBy {
 ///
 /// "order-by-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OrderedByArg {
     arg: OrderedBy,
 }
@@ -455,7 +463,7 @@ impl StmtArg for OrderedByArg {
 ///
 /// "min-value-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct MinValueArg {
     val: u64,
 }
@@ -474,7 +482,7 @@ impl StmtArg for MinValueArg {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum MaxValue {
     Unbounded,
     Value(u64),
@@ -492,7 +500,7 @@ impl fmt::Debug for MaxValue {
 ///
 /// "max-value-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct MaxValueArg {
     val: MaxValue,
 }
@@ -517,7 +525,7 @@ impl StmtArg for MaxValueArg {
 ///
 /// "integer-value".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct IntegerValue {
     val: i64,
 }
@@ -1245,7 +1253,7 @@ impl ToString for IfFeatureFactor {
 ///
 /// "require-instance-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct RequireInstanceArg {
     arg: bool,
 }
@@ -1298,12 +1306,12 @@ impl StmtArg for KeyArg {
 ///
 /// "schema-nodeid".  TODO - may consolidate.
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct AbsoluteSchemaNodeid {
     nodes: Vec<NodeIdentifier>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescendantSchemaNodeid {
     nodes: Vec<NodeIdentifier>,
 }
@@ -1379,7 +1387,7 @@ impl ToString for DescendantSchemaNodeid {
 ///
 /// "unique-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct UniqueArg {
     nodeids: Vec<DescendantSchemaNodeid>,
 }

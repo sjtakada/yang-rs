@@ -29,7 +29,7 @@ pub trait Compound {
 ///
 /// Module Header Statements.
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ModuleHeaderStmts {
     yang_version: Option<YangVersionStmt>,
     namespace: NamespaceStmt,
@@ -62,7 +62,7 @@ impl ModuleHeaderStmts {
 ///
 /// Submodule Header Statements.
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct SubmoduleHeaderStmts {
     yang_version: YangVersionStmt,
     belongs_to: BelongsToStmt,
@@ -91,7 +91,7 @@ impl SubmoduleHeaderStmts {
 ///
 /// Body Statements.
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct BodyStmts {
     extension: Vec<ExtensionStmt>,
     feature: Vec<FeatureStmt>,
@@ -152,7 +152,7 @@ impl BodyStmts {
 ///
 /// Meta Statements.
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct MetaStmts {
     organization: Option<OrganizationStmt>,
     contact: Option<ContactStmt>,
@@ -187,7 +187,7 @@ impl MetaStmts {
 ///
 /// Linkage Statements.
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LinkageStmts {
     import: Vec<ImportStmt>,
     include: Vec<IncludeStmt>,
@@ -216,7 +216,7 @@ impl LinkageStmts {
 ///
 /// Revision Statements.
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct RevisionStmts {
     revision: Vec<RevisionStmt>
 }
@@ -242,7 +242,7 @@ impl RevisionStmts {
 ///
 /// "numerical-restrictions".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct NumericalRestrictions {
     range: Option<RangeStmt>,
 }
@@ -268,7 +268,7 @@ impl NumericalRestrictions {
 ///
 /// "decimal64-specification".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Decimal64Specification {
     fraction_digits: FractionDigitsStmt,
     range: Option<RangeStmt>,
@@ -297,7 +297,7 @@ impl Decimal64Specification {
 ///
 /// "string-restrictions".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StringRestrictions {
     length: Option<LengthStmt>,
     pattern: Vec<PatternStmt>,
@@ -306,7 +306,7 @@ pub struct StringRestrictions {
 ///
 /// "enum-specification".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct EnumSpecification {
     enum_: Vec<EnumStmt>,
 }
@@ -314,7 +314,7 @@ pub struct EnumSpecification {
 ///
 /// "leafref-specification".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LeafrefSpecification {
     path: PathStmt,
     require_instance: Option<RequireInstanceStmt>,
@@ -323,7 +323,7 @@ pub struct LeafrefSpecification {
 ///
 /// "identityref-specification".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct IdentityrefSpecification {
     base: Vec<BaseStmt>,
 }
@@ -331,7 +331,7 @@ pub struct IdentityrefSpecification {
 ///
 /// "instance-identifier-specification".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct InstanceIdentifierSpecification {
     require_instance: Option<RequireInstanceStmt>,
 }
@@ -339,7 +339,7 @@ pub struct InstanceIdentifierSpecification {
 ///
 /// "bits-specification".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct BitsSpecification {
     bit: Vec<BitStmt>,
 }
@@ -347,7 +347,7 @@ pub struct BitsSpecification {
 ///
 /// "union-specification".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct UnionSpecification {
     type_: Vec<TypeStmt>,
 }
@@ -355,7 +355,7 @@ pub struct UnionSpecification {
 ///
 /// "binary-specification".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct BinarySpecification {
     length: Option<LengthStmt>,
 }
@@ -363,7 +363,7 @@ pub struct BinarySpecification {
 ///
 /// "type-body" Statements.
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum TypeBodyStmts {
     NumericalRestrictions(NumericalRestrictions),
     Decimal64Specification(Decimal64Specification),
@@ -491,7 +491,7 @@ pub trait Selection {
 ///
 /// "typedef-stmt" / "grouping-stmt"
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TypedefOrGrouping {
     typedef: Vec<TypedefStmt>,
     grouping: Vec<GroupingStmt>,
@@ -526,7 +526,7 @@ impl Selection for TypedefOrGrouping {
 ///
 /// "data-def-stmt".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DataDefStmt {
     container: Vec<ContainerStmt>,
     leaf: Vec<LeafStmt>,
@@ -581,7 +581,7 @@ impl Selection for DataDefStmt {
 ///
 /// "data-def-stmt" / "case-stmt" / "action-stmt" / "notification-stmt".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DataDefOrElse {
     container: Vec<ContainerStmt>,
     leaf: Vec<LeafStmt>,
@@ -647,7 +647,7 @@ impl Selection for DataDefOrElse {
 ///
 /// "short-case-stmt" / "case-stmt".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ShortCaseOrCaseStmt {
     choice: Vec<ChoiceStmt>,
     container: Vec<ContainerStmt>,
