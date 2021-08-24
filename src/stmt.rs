@@ -4694,7 +4694,6 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
         match ExtensionStmt::parse(&mut parser) {
             Ok(stmt) => {
-                println!("{:?}", stmt);
                 assert_eq!(stmt,
                            StmtType::ExtensionStmt(ExtensionStmt {
                                arg: Identifier::from_str("openconfig-version").unwrap(),
@@ -4710,6 +4709,31 @@ mod tests {
         }
     }    
     
+    #[test]
+    pub fn test_identity_stmt() {
+        let s = r#"SFP {
+    base TRANSCEIVER_FORM_FACTOR_TYPE;
+    description
+      "Small form-factor pluggable transceiver supporting up to
+      10 Gb/s signal";
+    }"#;
+        let mut parser = Parser::new(s.to_string());
+        match IdentityStmt::parse(&mut parser) {
+            Ok(stmt) => {
+                assert_eq!(stmt,
+                           StmtType::IdentityStmt(IdentityStmt {
+                               arg: Identifier::from_str("SFP").unwrap(),
+                               if_feature: vec![],
+                               base: vec![BaseStmt { arg: IdentifierRef::from_str("TRANSCEIVER_FORM_FACTOR_TYPE").unwrap() }],
+                               status: None,
+                               description: Some(DescriptionStmt { arg: String::from("Small form-factor pluggable transceiver supporting up to\n10 Gb/s signal") }),
+                               reference: None })
+                           );
+            }
+            Err(err) => panic!("{}", err.to_string()),
+        }
+    }
+
     #[test]
     pub fn test_typedef_stmt() {
 // TBD
