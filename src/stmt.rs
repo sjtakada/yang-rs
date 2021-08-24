@@ -27,7 +27,7 @@ pub trait Stmt {
     /// Sub Statements.
     type SubStmts;
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword;
 
     /// Return true if this statement has sub-statements.
@@ -105,11 +105,11 @@ pub trait Stmt {
 }
 
 ///
-/// 7.1. The "module" Statement.
+/// The "module" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ModuleStmt {
-    /// Module identifier.
+    /// Identifier arg.
     arg: Identifier,
 
     /// Module header statements.
@@ -135,7 +135,7 @@ impl Stmt for ModuleStmt {
     /// Sub Statements.
     type SubStmts = (ModuleHeaderStmts, LinkageStmts, MetaStmts, RevisionStmts, BodyStmts);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "module"
     }
@@ -170,11 +170,11 @@ impl Stmt for ModuleStmt {
 }
 
 ///
-/// 7.2. The "submodule" Statement.
+/// The "submodule" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct SubmoduleStmt {
-    /// Submodule identifier.
+    /// Identifier arg.
     arg: Identifier,
 
     /// Submodule header statements.
@@ -200,7 +200,7 @@ impl Stmt for SubmoduleStmt {
     /// Sub Statements.
     type SubStmts = (SubmoduleHeaderStmts, LinkageStmts, MetaStmts, RevisionStmts, BodyStmts);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "submodule"
     }
@@ -235,10 +235,11 @@ impl Stmt for SubmoduleStmt {
 }
 
 ///
-/// 7.1.2. The "yang-version" Statement.
+/// The "yang-version" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct YangVersionStmt {
+    /// Yang version arg.
     arg: YangVersionArg,
 }
 
@@ -249,7 +250,7 @@ impl Stmt for YangVersionStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "yang-version"
     }
@@ -263,14 +264,23 @@ impl Stmt for YangVersionStmt {
 }
 
 ///
-/// 7.1.5. The "import" Statement.
+/// The "import" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ImportStmt {
+    /// Identifier arg.
     arg: Identifier,
+
+    /// Prefix statement.
     prefix: PrefixStmt,
+
+    /// Revision date statement.
     revision_date: Option<RevisionDateStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -281,7 +291,7 @@ impl Stmt for ImportStmt {
     /// Sub Statements.
     type SubStmts = (PrefixStmt, Option<RevisionDateStmt>,Option<DescriptionStmt>, Option<ReferenceStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "import"
     }
@@ -323,13 +333,20 @@ impl Stmt for ImportStmt {
 }
 
 ///
-/// 7.1.6. The "include" Statement.
+/// The "include" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct IncludeStmt {
+    /// Identifier arg.
     arg: Identifier,
+
+    /// Revision date statement.
     revision_date: Option<RevisionDateStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -340,7 +357,7 @@ impl Stmt for IncludeStmt {
     /// Sub Statements.
     type SubStmts = (Option<RevisionDateStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "include"
     }
@@ -389,10 +406,11 @@ impl Stmt for IncludeStmt {
 }
 
 ///
-/// 7.1.3. The "namespace" Statement.
+/// The "namespace" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct NamespaceStmt {
+    /// URI.
     arg: Url,
 }
 
@@ -403,7 +421,7 @@ impl Stmt for NamespaceStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "namespace"
     }
@@ -415,10 +433,11 @@ impl Stmt for NamespaceStmt {
 }
 
 ///
-/// 7.1.4. The "prefix" Statement.
+/// The "prefix" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct PrefixStmt {
+    /// Identifier arg.
     arg: Identifier,
 }
 
@@ -429,7 +448,7 @@ impl Stmt for PrefixStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "prefix"
     }
@@ -441,11 +460,11 @@ impl Stmt for PrefixStmt {
 }
 
 ///
-/// 7.2.2. The "belongs-to" Statement.
+/// The "belongs-to" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct BelongsToStmt {
-    /// Identifier.
+    /// Identifier arg.
     arg: Identifier,
 
     /// Prefix statement.
@@ -459,7 +478,7 @@ impl Stmt for BelongsToStmt {
     /// Sub Statements.
     type SubStmts = (PrefixStmt,);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "belongs-to"
     }
@@ -492,10 +511,11 @@ impl Stmt for BelongsToStmt {
 }
 
 ///
-/// 7.1.7. The "Organization" Statement.
+/// The "organization" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct OrganizationStmt {
+    /// String.
     arg: String,
 }
 
@@ -506,7 +526,7 @@ impl Stmt for OrganizationStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "organization"
     }
@@ -518,10 +538,11 @@ impl Stmt for OrganizationStmt {
 }
 
 ///
-/// 7.1.8. The "contact" Statement.
+/// The "contact" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ContactStmt {
+    /// String.
     arg: String,
 }
 
@@ -532,7 +553,7 @@ impl Stmt for ContactStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "contact"
     }
@@ -544,10 +565,11 @@ impl Stmt for ContactStmt {
 }
 
 ///
-/// 7.21.3. The "description" Statement.
+/// The "description" Statement.
 /// 
 #[derive(Debug, Clone)]
 pub struct DescriptionStmt {
+    /// String.
     arg: String,
 }
 
@@ -558,7 +580,7 @@ impl Stmt for DescriptionStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "description"
     }
@@ -570,10 +592,11 @@ impl Stmt for DescriptionStmt {
 }
 
 ///
-/// 7.21.4. The "reference" Statement.
+/// The "reference" Statement.
 /// 
 #[derive(Debug, Clone)]
 pub struct ReferenceStmt {
+    /// String.
     arg: String,
 }
 
@@ -584,7 +607,7 @@ impl Stmt for ReferenceStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "reference"
     }
@@ -596,10 +619,11 @@ impl Stmt for ReferenceStmt {
 }
 
 ///
-/// 7.3.3. The "units" Statement.
+/// The "units" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct UnitsStmt {
+    /// String.
     arg: String,
 }
 
@@ -610,7 +634,7 @@ impl Stmt for UnitsStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "units"
     }
@@ -622,17 +646,17 @@ impl Stmt for UnitsStmt {
 }
 
 ///
-/// 7.1.9. The "revision" Statement.
+/// The "revision" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct RevisionStmt {
     /// Revision date.
     arg: DateArg,
 
-    /// Description.
+    /// Description statement..
     description: Option<DescriptionStmt>,
 
-    /// Reference.
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -643,7 +667,7 @@ impl Stmt for RevisionStmt {
     /// Sub Statements.
     type SubStmts = (Option<DescriptionStmt>, Option<ReferenceStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "revision"
     }
@@ -692,6 +716,7 @@ impl Stmt for RevisionStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct RevisionDateStmt {
+    /// Revision date.
     arg: DateArg,
 }
 
@@ -702,7 +727,7 @@ impl Stmt for RevisionDateStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "revision-date"
     }
@@ -714,14 +739,23 @@ impl Stmt for RevisionDateStmt {
 }
 
 ///
-/// 7.19. The "extension" Statement.
+/// The "extension" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ExtensionStmt {
+    /// Identifier arg.
     arg: Identifier,
+
+    /// Argument statement.
     argument: Option<ArgumentStmt>,
+
+    /// Status statement.
     status: Option<StatusStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -732,7 +766,7 @@ impl Stmt for ExtensionStmt {
     /// Sub Statements.
     type SubStmts = (Option<ArgumentStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "extension"
     }
@@ -785,11 +819,14 @@ impl Stmt for ExtensionStmt {
 }
 
 ///
-/// 7.19.2. The "argument" Statement.
+/// The "argument" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ArgumentStmt {
+    /// Identifier arg.
     arg: Identifier,
+
+    /// Yin element statement.
     yin_element: Option<YinElementStmt>,
 }
 
@@ -800,7 +837,7 @@ impl Stmt for ArgumentStmt {
     /// Sub Statements.
     type SubStmts = (Option<YinElementStmt>,);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "argument"
     }
@@ -841,10 +878,11 @@ impl Stmt for ArgumentStmt {
 }
 
 ///
-/// 7.19.2.2. The "yin-element" Statement.
+/// The "yin-element" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct YinElementStmt {
+    /// Yin element arg.
     arg: YinElementArg,
 }
 
@@ -855,7 +893,7 @@ impl Stmt for YinElementStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "yin-element"
     }
@@ -869,15 +907,26 @@ impl Stmt for YinElementStmt {
 }
 
 ///
-/// 7.18. The "identity" Statement.
+/// The "identity" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct IdentityStmt {
+    /// Identifier arg.
     arg: Identifier,
+
+    /// If-feature statement.
     if_feature: Vec<IfFeatureStmt>,
+
+    /// Base statement.
     base: Vec<BaseStmt>,
+
+    /// Status statement.
     status: Option<StatusStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -888,7 +937,7 @@ impl Stmt for IdentityStmt {
     /// Sub Statements.
     type SubStmts = (Vec<IfFeatureStmt>, Vec<BaseStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "identity"
     }
@@ -945,10 +994,11 @@ impl Stmt for IdentityStmt {
 }
 
 ///
-/// 7.18.2. The "base" Statement.
+/// The "base" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct BaseStmt {
+    /// Identifier-ref arg.
     arg: IdentifierRef,
 }
 
@@ -959,7 +1009,7 @@ impl Stmt for BaseStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "base"
     }
@@ -973,14 +1023,23 @@ impl Stmt for BaseStmt {
 }
 
 ///
-/// 7.20.1. The "feature" Statement.
+/// The "feature" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct FeatureStmt {
+    /// Identifier arg.
     arg: Identifier,
+
+    /// If-feature statement.
     if_feature: Vec<IfFeatureStmt>,
+
+    /// Status statement.
     status: Option<StatusStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -991,7 +1050,7 @@ impl Stmt for FeatureStmt {
     /// Sub Statements.
     type SubStmts = (Vec<IfFeatureStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "feature"
     }
@@ -1044,10 +1103,11 @@ impl Stmt for FeatureStmt {
 }
 
 ///
-/// 7.20.2. The "if-feature" Statement.
+/// The "if-feature" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct IfFeatureStmt {
+    /// If-feature-expr str.
     arg: IfFeatureExpr,
 }
 
@@ -1058,7 +1118,7 @@ impl Stmt for IfFeatureStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "if-feature"
     }
@@ -1070,16 +1130,29 @@ impl Stmt for IfFeatureStmt {
 }
 
 ///
-/// 7.3. The "typedef" Statement.
+/// The "typedef" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct TypedefStmt {
+    /// Identifier arg.
     arg: Identifier,
+
+    /// Type statement.
     type_: TypeStmt,
+
+    /// Units statement.
     units: Option<UnitsStmt>,
+
+    /// Default statement.
     default: Option<DefaultStmt>,
+
+    /// Status statement.
     status: Option<StatusStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1091,7 +1164,7 @@ impl Stmt for TypedefStmt {
     type SubStmts = (TypeStmt, Option<UnitsStmt>, Option<DefaultStmt>,
                      Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "typedef"
     }
@@ -1139,11 +1212,14 @@ impl Stmt for TypedefStmt {
 }
 
 ///
-/// 7.4. The "type" Statement.
+/// The "type" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct TypeStmt {
+    /// Identifier ref arg.
     arg: IdentifierRef,
+
+    /// Type-body statements.
     type_body: Option<TypeBodyStmts>,
 }
 
@@ -1154,7 +1230,7 @@ impl Stmt for TypeStmt {
     /// Sub Statements.
     type SubStmts = Option<TypeBodyStmts>;
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "type"
     }
@@ -1189,7 +1265,7 @@ impl Stmt for TypeStmt {
 }
 
 ///
-/// 9.2.4. The "range" Statement.
+/// The "range" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct RangeStmt {
@@ -1216,7 +1292,7 @@ impl Stmt for RangeStmt {
     /// Sub Statements.
     type SubStmts = (Option<ErrorMessageStmt>, Option<ErrorAppTagStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "range"
     }
@@ -1269,10 +1345,11 @@ impl Stmt for RangeStmt {
 }
 
 ///
-/// 9.3.4. The "fraction-digits" Statement.
+/// The "fraction-digits" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct FractionDigitsStmt {
+    /// Fraction-digits arg.
     arg: FractionDigitsArg,
 }
 
@@ -1283,7 +1360,7 @@ impl Stmt for FractionDigitsStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "fraction-digits"
     }
@@ -1297,14 +1374,23 @@ impl Stmt for FractionDigitsStmt {
 }
 
 ///
-/// 9.4.4. The "length" Statement.
+/// The "length" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct LengthStmt {
+    /// Length arg.
     arg: LengthArg,
+
+    /// Error-message statement.
     error_message: Option<ErrorMessageStmt>,
+
+    /// Error-app-tag statement.
     error_app_tag: Option<ErrorAppTagStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1315,7 +1401,7 @@ impl Stmt for LengthStmt {
     /// Sub Statements.
     type SubStmts = (Option<ErrorMessageStmt>, Option<ErrorAppTagStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "length"
     }
@@ -1368,15 +1454,26 @@ impl Stmt for LengthStmt {
 }
 
 ///
-/// 9.4.6. The "pattern" Statement.
+/// The "pattern" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct PatternStmt {
+    /// String.
     arg: String,
+
+    /// Modifier statement.
     modifier: Option<ModifierStmt>,
+
+    /// Error-message statement.
     error_message: Option<ErrorMessageStmt>,
+
+    /// Error-app-tag statement.
     error_app_tag: Option<ErrorAppTagStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1387,7 +1484,7 @@ impl Stmt for PatternStmt {
     /// Sub Statements.
     type SubStmts = (Option<ModifierStmt>, Option<ErrorMessageStmt>, Option<ErrorAppTagStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "pattern"
     }
@@ -1445,10 +1542,11 @@ impl Stmt for PatternStmt {
 }
 
 ///
-/// 9.4.6. The "modifier" Statement.
+/// The "modifier" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ModifierStmt {
+    /// Modifier arg.
     arg: ModifierArg,
 }
 
@@ -1459,7 +1557,7 @@ impl Stmt for ModifierStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "modifier"
     }
@@ -1477,6 +1575,7 @@ impl Stmt for ModifierStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct DefaultStmt {
+    /// String.
     arg: String,
 }
 
@@ -1487,7 +1586,7 @@ impl Stmt for DefaultStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "default"
     }
@@ -1501,15 +1600,26 @@ impl Stmt for DefaultStmt {
 }
 
 ///
-/// 9.6.4. The "enum" Statement.
+/// The "enum" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct EnumStmt {
+    /// String.
     arg: String,
+
+    /// If-feature statement.
     if_feature: Vec<IfFeatureStmt>,
+
+    /// Value statement.
     value: Option<ValueStmt>,
+
+    /// Status statement.
     status: Option<StatusStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1520,7 +1630,7 @@ impl Stmt for EnumStmt {
     /// Sub Statements.
     type SubStmts = (Vec<IfFeatureStmt>, Option<ValueStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "enum"
     }
@@ -1577,10 +1687,11 @@ impl Stmt for EnumStmt {
 }
 
 ///
-/// 9.9.2. The "path" Statement.
+/// The "path" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct PathStmt {
+    /// Path arg.
     arg: PathArg,
 }
 
@@ -1591,7 +1702,7 @@ impl Stmt for PathStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "path"
     }
@@ -1605,10 +1716,11 @@ impl Stmt for PathStmt {
 }
 
 ///
-/// 9.9.3. The "require-instance" Statement.
+/// The "require-instance" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct RequireInstanceStmt {
+    /// Require-instance arg.
     arg: RequireInstanceArg,
 }
 
@@ -1619,7 +1731,7 @@ impl Stmt for RequireInstanceStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "require-instance"
     }
@@ -1633,15 +1745,26 @@ impl Stmt for RequireInstanceStmt {
 }
 
 ///
-/// 9.7.4. The "bit" Statement.
+/// The "bit" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct BitStmt {
+    /// Identifier arg.
     arg: Identifier,
+
+    /// If-feature statement.
     if_feature: Vec<IfFeatureStmt>,
+
+    /// Position statement.
     position: Option<PositionStmt>,
+
+    /// Status statement.
     status: Option<StatusStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1652,7 +1775,7 @@ impl Stmt for BitStmt {
     /// Sub Statements.
     type SubStmts = (Vec<IfFeatureStmt>, Option<PositionStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "bit"
     }
@@ -1709,10 +1832,11 @@ impl Stmt for BitStmt {
 }
 
 ///
-/// 9.7.4.2. The "position" Statement.
+/// The "position" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct PositionStmt {
+    /// Position value arg.
     arg: PositionValueArg,
 }
 
@@ -1723,7 +1847,7 @@ impl Stmt for PositionStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "position"
     }
@@ -1737,10 +1861,11 @@ impl Stmt for PositionStmt {
 }
 
 ///
-/// 7.21.2. The "status" Statement.
+/// The "status" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct StatusStmt {
+    /// Status arg.
     arg: StatusArg,
 }
 
@@ -1751,7 +1876,7 @@ impl Stmt for StatusStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "status"
     }
@@ -1766,10 +1891,11 @@ impl Stmt for StatusStmt {
 
 
 ///
-/// 7.21.1. The "config" Statement.
+/// The "config" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ConfigStmt {
+    /// Config arg.
     arg: ConfigArg,
 }
 
@@ -1780,7 +1906,7 @@ impl Stmt for ConfigStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "config"
     }
@@ -1798,6 +1924,7 @@ impl Stmt for ConfigStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct MandatoryStmt {
+    /// Mandatory arg.
     arg: MandatoryArg,
 }
 
@@ -1808,7 +1935,7 @@ impl Stmt for MandatoryStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "mandatory"
     }
@@ -1822,10 +1949,11 @@ impl Stmt for MandatoryStmt {
 }
 
 ///
-/// 7.5.5. The "presence" Statement.
+/// The "presence" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct PresenceStmt {
+    /// String.
     arg: String,
 }
 
@@ -1836,7 +1964,7 @@ impl Stmt for PresenceStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "presence"
     }
@@ -1850,10 +1978,11 @@ impl Stmt for PresenceStmt {
 }
 
 ///
-/// 7.7.7. The "ordered-by" Statement.
+/// The "ordered-by" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct OrderedByStmt {
+    /// Ordered-by arg.
     arg: OrderedByArg,
 }
 
@@ -1864,7 +1993,7 @@ impl Stmt for OrderedByStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "ordered-by"
     }
@@ -1878,14 +2007,23 @@ impl Stmt for OrderedByStmt {
 }
 
 ///
-/// 7.5.3. The "must" Statement.
+/// The "must" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct MustStmt {
+    /// String.
     arg: String,
+
+    /// Error-message statement.
     error_message: Option<ErrorMessageStmt>,
+
+    /// Error-app-tag statement.
     error_app_tag: Option<ErrorAppTagStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1896,7 +2034,7 @@ impl Stmt for MustStmt {
     /// Sub Statements.
     type SubStmts = (Option<ErrorMessageStmt>, Option<ErrorAppTagStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "must"
     }
@@ -1949,10 +2087,11 @@ impl Stmt for MustStmt {
 }
 
 ///
-/// 7.5.4.1. The "error-message" Statement.
+/// The "error-message" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ErrorMessageStmt {
+    /// String.
     arg: String,
 }
 
@@ -1963,7 +2102,7 @@ impl Stmt for ErrorMessageStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "error-message"
     }
@@ -1977,10 +2116,11 @@ impl Stmt for ErrorMessageStmt {
 }
 
 ///
-/// 7.5.4.2. The "error-app-tag" Statement.
+/// The "error-app-tag" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ErrorAppTagStmt {
+    /// String.
     arg: String,
 }
 
@@ -1991,7 +2131,7 @@ impl Stmt for ErrorAppTagStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "error-app-tag"
     }
@@ -2005,10 +2145,11 @@ impl Stmt for ErrorAppTagStmt {
 }
 
 ///
-/// 7.7.5. The "min-elements" Statement.
+/// The "min-elements" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct MinElementsStmt {
+    /// Min-value arg.
     arg: MinValueArg,
 }
 
@@ -2019,7 +2160,7 @@ impl Stmt for MinElementsStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "min-elements"
     }
@@ -2031,10 +2172,11 @@ impl Stmt for MinElementsStmt {
 }
 
 ///
-/// 7.7.6. The "max-elements" Statement.
+/// The "max-elements" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct MaxElementsStmt {
+    /// Max-value arg.
     arg: MaxValueArg,
 }
 
@@ -2045,7 +2187,7 @@ impl Stmt for MaxElementsStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "max-elements"
     }
@@ -2057,10 +2199,11 @@ impl Stmt for MaxElementsStmt {
 }
 
 ///
-/// 9.6.4.2. The "value" Statement.
+/// The "value" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ValueStmt {
+    /// Integer-value.
     arg: IntegerValue,
 }
 
@@ -2071,7 +2214,7 @@ impl Stmt for ValueStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "value"
     }
@@ -2083,17 +2226,32 @@ impl Stmt for ValueStmt {
 }
 
 ///
-/// 7.12. The "grouping" Statement.
+/// The "grouping" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct GroupingStmt {
+    /// Identifier arg.
     arg: Identifier,
+
+    /// Status statement.
     status: Option<StatusStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
+
+    /// Typedef / Grouping statement.
     typedef_or_grouping: TypedefOrGrouping,
+
+    /// Data-def statement.
     data_def: DataDefStmt,
+
+    /// Action statement.
     action: Vec<ActionStmt>,
+
+    /// Notification statement.
     notification: Vec<NotificationStmt>,
 }
 
@@ -2105,7 +2263,7 @@ impl Stmt for GroupingStmt {
     type SubStmts = (Option<StatusStmt>,Option<DescriptionStmt>, Option<ReferenceStmt>,
                      TypedefOrGrouping, DataDefStmt, Vec<ActionStmt>, Vec<NotificationStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "grouping"
     }
@@ -2181,22 +2339,47 @@ impl Stmt for GroupingStmt {
 }
 
 ///
-/// 7.5. The "container" Statement.
+/// The "container" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ContainerStmt {
+    /// Identifier arg.
     arg: Identifier,
+
+    /// When statement.
     when: Option<WhenStmt>,
+
+    /// If-feature statement.
     if_feature: Vec<IfFeatureStmt>,
+
+    /// Must statement.
     must: Vec<MustStmt>,
+
+    /// Presence statement.
     presence: Option<PresenceStmt>,
+
+    /// Config statement.
     config: Option<ConfigStmt>,
+
+    /// Status statement.
     status: Option<StatusStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
+
+    /// Typedef / Grouping statement.
     typedef_or_grouping: TypedefOrGrouping,
+
+    /// Data-def statement.
     data_def: DataDefStmt,
+
+    /// Action statement.
     action: Vec<ActionStmt>,
+
+    /// Notification statement.
     notification: Vec<NotificationStmt>,
 }
 
@@ -2209,7 +2392,7 @@ impl Stmt for ContainerStmt {
                      Option<ConfigStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>,
                      TypedefOrGrouping, DataDefStmt, Vec<ActionStmt>, Vec<NotificationStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "container"
     }
@@ -2305,21 +2488,44 @@ impl Stmt for ContainerStmt {
 }
 
 ///
-/// 7.6. The "leaf" Statement.
+/// The "leaf" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct LeafStmt {
+    /// Identifier arg.
     arg: Identifier,
+
+    /// When statement.
     when: Option<WhenStmt>,
+
+    /// If-feature statement.
     if_feature: Vec<IfFeatureStmt>,
+
+    /// Type statement.
     type_: TypeStmt,
+
+    /// Units statement.
     units: Option<UnitsStmt>,
+
+    /// Must statement.
     must: Vec<MustStmt>,
+
+    /// Default statement.
     default: Option<DefaultStmt>,
+
+    /// Config statement.
     config: Option<ConfigStmt>,
+
+    /// Mandatory statement.
     mandatory: Option<MandatoryStmt>,
+
+    /// Status statement.
     status: Option<StatusStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -2332,7 +2538,7 @@ impl Stmt for LeafStmt {
                      Option<DefaultStmt>, Option<ConfigStmt>, Option<MandatoryStmt>, Option<StatusStmt>,
                      Option<DescriptionStmt>, Option<ReferenceStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "leaf"
     }
@@ -2396,23 +2602,50 @@ impl Stmt for LeafStmt {
 }
 
 ///
-/// 7.7. The "leaf-list" Statement.
+/// The "leaf-list" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct LeafListStmt {
+    /// Identifier arg.
     arg: Identifier,
+
+    /// When statement.
     when: Option<WhenStmt>,
+
+    /// If-feature statement.
     if_feature: Vec<IfFeatureStmt>,
+
+    /// Type statement.
     type_: TypeStmt,
+
+    /// Units statement.
     units: Option<UnitsStmt>,
+
+    /// Must statement.
     must: Vec<MustStmt>,
+
+    /// Default statement.
     default: Vec<DefaultStmt>,
+
+    /// Config statement.
     config: Option<ConfigStmt>,
+
+    /// Min-elements statement.
     min_elements: Option<MinElementsStmt>,
+
+    /// Max-elements statement.
     max_elements: Option<MaxElementsStmt>,
+
+    /// Ordered-by statement.
     ordered_by: Option<OrderedByStmt>,
+
+    /// Status statement.
     status: Option<StatusStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -2425,7 +2658,7 @@ impl Stmt for LeafListStmt {
                      Vec<DefaultStmt>, Option<ConfigStmt>, Option<MinElementsStmt>, Option<MaxElementsStmt>,
                      Option<OrderedByStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "leaf-list"
     }
@@ -2495,26 +2728,59 @@ impl Stmt for LeafListStmt {
 }
 
 ///
-/// 7.8. The "list" Statement.
+/// The "list" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ListStmt {
+    /// Identifier arg.
     arg: Identifier,
+
+    /// When statement.
     when: Option<WhenStmt>,
+
+    /// If-feature statement.
     if_feature: Vec<IfFeatureStmt>,
+
+    /// Must statement.
     must: Vec<MustStmt>,
+
+    /// Key statement.
     key: Option<KeyStmt>,
+
+    /// Unique statement.
     unique: Vec<UniqueStmt>,
+
+    /// Config statement.
     config: Option<ConfigStmt>,
+
+    /// Min-elements statement.
     min_elements: Option<MinElementsStmt>,
+
+    /// Max-elements statement.
     max_elements: Option<MaxElementsStmt>,
+
+    /// Ordered-by statement.
     ordered_by: Option<OrderedByStmt>,
+
+    /// Status statement.
     status: Option<StatusStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
+
+    /// Typedef / Grouping statement.
     typedef_or_grouping: TypedefOrGrouping,
+
+    /// Data-def statement.
     data_def: DataDefStmt,
+
+    /// Action statement.
     action: Vec<ActionStmt>,
+
+    /// Notification statement.
     notification: Vec<NotificationStmt>,
 }
 
@@ -2528,7 +2794,7 @@ impl Stmt for ListStmt {
                      Option<OrderedByStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>,
                      TypedefOrGrouping, DataDefStmt, Vec<ActionStmt>, Vec<NotificationStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "list"
     }
@@ -2617,10 +2883,11 @@ impl Stmt for ListStmt {
 }
 
 ///
-/// 7.8.2. The list's "key" Statement.
+/// The "key" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct KeyStmt {
+    /// Key arg.
     arg: KeyArg,
 }
 
@@ -2631,7 +2898,7 @@ impl Stmt for KeyStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "key"
     }
@@ -2645,10 +2912,11 @@ impl Stmt for KeyStmt {
 }
 
 ///
-/// 7.8.3. The list's "unique" Statement.
+/// The list's "unique" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct UniqueStmt {
+    /// Unique arg.
     arg: UniqueArg,
 }
 
@@ -2659,7 +2927,7 @@ impl Stmt for UniqueStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "unique"
     }
@@ -2673,19 +2941,38 @@ impl Stmt for UniqueStmt {
 }
 
 ///
-/// 7.9. The "choice" Statement.
+/// The "choice" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ChoiceStmt {
+    /// Identifier arg.
     arg: Identifier,
+
+    /// When statement.
     when: Option<WhenStmt>,
+
+    /// If-feature statement.
     if_feature: Vec<IfFeatureStmt>,
+
+    /// Default statement.
     default: Option<DefaultStmt>,
+
+    /// Config statement.
     config: Option<ConfigStmt>,
+
+    /// Mandatory statement.
     mandatory: Option<MandatoryStmt>,
+
+    /// Status statement.
     status: Option<StatusStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
+
+    /// Short-case / Case statement.
     short_case_or_case: ShortCaseOrCaseStmt,
 }
 
@@ -2693,7 +2980,7 @@ impl Stmt for ChoiceStmt {
     /// Arg type.
     type Arg = Identifier;
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "choice"
     }
@@ -2781,16 +3068,29 @@ impl Stmt for ChoiceStmt {
 }
 
 ///
-/// 7.9.2. The choice's "case" Statement.
+/// The "case" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct CaseStmt {
+    /// Identifier arg.
     arg: Identifier,
+
+    /// When statement.
     when: Option<WhenStmt>,
+
+    /// If-feature statement.
     if_feature: Vec<IfFeatureStmt>,
+
+    /// Status statement.
     status: Option<StatusStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
+
+    /// Data-def statement.
     data_def: DataDefStmt,
 }
 
@@ -2798,7 +3098,7 @@ impl Stmt for CaseStmt {
     /// Arg type.
     type Arg = Identifier;
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "case"
     }
@@ -2872,18 +3172,35 @@ impl Stmt for CaseStmt {
 }
 
 ///
-/// 7.10. The "anydata" Statement.
+/// The "anydata" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct AnydataStmt {
+    /// Identifier arg.
     arg: Identifier,
+
+    /// When statement.
     when: Option<WhenStmt>,
+
+    /// If-feature statement.
     if_feature: Vec<IfFeatureStmt>,
+
+    /// Must statement.
     must: Vec<MustStmt>,
+
+    /// Config statement.
     config: Option<ConfigStmt>,
+
+    /// Mandatory statement.
     mandatory: Option<MandatoryStmt>,
+
+    /// Status statement.
     status: Option<StatusStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -2895,7 +3212,7 @@ impl Stmt for AnydataStmt {
     type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Vec<MustStmt>, Option<ConfigStmt>,
                      Option<MandatoryStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "anydata"
     }
@@ -2964,18 +3281,35 @@ impl Stmt for AnydataStmt {
 }
 
 ///
-/// 7.11. The "anyxml" Statement.
+/// The "anyxml" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct AnyxmlStmt {
+    /// Identifier arg.
     arg: Identifier,
+
+    /// When statement.
     when: Option<WhenStmt>,
+
+    /// If-feature statement.
     if_feature: Vec<IfFeatureStmt>,
+
+    /// Must statement.
     must: Vec<MustStmt>,
+
+    /// Config statement.
     config: Option<ConfigStmt>,
+
+    /// Mandatory statement.
     mandatory: Option<MandatoryStmt>,
+
+    /// Status statement.
     status: Option<StatusStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -2987,7 +3321,7 @@ impl Stmt for AnyxmlStmt {
     type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Vec<MustStmt>, Option<ConfigStmt>,
                      Option<MandatoryStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "anyxml"
     }
@@ -3056,17 +3390,32 @@ impl Stmt for AnyxmlStmt {
 }
 
 ///
-/// 7.13. The "uses" Statement.
+/// The "uses" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct UsesStmt {
+    /// Identifier-ref arg.
     arg: IdentifierRef,
+
+    /// When statement.
     when: Option<WhenStmt>,
+
+    /// If-feature statement.
     if_feature: Vec<IfFeatureStmt>,
+
+    /// Status statement.
     status: Option<StatusStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
+
+    /// Refine statement.
     refine: Vec<RefineStmt>,
+
+    /// Uses statement.
     uses_augment: Vec<UsesAugmentStmt>,
 }
 
@@ -3078,7 +3427,7 @@ impl Stmt for UsesStmt {
     type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Option<StatusStmt>, Option<DescriptionStmt>,
                      Option<ReferenceStmt>, Vec<RefineStmt>, Vec<UsesAugmentStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "uses"
     }
@@ -3143,34 +3492,54 @@ impl Stmt for UsesStmt {
 }
 
 ///
-/// 7.13.2. The "refine" Statement.
+/// The "refine" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct RefineStmt {
-    arg: String,
-//    arg: RefineArg,
+    /// Refine arg.
+    arg: RefineArg,
+
+    /// If-feature statement.
     if_feature: Vec<IfFeatureStmt>,
+
+    /// Must statement.
     must: Vec<MustStmt>,
+
+    /// Presence statement.
     presence: Option<PresenceStmt>,
+
+    /// Default statement.
     default: Vec<DefaultStmt>,
+
+    /// Config statement.
     config: Option<ConfigStmt>,
+
+    /// Mandatory statement.
     mandatory: Option<MandatoryStmt>,
+
+    /// Min-elements statement.
     min_elements: Option<MinElementsStmt>,
+
+    /// Max-elements statement.
     max_elements: Option<MaxElementsStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
 }
 
 impl Stmt for RefineStmt {
     /// Arg type.
-    type Arg = String;//RefineArg;
+    type Arg = RefineArg;
 
     /// Sub Statements.
     type SubStmts = (Vec<IfFeatureStmt>, Vec<MustStmt>, Option<PresenceStmt>,
                      Vec<DefaultStmt>, Option<ConfigStmt>, Option<MandatoryStmt>,
                      Option<MinElementsStmt>, Option<MaxElementsStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "refine"
     }
@@ -3251,12 +3620,25 @@ impl Stmt for RefineStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct UsesAugmentStmt {
+    /// Uses augment arg.
     arg: UsesAugmentArg,
+
+    /// When statement.
     when: Option<WhenStmt>,
+
+    /// If-feature statement.
     if_feature: Vec<IfFeatureStmt>,
+
+    /// Status statement.
     status: Option<StatusStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
+
+    /// Data-def / case / action / notification statement.
     data_def_or_else: DataDefOrElse,
 }
 
@@ -3268,7 +3650,7 @@ impl Stmt for UsesAugmentStmt {
     type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Option<StatusStmt>,
                      Option<DescriptionStmt>, Option<ReferenceStmt>, DataDefOrElse);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "uses-augment"
     }
@@ -3329,16 +3711,29 @@ impl Stmt for UsesAugmentStmt {
 }
 
 ///
-/// 7.17. The "augment" Statement.
+/// The "augment" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct AugmentStmt {
+    /// Augment arg.
     arg: AugmentArg,
+
+    /// When statement.
     when: Option<WhenStmt>,
+
+    /// If-feature statement.
     if_feature: Vec<IfFeatureStmt>,
+
+    /// Status statement.
     status: Option<StatusStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
+
+    /// Data-def / case / action / notification statement.
     data_def_or_else: DataDefOrElse,
 }
 
@@ -3350,7 +3745,7 @@ impl Stmt for AugmentStmt {
     type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Option<StatusStmt>,
                      Option<DescriptionStmt>, Option<ReferenceStmt>, DataDefOrElse);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "augment"
     }
@@ -3411,12 +3806,17 @@ impl Stmt for AugmentStmt {
 }
 
 ///
-/// 7.21.5. The "when" Statement.
+/// The "when" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct WhenStmt {
+    /// String.
     arg: String,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -3427,7 +3827,7 @@ impl Stmt for WhenStmt {
     /// Sub Statements.
     type SubStmts = (Option<DescriptionStmt>, Option<ReferenceStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "when"
     }
@@ -3472,17 +3872,32 @@ impl Stmt for WhenStmt {
 }
 
 ///
-/// 7.14. The "rpc" Statement.
+/// The "rpc" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct RpcStmt {
+    /// Identifier arg.
     arg: Identifier,
+
+    /// If-feature statement.
     if_feature: Vec<IfFeatureStmt>,
+
+    /// Status statement.
     status: Option<StatusStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
+
+    /// Typedef / grouping statement.
     typedef_or_grouping: TypedefOrGrouping,
+
+    /// Input statement.
     input: Option<InputStmt>,
+
+    /// Output statement.
     output: Option<OutputStmt>,
 }
 
@@ -3494,7 +3909,7 @@ impl Stmt for RpcStmt {
     type SubStmts = (Vec<IfFeatureStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>,
                      TypedefOrGrouping, Option<InputStmt>, Option<OutputStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "rpc"
     }
@@ -3563,17 +3978,32 @@ impl Stmt for RpcStmt {
 }
 
 ///
-/// 7.15. The "action" Statement.
+/// The "action" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct ActionStmt {
+    /// Identifier arg.
     arg: Identifier,
+
+    /// If-feature statement.
     if_feature: Vec<IfFeatureStmt>,
+
+    /// Status statement.
     status: Option<StatusStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
+
+    /// Typedef / Grouping statement.
     typedef_or_grouping: TypedefOrGrouping,
+
+    /// Input statement.
     input: Option<InputStmt>,
+
+    /// Output statement.
     output: Option<OutputStmt>,
 }
 
@@ -3585,7 +4015,7 @@ impl Stmt for ActionStmt {
     type SubStmts = (Vec<IfFeatureStmt>, Option<StatusStmt>, Option<DescriptionStmt>, Option<ReferenceStmt>,
                      TypedefOrGrouping, Option<InputStmt>, Option<OutputStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "action"
     }
@@ -3654,12 +4084,17 @@ impl Stmt for ActionStmt {
 }
 
 ///
-/// 7.14.2. The "input" Statement.
+/// The "input" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct InputStmt {
+    /// Must statement.
     must: Vec<MustStmt>,
+
+    /// Typedef / Grouping statement.
     typedef_or_grouping: TypedefOrGrouping,
+
+    /// Data-def statement.
     data_def: DataDefStmt,
 }
 
@@ -3670,7 +4105,7 @@ impl Stmt for InputStmt {
     /// Sub Statements.
     type SubStmts = (Vec<MustStmt>, TypedefOrGrouping, DataDefStmt);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "input"
     }
@@ -3719,12 +4154,17 @@ impl Stmt for InputStmt {
 }
 
 ///
-/// 7.14.3. The "output" Statement.
+/// The "output" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct OutputStmt {
+    /// Must statement.
     must: Vec<MustStmt>,
+
+    /// Typedef / Grouping statement.
     typedef_or_grouping: TypedefOrGrouping,
+
+    /// Data-def statement.
     data_def: DataDefStmt,
 }
 
@@ -3735,7 +4175,7 @@ impl Stmt for OutputStmt {
     /// Sub Statements.
     type SubStmts = (Vec<MustStmt>, TypedefOrGrouping, DataDefStmt);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "output"
     }
@@ -3785,17 +4225,32 @@ impl Stmt for OutputStmt {
 }
 
 ///
-///
+/// The "notification" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct NotificationStmt {
+    /// Identifier arg.
     arg: Identifier,
+
+    /// If-feature statement.
     if_feature: Vec<IfFeatureStmt>,
+
+    /// Must statement.
     must: Vec<MustStmt>,
+
+    /// Status statement.
     status: Option<StatusStmt>,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
+
+    /// Typedef / Grouping statement.
     typedef_or_grouping: TypedefOrGrouping,
+
+    /// Data-def statement.
     data_def: DataDefStmt,
 }
 
@@ -3807,7 +4262,7 @@ impl Stmt for NotificationStmt {
     type SubStmts = (Vec<IfFeatureStmt>, Vec<MustStmt>, Option<StatusStmt>, Option<DescriptionStmt>,
                      Option<ReferenceStmt>, TypedefOrGrouping, DataDefStmt);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "notification"
     }
@@ -3883,13 +4338,20 @@ impl Stmt for NotificationStmt {
 }
 
 ///
-/// 7.20.3. The "deviation" Statement.
+/// The "deviation" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct DeviationStmt {
+    /// Deviation arg.
     arg: DeviationArg,
+
+    /// Description statement.
     description: Option<DescriptionStmt>,
+
+    /// Reference statement.
     reference: Option<ReferenceStmt>,
+
+    /// Deviate statement.
     deviate: Vec<DeviateStmt>,
 }
 
@@ -3900,7 +4362,7 @@ impl Stmt for DeviationStmt {
     /// Sub Statements.
     type SubStmts = (Option<DescriptionStmt>, Option<ReferenceStmt>, Vec<DeviateStmt>);
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "deviation"
     }
@@ -3943,9 +4405,16 @@ impl Stmt for DeviationStmt {
 ///
 #[derive(Debug, Clone)]
 pub enum DeviateStmt {
+    /// "deviate not-supported".
     NotSupported,
+
+    /// "deviate add".
     Add(DeviateAddStmt),
+
+    /// "deviate replace".
     Replace(DeviateReplaceStmt),
+
+    /// "deviate delete".
     Delete(DeviateDeleteStmt),
 }
 
@@ -3956,7 +4425,7 @@ impl Stmt for DeviateStmt {
     /// Sub Statements.
     type SubStmts = ();
 
-    /// Return statement keyword in &str.
+    /// Return statement keyword.
     fn keyword() -> Keyword {
         "deviate"
     }
@@ -3986,27 +4455,33 @@ impl Stmt for DeviateStmt {
     }
 }
 
-/*
-///
-/// "deviate" ("add" / "replace" / "delete").
-///
-#[derive(Debug, Clone)]
-pub enum DeviateOp {
-}
-*/
-
 ///
 /// The "deviate add" Statement.
 ///
 #[derive(Debug, Clone)]
 pub struct DeviateAddStmt {
+    /// Units statement.
     units: Option<UnitsStmt>,
+
+    /// Must statement.
     must: Vec<MustStmt>,
+
+    /// Unique statement.
     unqiue: Vec<UniqueStmt>,
+
+    /// Default statement.
     default: Vec<DefaultStmt>,
+
+    /// Config statement.
     config: Option<ConfigStmt>,
+
+    /// Mandatory statement.
     mandatory: Option<MandatoryStmt>,
+
+    /// Min-elements statement.
     min_elements: Option<MinElementsStmt>,
+
+    /// Max-elements statement.
     max_elements: Option<MaxElementsStmt>,
 }
 
@@ -4047,9 +4522,16 @@ impl DeviateAddStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct DeviateDeleteStmt {
+    /// Units statement.
     units: Option<UnitsStmt>,
+
+    /// Must statement.
     must: Vec<MustStmt>,
+
+    /// Unique statement.
     unqiue: Vec<UniqueStmt>,
+
+    /// Default statement.
     default: Vec<DefaultStmt>,
 }
 
@@ -4083,12 +4565,25 @@ impl DeviateDeleteStmt {
 ///
 #[derive(Debug, Clone)]
 pub struct DeviateReplaceStmt {
+    /// Type statement.
     type_: Option<TypeStmt>,
+
+    /// Units statement.
     units: Option<UnitsStmt>,
+
+    /// Default statement.
     default: Option<DefaultStmt>,
+
+    /// Config statement.
     config: Option<ConfigStmt>,
+
+    /// Mandatory statement.
     mandatory: Option<MandatoryStmt>,
+
+    /// Min-elements statement.
     min_elements: Option<MinElementsStmt>,
+
+    /// Max-elements statement.
     max_elements: Option<MaxElementsStmt>,
 }
 
