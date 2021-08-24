@@ -4735,6 +4735,11 @@ mod tests {
     }
 
     #[test]
+    pub fn test_feature_stmt() {
+        // TBD
+    }
+
+    #[test]
     pub fn test_typedef_stmt() {
 // TBD
         let s = r#"area-id {
