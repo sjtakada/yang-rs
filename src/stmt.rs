@@ -4642,10 +4642,46 @@ mod tests {
                                reference: None })
                 );
             }
-            Err(err) => panic!(err.to_string()),
+            Err(err) => panic!("{}", err.to_string()),
         }
     }
 
+    #[test]
+    pub fn test_include_stmt() {
+        let s = r#"openconfig-inet-types {
+                       prefix oc-inet;
+                       revision-date 2017-07-06;
+                   }"#;
+
+        let mut parser = Parser::new(s.to_string());
+        match IncludeStmt::parse(&mut parser) {
+            Ok(stmt) => panic!("{:?}", stmt),
+            Err(err) => assert_eq!(err.to_string(), "Unexpected token at line 1"),
+        }
+
+        let s = r#"openconfig-inet-types {
+                       revision-date 2017-07-06;
+                   }"#;
+
+        let mut parser = Parser::new(s.to_string());
+        match IncludeStmt::parse(&mut parser) {
+            Ok(stmt) => {
+                println!("{:?}", stmt);
+
+                assert_eq!(stmt,
+                           StmtType::IncludeStmt(IncludeStmt {
+                               arg: Identifier::from_str("openconfig-inet-types").unwrap(),
+                               revision_date: Some(RevisionDateStmt { arg: DateArg::from_str("2017-07-06").unwrap() } ),
+                               description: None,
+                               reference: None })
+                );
+            }
+            Err(err) => panic!("{}", err.to_string()),
+        }
+    }
+
+    
+    
     #[test]
     pub fn test_typedef_stmt() {
 // TBD
