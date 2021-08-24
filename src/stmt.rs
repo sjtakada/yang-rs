@@ -4680,7 +4680,35 @@ mod tests {
         }
     }
 
-    
+    #[test]
+    pub fn test_extension_stmt() {
+        let s = r#"openconfig-version {
+    argument "semver" {
+      yin-element false;
+    }
+    description
+      "The OpenConfig version number for the module. This is
+      ...";
+    }"#;
+
+        let mut parser = Parser::new(s.to_string());
+        match ExtensionStmt::parse(&mut parser) {
+            Ok(stmt) => {
+                println!("{:?}", stmt);
+                assert_eq!(stmt,
+                           StmtType::ExtensionStmt(ExtensionStmt {
+                               arg: Identifier::from_str("openconfig-version").unwrap(),
+                               argument: Some(ArgumentStmt { arg: Identifier::from_str("semver").unwrap(),
+                                                             yin_element: Some(YinElementStmt { arg: YinElementArg::from_str("false").unwrap() })}),
+                               status: None,
+                               description: Some(DescriptionStmt { arg: String::from("The OpenConfig version number for the module. This is\n...") }),
+                               reference: None 
+                           })
+                );
+            }
+            Err(err) => panic!("{}", err.to_string()),
+        }
+    }    
     
     #[test]
     pub fn test_typedef_stmt() {

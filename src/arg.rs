@@ -316,16 +316,25 @@ pub struct YinElementArg {
     arg: bool,
 }
 
+impl FromStr for YinElementArg {
+    type Err = ArgError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s == "true" {
+            Ok(YinElementArg { arg: true })
+        } else if s == "false" {
+            Ok(YinElementArg { arg: false })
+        } else {
+            Err(ArgError::new("yin-element-arg"))
+        }
+    }
+}
+
 impl StmtArg for YinElementArg {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
-        if str == "true" {
-            Ok(YinElementArg { arg: true })
-        } else if str == "false" {
-            Ok(YinElementArg { arg: false })
-        } else {
-            Err(YangError::ArgumentParseError("yin-element-arg", parser.line()))
-        }
+
+        YinElementArg::from_str(&str).map_err(|_| YangError::ArgumentParseError("yin-element-arg", parser.line()))
     }
 }
 
