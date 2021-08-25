@@ -14,6 +14,7 @@ use std::path::Path;
 
 use super::core::*;
 use super::error::*;
+use super::config::Config;
 use super::stmt::*;
 use super::substmt::*;
 
@@ -151,6 +152,9 @@ pub enum Token {
 /// Parser.
 
 pub struct Parser {
+    /// Config.
+    config: Config,
+
     /// Input string.
     input: String,
 
@@ -171,6 +175,19 @@ impl Parser {
     /// Constructor.
     pub fn new(s: String) -> Parser {
         Parser {
+            config: Config::new(),
+            input: s,
+            pos: Cell::new(0),
+            line: Cell::new(0),
+            column: Cell::new(0),
+            saved: Cell::new(None),
+        }
+    }
+
+    /// Constructor with config.
+    pub fn new_with_config(config: Config, s: String) -> Parser {
+        Parser {
+            config,
             input: s,
             pos: Cell::new(0),
             line: Cell::new(0),

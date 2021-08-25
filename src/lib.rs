@@ -7,6 +7,7 @@
 
 pub mod core;
 pub mod error;
+pub mod config;
 pub mod parser;
 pub mod arg;
 pub mod stmt;

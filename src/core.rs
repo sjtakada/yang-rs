@@ -342,7 +342,6 @@ pub fn is_decimal_value(s: &str) -> bool {
 mod tests {
     use super::*;
 
-
     #[test]
     pub fn test_current_function_invocation() {
         let s = "current()";
