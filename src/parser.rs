@@ -21,7 +21,7 @@ use super::substmt::*;
 use crate::collect_a_stmt;
 
 /// Open and parse a YANG file.
-pub fn parse_file(filename: &str) -> std::io::Result<()> {
+pub fn parse_file(filename: &str, config: Config) -> std::io::Result<()> {
     let mut f = File::open(filename)?;
     let mut s = String::new();
     let p = Path::new(filename)
@@ -33,12 +33,11 @@ pub fn parse_file(filename: &str) -> std::io::Result<()> {
     let _n2 = str::replace(n1, ".", "_");
 
     f.read_to_string(&mut s)?;
-    let mut parser = Parser::new(s);
-//    parser.init_stmt_parsers();
+    let mut parser = Parser::new_with_config(config, s);
 
     match parser.parse_yang() {
-        Ok(_yang) => {
-//            println!("{:?}", yang)
+        Ok(yang) => {
+            println!("{:?}", yang)
         }
         Err(err) => {
             println!(
