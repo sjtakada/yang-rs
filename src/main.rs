@@ -3,7 +3,6 @@
 //  Copyright (C) 2021 Toshiaki Takada
 //
 
-
 use yang_rs::parser;
 use std::env;
 

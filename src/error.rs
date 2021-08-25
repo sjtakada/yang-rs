@@ -8,9 +8,6 @@ use quick_error::*;
 quick_error! {
     #[derive(Debug)]
     pub enum YangError {
-        TokenParseError {
-            display("Token parse error")
-        }
         InvalidComment {
             display("Invalid comment")
         }
@@ -19,9 +16,6 @@ quick_error! {
         }
         InvalidIdentifier {
             display("Invalid identifier")
-        }
-        NoSuchRulename(s: String) {
-            display("No such rulename {}", s)
         }
         UnexpectedEof {
             display("Unexpected end of file")
@@ -32,14 +26,14 @@ quick_error! {
         UnexpectedStatement(line: usize) {
             display("Unexpected statement at line {}", line)
         }
-        StatementMismatch(s: &'static str) {
-            display("Number of statements mismatch {}", s)
-        }
         MissingStatement(s: &'static str) {
             display("Missing statement {}", s)
         }
-        MethodNotImplemented {
-            display("Method not implemented")
+        TooFewStatement(line: usize, s: String) {
+            display("Too few statement {} at line {}", s, line)
+        }
+        TooManyStatements(line: usize, s: String) {
+            display("Too many statements {} at line {}", s, line)
         }
         ArgumentParseError(s: &'static str, line: usize) {
             display("Argument parse error: {} at line {}", s, line)
