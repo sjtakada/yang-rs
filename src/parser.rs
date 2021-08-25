@@ -493,7 +493,7 @@ mod tests {
     use super::*;
 
     #[test]
-    pub fn test_get_token_1() {
+    pub fn test_get_token() {
         let s = "module { }";
         let mut parser = Parser::new(s.to_string());
 
@@ -508,7 +508,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_get_token_2() {
+    pub fn test_get_token_comment_1() {
         let s = "module; /* comment */ statement";
         let mut parser = Parser::new(s.to_string());
 
@@ -523,7 +523,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_get_token_3() {
+    pub fn test_get_token_comment_2() {
         let s = "module // comment
 ";
         let mut parser = Parser::new(s.to_string());
@@ -536,7 +536,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_get_token_4() {
+    pub fn test_get_token_comment_3() {
         let s = "/* comment // */ module";
         let mut parser = Parser::new(s.to_string());
         
@@ -548,7 +548,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_get_token_5() {
+    pub fn test_get_token_comment_4() {
         let s = "// /* comment */ module";
         let mut parser = Parser::new(s.to_string());
 
@@ -557,7 +557,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_get_token_6() {
+    pub fn test_get_token_string_1() {
         let s = r#" "string" "#;
         let mut parser = Parser::new(s.to_string());
         
@@ -569,7 +569,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_get_token_7() {
+    pub fn test_get_token_string_2() {
         let s = r#" '"string"' "#;
         let mut parser = Parser::new(s.to_string());
         
@@ -581,7 +581,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_get_token_8() {
+    pub fn test_get_token_string_3() {
         let s = r#" "Hello" + "World" { }"#;
         let mut parser = Parser::new(s.to_string());
 
@@ -599,7 +599,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_get_token_9() {
+    pub fn test_get_token_string_4() {
         let s = r#" 'string1
  string2 ' "#;
 
@@ -613,7 +613,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_get_token_10() {
+    pub fn test_get_token_string_5() {
         let s = r#"    "string1
      string2" "#;
 
@@ -627,7 +627,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_get_token_11() {
+    pub fn test_get_token_string_6() {
         let s = r#"/**/"string1
 
       string2   	 
