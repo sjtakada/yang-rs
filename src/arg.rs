@@ -984,8 +984,6 @@ impl FromStr for PathKeyExpr {
         let paths: Vec<_> = str.split("/").map(|s| s.trim()).collect();
         // Minimum of "current() / .. / node-identifier".
         if paths.len() < 3 {
-            println!("*** hoge");
-
             return Err(ArgError::new("path-key-expr"))
         // Invalid current function invocation.
         } else if !is_current_function_invocation(&paths[0]) {

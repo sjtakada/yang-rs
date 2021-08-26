@@ -4439,16 +4439,20 @@ impl Stmt for DeviateStmt {
                 let stmt = DeviateAddStmt::parse(parser)?;
                 Ok(StmtType::DeviateStmt(DeviateStmt::Add(stmt)))
             }
-            "replace" => {
+            "delete" => {
                 let stmt = DeviateDeleteStmt::parse(parser)?;
                 Ok(StmtType::DeviateStmt(DeviateStmt::Delete(stmt)))
             }
-            "delete" => {
+            "replace" => {
                 let stmt = DeviateReplaceStmt::parse(parser)?;
                 Ok(StmtType::DeviateStmt(DeviateStmt::Replace(stmt)))
             }
             "not-supported" => {
-                Ok(StmtType::DeviateStmt(DeviateStmt::NotSupported))
+                if let Token::StatementEnd = parser.get_token()? {
+                    Ok(StmtType::DeviateStmt(DeviateStmt::NotSupported))
+                } else {
+                    Err(YangError::UnexpectedToken(parser.line()))
+                }
             }
             _ => Err(YangError::UnexpectedToken(parser.line()))
         }
@@ -4467,7 +4471,7 @@ pub struct DeviateAddStmt {
     must: Vec<MustStmt>,
 
     /// Unique statement.
-    unqiue: Vec<UniqueStmt>,
+    unique: Vec<UniqueStmt>,
 
     /// Default statement.
     default: Vec<DefaultStmt>,
@@ -4502,18 +4506,39 @@ impl Compound for DeviateAddStmt {
 
 impl DeviateAddStmt {
     pub fn parse(parser: &mut Parser) -> Result<DeviateAddStmt, YangError> {
-        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+        match parser.get_token()? {
+            Token::BlockBegin => {
+                let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
-        Ok(DeviateAddStmt {
-            units: collect_opt_stmt!(stmts, UnitsStmt)?,
-            must: collect_vec_stmt!(stmts, MustStmt)?,
-            unqiue: collect_vec_stmt!(stmts, UniqueStmt)?,
-            default: collect_vec_stmt!(stmts, DefaultStmt)?,
-            config: collect_opt_stmt!(stmts, ConfigStmt)?,
-            mandatory: collect_opt_stmt!(stmts, MandatoryStmt)?,
-            min_elements: collect_opt_stmt!(stmts, MinElementsStmt)?,
-            max_elements: collect_opt_stmt!(stmts, MaxElementsStmt)?,
-        })
+                if let Token::BlockEnd = parser.get_token()? {
+                    Ok(DeviateAddStmt {
+                        units: collect_opt_stmt!(stmts, UnitsStmt)?,
+                        must: collect_vec_stmt!(stmts, MustStmt)?,
+                        unique: collect_vec_stmt!(stmts, UniqueStmt)?,
+                        default: collect_vec_stmt!(stmts, DefaultStmt)?,
+                        config: collect_opt_stmt!(stmts, ConfigStmt)?,
+                        mandatory: collect_opt_stmt!(stmts, MandatoryStmt)?,
+                        min_elements: collect_opt_stmt!(stmts, MinElementsStmt)?,
+                        max_elements: collect_opt_stmt!(stmts, MaxElementsStmt)?,
+                    })
+                } else {
+                    Err(YangError::UnexpectedToken(parser.line()))
+                }
+            }
+            Token::StatementEnd => {
+                Ok(DeviateAddStmt {
+                    units: None,
+                    must: Vec::new(),
+                    unique: Vec::new(),
+                    default: Vec::new(),
+                    config: None,
+                    mandatory: None,
+                    min_elements: None,
+                    max_elements: None,
+                })
+            }
+            _ => Err(YangError::UnexpectedToken(parser.line())),
+        }
     }
 }
 
@@ -4529,7 +4554,7 @@ pub struct DeviateDeleteStmt {
     must: Vec<MustStmt>,
 
     /// Unique statement.
-    unqiue: Vec<UniqueStmt>,
+    unique: Vec<UniqueStmt>,
 
     /// Default statement.
     default: Vec<DefaultStmt>,
@@ -4549,14 +4574,31 @@ impl Compound for DeviateDeleteStmt {
 impl DeviateDeleteStmt {
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<DeviateDeleteStmt, YangError> {
-        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+        match parser.get_token()? {
+            Token::BlockBegin => {
+                let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
-        Ok(DeviateDeleteStmt {
-            units: collect_opt_stmt!(stmts, UnitsStmt)?,
-            must: collect_vec_stmt!(stmts, MustStmt)?,
-            unqiue: collect_vec_stmt!(stmts, UniqueStmt)?,
-            default: collect_vec_stmt!(stmts, DefaultStmt)?,
-        })
+                if let Token::BlockEnd = parser.get_token()? {
+                    Ok(DeviateDeleteStmt {
+                        units: collect_opt_stmt!(stmts, UnitsStmt)?,
+                        must: collect_vec_stmt!(stmts, MustStmt)?,
+                        unique: collect_vec_stmt!(stmts, UniqueStmt)?,
+                        default: collect_vec_stmt!(stmts, DefaultStmt)?,
+                    })
+                } else {
+                    Err(YangError::UnexpectedToken(parser.line()))
+                }
+            }
+            Token::StatementEnd => {
+                Ok(DeviateDeleteStmt {
+                    units: None,
+                    must: Vec::new(),
+                    unique: Vec::new(),
+                    default: Vec::new(),
+                })
+            }
+            _ => Err(YangError::UnexpectedToken(parser.line())),
+        }
     }
 }
 
@@ -4603,17 +4645,37 @@ impl Compound for DeviateReplaceStmt {
 
 impl DeviateReplaceStmt {
     pub fn parse(parser: &mut Parser) -> Result<DeviateReplaceStmt, YangError> {
-        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+        match parser.get_token()? {
+            Token::BlockBegin => {
+                let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
-        Ok(DeviateReplaceStmt {
-            type_: collect_opt_stmt!(stmts, TypeStmt)?,
-            units: collect_opt_stmt!(stmts, UnitsStmt)?,
-            default: collect_opt_stmt!(stmts, DefaultStmt)?,
-            config: collect_opt_stmt!(stmts, ConfigStmt)?,
-            mandatory: collect_opt_stmt!(stmts, MandatoryStmt)?,
-            min_elements: collect_opt_stmt!(stmts, MinElementsStmt)?,
-            max_elements: collect_opt_stmt!(stmts, MaxElementsStmt)?,
-        })
+                if let Token::BlockEnd = parser.get_token()? {
+                    Ok(DeviateReplaceStmt {
+                        type_: collect_opt_stmt!(stmts, TypeStmt)?,
+                        units: collect_opt_stmt!(stmts, UnitsStmt)?,
+                        default: collect_opt_stmt!(stmts, DefaultStmt)?,
+                        config: collect_opt_stmt!(stmts, ConfigStmt)?,
+                        mandatory: collect_opt_stmt!(stmts, MandatoryStmt)?,
+                        min_elements: collect_opt_stmt!(stmts, MinElementsStmt)?,
+                        max_elements: collect_opt_stmt!(stmts, MaxElementsStmt)?,
+                    })
+                } else {
+                    Err(YangError::UnexpectedToken(parser.line()))
+                }
+            }
+            Token::StatementEnd => {
+                Ok(DeviateReplaceStmt {
+                    type_: None,
+                    units: None,
+                    default: None,
+                    config: None,
+                    mandatory: None,
+                    min_elements: None,
+                    max_elements: None,
+                })
+            }
+            _ => Err(YangError::UnexpectedToken(parser.line())),
+        }
     }
 }
 
@@ -4737,6 +4799,110 @@ mod tests {
     #[test]
     pub fn test_feature_stmt() {
         // TBD
+    }
+
+    #[test]
+    pub fn test_deviation_stmt() {
+        // Deviation add.
+        let s = r#""/oc-if:interfaces/oc-if:interface/oc-if:hold-time" +
+            "/oc-if:config/oc-if:up" {
+      deviate add;
+  }"#;
+        let mut parser = Parser::new(s.to_string());
+        match DeviationStmt::parse(&mut parser) {
+            Ok(stmt) => {
+                assert_eq!(stmt, StmtType::DeviationStmt(DeviationStmt {
+                    arg: AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-if:hold-time/oc-if:config/oc-if:up").unwrap(),
+                    description: None,
+                    reference: None,
+                    deviate: vec![DeviateStmt::Add(DeviateAddStmt { units: None,
+                                                                    must: vec![],
+                                                                    unique: vec![],
+                                                                    default: vec![],
+                                                                    config: None,
+                                                                    mandatory: None,
+                                                                    min_elements: None,
+                                                                    max_elements: None,
+                    })]
+                }));
+            }
+            Err(err) => panic!("{}", err.to_string()),
+        }
+
+        // Deviation delete.
+        let s = r#""/oc-if:interfaces/oc-if:interface/oc-if:hold-time" +
+            "/oc-if:config/oc-if:up" {
+      deviate delete {
+        default 0;
+      }
+      description
+        "Hold-time 0 is not configurable on XE, use no dampening.";
+  }"#;
+        let mut parser = Parser::new(s.to_string());
+        match DeviationStmt::parse(&mut parser) {
+            Ok(stmt) => {
+                assert_eq!(stmt, StmtType::DeviationStmt(DeviationStmt {
+                    arg: AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-if:hold-time/oc-if:config/oc-if:up").unwrap(),
+                    description: Some(DescriptionStmt { arg: String::from("Hold-time 0 is not configurable on XE, use no dampening.") }),
+                    reference: None,
+                    deviate: vec![DeviateStmt::Delete(DeviateDeleteStmt { units: None,
+                                                                          must: vec![],
+                                                                          unique: vec![],
+                                                                          default: vec![DefaultStmt { arg: String::from("0") }] })]
+                }));
+            }
+            Err(err) => panic!("{}", err.to_string()),
+        }
+
+        // Deviation replace
+        let s = r#""/oc-if:interfaces/oc-if:interface/oc-if:state" +
+            "/oc-if:last-change" {
+      deviate replace {
+        type yang:date-and-time;
+      }
+      description
+        "Change the type of the last-change flag to date-and-time";
+  }"#;
+        let mut parser = Parser::new(s.to_string());
+        match DeviationStmt::parse(&mut parser) {
+            Ok(stmt) => {
+                assert_eq!(stmt, StmtType::DeviationStmt(DeviationStmt {
+                    arg: AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-if:state/oc-if:last-change").unwrap(),
+                    description: Some(DescriptionStmt { arg: String::from("Change the type of the last-change flag to date-and-time") }),
+                    reference: None,
+                    deviate: vec![DeviateStmt::Replace(DeviateReplaceStmt { 
+                        type_: Some(TypeStmt { arg: IdentifierRef::from_str("yang:date-and-time").unwrap(), type_body: None }),
+                        units: None,
+                        default: None,
+                        config: None,
+                        mandatory: None,
+                        min_elements: None,
+                        max_elements: None,
+                    })]
+                }));
+            }
+            Err(err) => panic!("{}", err.to_string()),
+        }
+
+        // Deviation not-supported
+        let s = r#""/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan" +
+            "/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp" {
+      deviate not-supported;
+      description
+        "IPv4 VRRP not supported in 16.6.1.";
+  }"#;
+        let mut parser = Parser::new(s.to_string());
+        match DeviationStmt::parse(&mut parser) {
+            Ok(stmt) => {
+                assert_eq!(stmt, StmtType::DeviationStmt(DeviationStmt {
+                    arg: AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp").unwrap(),
+                    description: Some(DescriptionStmt { arg: String::from("IPv4 VRRP not supported in 16.6.1.") }),
+                    reference: None,
+                    deviate: vec![DeviateStmt::NotSupported]
+                }));
+            }
+            Err(err) => panic!("{}", err.to_string()),
+        }
     }
 
     #[test]
