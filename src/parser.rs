@@ -257,6 +257,7 @@ impl Parser {
     pub fn get_token(&mut self) -> Result<Token, YangError> {
         let mut st = String::new();
         let mut concat_str = false;
+        let mut string_parsed = false;
 
         if let Some(token) = self.load_token() {
             return Ok(token)
@@ -281,6 +282,7 @@ impl Parser {
                     if st.len() == 0 || concat_str {
                         st.push_str(&s);
                         concat_str = false;
+                        string_parsed = true;
                     } else {
                         return Err(YangError::InvalidString);
                     }
@@ -297,7 +299,7 @@ impl Parser {
                         return Err(YangError::InvalidString);
                     }
 
-                    if st.len() > 0 {
+                    if string_parsed {
                         self.save_token(token);
                         return Ok(Token::QuotedString(st));
                     }
@@ -450,15 +452,6 @@ impl Parser {
 
         self.pos_add(pos);
         Ok((token, pos))
-    }
-
-    /// Expect a given keyword.
-    pub fn expect_keyword(&mut self, keyword: &str) -> Result<bool, YangError> {
-        let token = self.peek_token()?;
-        match token {
-            Token::Identifier(k) => Ok(k == keyword),
-            _ => Err(YangError::UnexpectedToken(self.line())),
-        }
     }
 
     /// Return substatements definition.
@@ -640,5 +633,26 @@ mod tests {
 
         let token = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
+    }
+
+    #[test]
+    pub fn test_get_token_empty() {
+        let s = r#"identifier " ";"#;
+        let mut parser = Parser::new(s.to_string());
+
+        let token = parser.get_token().unwrap();
+        assert_eq!(token, Token::Identifier(String::from("identifier")));
+
+        let token = parser.get_token().unwrap();
+        assert_eq!(token, Token::QuotedString(String::from(" ")));
+
+        let s = r#"identifier "";"#;
+        let mut parser = Parser::new(s.to_string());
+
+        let token = parser.get_token().unwrap();
+        assert_eq!(token, Token::Identifier(String::from("identifier")));
+
+        let token = parser.get_token().unwrap();
+        assert_eq!(token, Token::QuotedString(String::from("")));
     }
 }
