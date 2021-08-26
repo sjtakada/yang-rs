@@ -148,8 +148,23 @@ pub enum Token {
     EndOfInput,
 }
 
-/// Parser.
+impl ToString for Token {
+    fn to_string(&self) -> String {
+        match &self {
+            Token::Whitespace(_) => String::from("Whitespace"),
+            Token::Comment(_) => String::from("Comment"),
+            Token::PlusSign => String::from("PlusSign"),
+            Token::BlockBegin => String::from("BlockBegin"),
+            Token::BlockEnd => String::from("BlockEnd"),
+            Token::QuotedString(_) => String::from("QuotedString"),
+            Token::Identifier(s) => format!("Identifier '{:?}'", s),
+            Token::StatementEnd => String::from("StatementEnd"),
+            Token::EndOfInput => String::from("EndOfInput"),
+        }
+    }
+}
 
+/// Parser.
 pub struct Parser {
     /// Config.
     config: Config,

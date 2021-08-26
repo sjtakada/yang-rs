@@ -20,8 +20,8 @@ quick_error! {
         UnexpectedEof {
             display("Unexpected end of file")
         }
-        UnexpectedToken(line: usize) {
-            display("Unexpected token at line {}", line)
+        UnexpectedToken(s: String) {
+            display("Unexpected token at line {}", s)
         }
         UnexpectedStatement(line: usize) {
             display("Unexpected statement at line {}", line)

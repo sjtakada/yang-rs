@@ -54,7 +54,7 @@ fn parse_string(parser: &mut Parser) -> Result<String, YangError> {
         // End of Input.
         Token::EndOfInput => Err(YangError::UnexpectedEof),
         // Unexpected Token.
-        _ => Err(YangError::UnexpectedToken(parser.line())),
+        _ => Err(YangError::UnexpectedToken(token.to_string())),
     }
 }
 

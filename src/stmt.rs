@@ -65,40 +65,43 @@ pub trait Stmt {
         let arg = Self::Arg::parse_arg(parser)?;
 
         if Self::has_substmts() {
-            if let Token::BlockBegin = parser.get_token()? {
-                let substmts = Self::parse_substmts(parser)?;
+            let token = parser.get_token()?;
+            match token {
+                Token::BlockBegin => {
 
-                if let Token::BlockEnd = parser.get_token()? {
-                    Ok(Self::new_with_substmts(arg, substmts))
-                } else {
-                    Err(YangError::UnexpectedToken(parser.line()))
+                    let substmts = Self::parse_substmts(parser)?;
+                    let token = parser.get_token()?;
+
+                    match token {
+                        Token::BlockEnd => Ok(Self::new_with_substmts(arg, substmts)),
+                        _ => Err(YangError::UnexpectedToken(token.to_string()))
+                    }
                 }
-            } else {
-                Err(YangError::UnexpectedToken(parser.line()))
+                _ => Err(YangError::UnexpectedToken(token.to_string())),
             }
         } else if Self::opt_substmts() {
-            match parser.get_token()? {
+            let token = parser.get_token()?;
+            match token {
                 Token::StatementEnd => {
                     Ok(Self::new_with_arg(arg))
                 }
                 Token::BlockBegin => {
                     let substmts = Self::parse_substmts(parser)?;
-
-                    if let Token::BlockEnd = parser.get_token()? {
-                        Ok(Self::new_with_substmts(arg, substmts))
-                    } else {
-                        Err(YangError::UnexpectedToken(parser.line()))
+                    let token =  parser.get_token()?;
+                    match token {
+                        Token::BlockEnd => Ok(Self::new_with_substmts(arg, substmts)),
+                        _ => Err(YangError::UnexpectedToken(token.to_string())),
                     }
                 }
                 _ => {
-                    Err(YangError::UnexpectedToken(parser.line()))
+                    Err(YangError::UnexpectedToken(token.to_string()))
                 }
             }
         } else {
-            if let Token::StatementEnd = parser.get_token()? {
-                Ok(Self::new_with_arg(arg))
-            } else {
-                Err(YangError::UnexpectedToken(parser.line()))
+            let token = parser.get_token()?;
+            match token {
+                Token::StatementEnd => Ok(Self::new_with_arg(arg)),
+                _ => Err(YangError::UnexpectedToken(token.to_string())),
             }
         }
     }
@@ -4448,13 +4451,13 @@ impl Stmt for DeviateStmt {
                 Ok(StmtType::DeviateStmt(DeviateStmt::Replace(stmt)))
             }
             "not-supported" => {
-                if let Token::StatementEnd = parser.get_token()? {
-                    Ok(StmtType::DeviateStmt(DeviateStmt::NotSupported))
-                } else {
-                    Err(YangError::UnexpectedToken(parser.line()))
+                let token = parser.get_token()?;
+                match token {
+                    Token::StatementEnd => Ok(StmtType::DeviateStmt(DeviateStmt::NotSupported)),
+                    _ => Err(YangError::UnexpectedToken(token.to_string())),
                 }
             }
-            _ => Err(YangError::UnexpectedToken(parser.line()))
+            _ => Err(YangError::UnexpectedToken(arg.to_string()))
         }
     }
 }
@@ -4506,23 +4509,26 @@ impl Compound for DeviateAddStmt {
 
 impl DeviateAddStmt {
     pub fn parse(parser: &mut Parser) -> Result<DeviateAddStmt, YangError> {
-        match parser.get_token()? {
+        let token = parser.get_token()?;
+        match token {
             Token::BlockBegin => {
                 let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
-                if let Token::BlockEnd = parser.get_token()? {
-                    Ok(DeviateAddStmt {
-                        units: collect_opt_stmt!(stmts, UnitsStmt)?,
-                        must: collect_vec_stmt!(stmts, MustStmt)?,
-                        unique: collect_vec_stmt!(stmts, UniqueStmt)?,
-                        default: collect_vec_stmt!(stmts, DefaultStmt)?,
-                        config: collect_opt_stmt!(stmts, ConfigStmt)?,
-                        mandatory: collect_opt_stmt!(stmts, MandatoryStmt)?,
-                        min_elements: collect_opt_stmt!(stmts, MinElementsStmt)?,
-                        max_elements: collect_opt_stmt!(stmts, MaxElementsStmt)?,
-                    })
-                } else {
-                    Err(YangError::UnexpectedToken(parser.line()))
+                let token = parser.get_token()?;
+                match token {
+                    Token::BlockEnd => {
+                        Ok(DeviateAddStmt {
+                            units: collect_opt_stmt!(stmts, UnitsStmt)?,
+                            must: collect_vec_stmt!(stmts, MustStmt)?,
+                            unique: collect_vec_stmt!(stmts, UniqueStmt)?,
+                            default: collect_vec_stmt!(stmts, DefaultStmt)?,
+                            config: collect_opt_stmt!(stmts, ConfigStmt)?,
+                            mandatory: collect_opt_stmt!(stmts, MandatoryStmt)?,
+                            min_elements: collect_opt_stmt!(stmts, MinElementsStmt)?,
+                            max_elements: collect_opt_stmt!(stmts, MaxElementsStmt)?,
+                        })
+                    }
+                    _ => Err(YangError::UnexpectedToken(token.to_string())),
                 }
             }
             Token::StatementEnd => {
@@ -4537,7 +4543,7 @@ impl DeviateAddStmt {
                     max_elements: None,
                 })
             }
-            _ => Err(YangError::UnexpectedToken(parser.line())),
+            _ => Err(YangError::UnexpectedToken(token.to_string())),
         }
     }
 }
@@ -4574,19 +4580,22 @@ impl Compound for DeviateDeleteStmt {
 impl DeviateDeleteStmt {
     /// Parse a statement and return the object wrapped in enum.
     fn parse(parser: &mut Parser) -> Result<DeviateDeleteStmt, YangError> {
-        match parser.get_token()? {
+        let token = parser.get_token()?;
+        match token {
             Token::BlockBegin => {
                 let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
+                let token = parser.get_token()?;
 
-                if let Token::BlockEnd = parser.get_token()? {
-                    Ok(DeviateDeleteStmt {
-                        units: collect_opt_stmt!(stmts, UnitsStmt)?,
-                        must: collect_vec_stmt!(stmts, MustStmt)?,
-                        unique: collect_vec_stmt!(stmts, UniqueStmt)?,
-                        default: collect_vec_stmt!(stmts, DefaultStmt)?,
-                    })
-                } else {
-                    Err(YangError::UnexpectedToken(parser.line()))
+                match token {
+                    Token::BlockEnd => {
+                        Ok(DeviateDeleteStmt {
+                            units: collect_opt_stmt!(stmts, UnitsStmt)?,
+                            must: collect_vec_stmt!(stmts, MustStmt)?,
+                            unique: collect_vec_stmt!(stmts, UniqueStmt)?,
+                            default: collect_vec_stmt!(stmts, DefaultStmt)?,
+                        })
+                    }
+                    _ => Err(YangError::UnexpectedToken(token.to_string())),
                 }
             }
             Token::StatementEnd => {
@@ -4597,7 +4606,7 @@ impl DeviateDeleteStmt {
                     default: Vec::new(),
                 })
             }
-            _ => Err(YangError::UnexpectedToken(parser.line())),
+            _ => Err(YangError::UnexpectedToken(token.to_string())),
         }
     }
 }
@@ -4645,22 +4654,25 @@ impl Compound for DeviateReplaceStmt {
 
 impl DeviateReplaceStmt {
     pub fn parse(parser: &mut Parser) -> Result<DeviateReplaceStmt, YangError> {
-        match parser.get_token()? {
+        let token = parser.get_token()?;
+        match token {
             Token::BlockBegin => {
                 let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
-                if let Token::BlockEnd = parser.get_token()? {
-                    Ok(DeviateReplaceStmt {
-                        type_: collect_opt_stmt!(stmts, TypeStmt)?,
-                        units: collect_opt_stmt!(stmts, UnitsStmt)?,
-                        default: collect_opt_stmt!(stmts, DefaultStmt)?,
-                        config: collect_opt_stmt!(stmts, ConfigStmt)?,
-                        mandatory: collect_opt_stmt!(stmts, MandatoryStmt)?,
-                        min_elements: collect_opt_stmt!(stmts, MinElementsStmt)?,
-                        max_elements: collect_opt_stmt!(stmts, MaxElementsStmt)?,
-                    })
-                } else {
-                    Err(YangError::UnexpectedToken(parser.line()))
+                let token = parser.get_token()?;
+                match token {
+                    Token::BlockEnd => {
+                        Ok(DeviateReplaceStmt {
+                            type_: collect_opt_stmt!(stmts, TypeStmt)?,
+                            units: collect_opt_stmt!(stmts, UnitsStmt)?,
+                            default: collect_opt_stmt!(stmts, DefaultStmt)?,
+                            config: collect_opt_stmt!(stmts, ConfigStmt)?,
+                            mandatory: collect_opt_stmt!(stmts, MandatoryStmt)?,
+                            min_elements: collect_opt_stmt!(stmts, MinElementsStmt)?,
+                            max_elements: collect_opt_stmt!(stmts, MaxElementsStmt)?,
+                        })
+                    }
+                    _ => Err(YangError::UnexpectedToken(token.to_string())),
                 }
             }
             Token::StatementEnd => {
@@ -4674,7 +4686,7 @@ impl DeviateReplaceStmt {
                     max_elements: None,
                 })
             }
-            _ => Err(YangError::UnexpectedToken(parser.line())),
+            _ => Err(YangError::UnexpectedToken(token.to_string())),
         }
     }
 }
