@@ -3419,7 +3419,7 @@ pub struct UsesStmt {
     refine: Vec<RefineStmt>,
 
     /// Uses statement.
-    uses_augment: Vec<UsesAugmentStmt>,
+    uses_augment: Vec<AugmentStmt>,
 }
 
 impl Stmt for UsesStmt {
@@ -3428,7 +3428,7 @@ impl Stmt for UsesStmt {
 
     /// Sub Statements.
     type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Option<StatusStmt>, Option<DescriptionStmt>,
-                     Option<ReferenceStmt>, Vec<RefineStmt>, Vec<UsesAugmentStmt>);
+                     Option<ReferenceStmt>, Vec<RefineStmt>, Vec<AugmentStmt>);
 
     /// Return statement keyword.
     fn keyword() -> Keyword {
@@ -3448,7 +3448,7 @@ impl Stmt for UsesStmt {
              SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
              SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(RefineStmt::keyword)),
-             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(UsesAugmentStmt::keyword)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(AugmentStmt::keyword)),
         ]
     }
 
@@ -3490,7 +3490,7 @@ impl Stmt for UsesStmt {
             collect_opt_stmt!(stmts, DescriptionStmt)?,
             collect_opt_stmt!(stmts, ReferenceStmt)?,
             collect_vec_stmt!(stmts, RefineStmt)?,
-            collect_vec_stmt!(stmts, UsesAugmentStmt)?))
+            collect_vec_stmt!(stmts, AugmentStmt)?))
     }
 }
 
@@ -3619,107 +3619,12 @@ impl Stmt for RefineStmt {
 }
 
 ///
-/// The "uses-augment" Statement.
-///
-#[derive(Debug, Clone, PartialEq)]
-pub struct UsesAugmentStmt {
-    /// Uses augment arg.
-    arg: UsesAugmentArg,
-
-    /// When statement.
-    when: Option<WhenStmt>,
-
-    /// If-feature statement.
-    if_feature: Vec<IfFeatureStmt>,
-
-    /// Status statement.
-    status: Option<StatusStmt>,
-
-    /// Description statement.
-    description: Option<DescriptionStmt>,
-
-    /// Reference statement.
-    reference: Option<ReferenceStmt>,
-
-    /// Data-def / case / action / notification statement.
-    data_def_or_else: DataDefOrElse,
-}
-
-impl Stmt for UsesAugmentStmt {
-    /// Arg type.
-    type Arg = UsesAugmentArg;
-
-    /// Sub Statements.
-    type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Option<StatusStmt>,
-                     Option<DescriptionStmt>, Option<ReferenceStmt>, DataDefOrElse);
-
-    /// Return statement keyword.
-    fn keyword() -> Keyword {
-        "uses-augment"
-    }
-
-    /// Return true if this statement has substatements.
-    fn has_substmts() -> bool {
-        true
-    }
-
-    /// Return substatements definition.
-    fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::Optional(SubStmtWith::Stmt(WhenStmt::keyword)),
-             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IfFeatureStmt::keyword)),
-             SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
-             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
-             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
-             SubStmtDef::OneOrMore(SubStmtWith::Selection(DataDefOrElse::keywords)),
-        ]
-    }
-
-    /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::UsesAugmentStmt(UsesAugmentStmt {
-            arg,
-            when: substmts.0,
-            if_feature: substmts.1,
-            status: substmts.2,
-            description: substmts.3,
-            reference: substmts.4,
-            data_def_or_else: substmts.5,
-        })
-    }
-
-    /// Parse substatements.
-    fn parse_substmts(parser: &mut Parser) -> Result<Self::SubStmts, YangError> {
-        let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
-
-        Ok((collect_opt_stmt!(stmts, WhenStmt)?,
-            collect_vec_stmt!(stmts, IfFeatureStmt)?,
-            collect_opt_stmt!(stmts, StatusStmt)?,
-            collect_opt_stmt!(stmts, DescriptionStmt)?,
-            collect_opt_stmt!(stmts, ReferenceStmt)?,
-            DataDefOrElse::new_with_substmts((
-                collect_vec_stmt!(stmts, ContainerStmt)?,
-                collect_vec_stmt!(stmts, LeafStmt)?,
-                collect_vec_stmt!(stmts, LeafListStmt)?,
-                collect_vec_stmt!(stmts, ListStmt)?,
-                collect_vec_stmt!(stmts, ChoiceStmt)?,
-                collect_vec_stmt!(stmts, AnydataStmt)?,
-                collect_vec_stmt!(stmts, AnyxmlStmt)?,
-                collect_vec_stmt!(stmts, UsesStmt)?,
-                collect_vec_stmt!(stmts, CaseStmt)?,
-                collect_vec_stmt!(stmts, ActionStmt)?,
-                collect_vec_stmt!(stmts, NotificationStmt)?,
-            )),
-        ))
-    }
-}
-
-///
 /// The "augment" Statement.
 ///
 #[derive(Debug, Clone, PartialEq)]
 pub struct AugmentStmt {
     /// Augment arg.
-    arg: AugmentArg,
+    arg: SchemaNodeid,
 
     /// When statement.
     when: Option<WhenStmt>,
@@ -3742,7 +3647,7 @@ pub struct AugmentStmt {
 
 impl Stmt for AugmentStmt {
     /// Arg type.
-    type Arg = AugmentArg;
+    type Arg = SchemaNodeid;
 
     /// Sub Statements.
     type SubStmts = (Option<WhenStmt>, Vec<IfFeatureStmt>, Option<StatusStmt>,

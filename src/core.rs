@@ -74,7 +74,6 @@ lazy_static! {
         m.insert("anyxml", AnyxmlStmt::parse as StmtParserFn);
         m.insert("uses", UsesStmt::parse as StmtParserFn);
         m.insert("refine", RefineStmt::parse as StmtParserFn);
-        m.insert("uses-augment", UsesAugmentStmt::parse as StmtParserFn);
         m.insert("augment", AugmentStmt::parse as StmtParserFn);
         m.insert("when", WhenStmt::parse as StmtParserFn);
         m.insert("rpc", RpcStmt::parse as StmtParserFn);
@@ -159,7 +158,6 @@ pub enum StmtType {
     AnyxmlStmt(AnyxmlStmt),
     UsesStmt(UsesStmt),
     RefineStmt(RefineStmt),
-    UsesAugmentStmt(UsesAugmentStmt),
     AugmentStmt(AugmentStmt),
     WhenStmt(WhenStmt),
     RpcStmt(RpcStmt),
@@ -233,7 +231,6 @@ impl fmt::Debug for StmtType {
             StmtType::AnyxmlStmt(stmt) => write!(f, "{:?}", stmt),
             StmtType::UsesStmt(stmt) => write!(f, "{:?}", stmt),
             StmtType::RefineStmt(stmt) => write!(f, "{:?}", stmt),
-            StmtType::UsesAugmentStmt(stmt) => write!(f, "{:?}", stmt),
             StmtType::AugmentStmt(stmt) => write!(f, "{:?}", stmt),
             StmtType::WhenStmt(stmt) => write!(f, "{:?}", stmt),
             StmtType::RpcStmt(stmt) => write!(f, "{:?}", stmt),

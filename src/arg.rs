@@ -1314,6 +1314,25 @@ impl StmtArg for KeyArg {
 /// "schema-nodeid".  TODO - may consolidate.
 ///
 #[derive(Debug, Clone, PartialEq)]
+pub enum SchemaNodeid {
+    Absolute(AbsoluteSchemaNodeid),
+    Descendant(DescendantSchemaNodeid),
+}
+
+impl StmtArg for SchemaNodeid {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        if str.starts_with('/') {
+            Ok(SchemaNodeid::Absolute(
+                AbsoluteSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?))
+        } else {
+            Ok(SchemaNodeid::Descendant(
+                DescendantSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?))
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct AbsoluteSchemaNodeid {
     nodes: Vec<NodeIdentifier>,
 }
