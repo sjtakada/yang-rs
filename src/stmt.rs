@@ -3009,7 +3009,7 @@ impl Stmt for ChoiceStmt {
              SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
-             SubStmtDef::HasOne(SubStmtWith::Selection(ShortCaseOrCaseStmt::keywords)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(ShortCaseOrCaseStmt::keywords)),
         ]
     }
 
@@ -4608,8 +4608,8 @@ pub struct UnknownStmt {
     /// Optional arg.
     arg: Option<String>,
 
-    // YANG statement.
-    
+    /// YANG statement.
+    yang: Vec<YangStmt>,
 }
 
 impl UnknownStmt {
@@ -4631,6 +4631,7 @@ impl UnknownStmt {
         Ok(YangStmt::UnknownStmt(UnknownStmt {
             keyword,
             arg,
+            yang: Vec::new(),
         }))
     }
 }
