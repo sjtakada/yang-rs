@@ -106,7 +106,7 @@ println!("*** [DEBUG] parse_substmts_default {:?}", token);
                         }
                     } else if !STMT_PARSER.contains_key(keyword as &str) {
                         // This is "unknown" statement.
-                        let _stmt = UnknownStmt::parse_unknown(parser)?;
+                        let _stmt = UnknownStmt::parse(parser, keyword)?;
                         // TBD: just parse and ignore it for now.
                     } else {
                         parser.save_token(token);

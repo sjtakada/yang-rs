@@ -4614,38 +4614,11 @@ pub struct UnknownStmt {
 
 impl UnknownStmt {
     /// Parse a statement and return the object wrapped in enum.
-    pub fn parse_unknown(parser: &mut Parser) -> Result<YangStmt, YangError>  where Self: Sized {
-        Self::parse(parser)
-    }
-}
-
-impl Stmt for UnknownStmt {
-    /// Arg type.
-    type Arg = String;
-
-    /// Sub Statements.
-    type SubStmts = ();
-
-    /// Return statement keyword.
-    fn keyword() -> Keyword {
-        "unknown"
-    }
-
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<YangStmt, YangError>  where Self::Arg: StmtArg, Self: Sized {
-/*
-        let token = parser.get_token()?;
-        let keyword = match token {
-            Token::Identifier(s) => {
-                UnknownStmtKeyword::from_str(&s).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?
-            }
-            _ => return Err(YangError::UnexpectedToken(token.to_string()))
-        };
-*/
-        let keyword = UnknownStmtKeyword::from_str("hoge:hgoe").unwrap();
-
+    pub fn parse(parser: &mut Parser, keyword: &str) -> Result<YangStmt, YangError>  where Self: Sized {
+        let keyword = UnknownStmtKeyword::from_str(keyword).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?;
         let token = parser.get_token()?;
         let mut arg = None;
+
         match token {
             Token::Identifier(s) => {
                 arg = Some(s);
