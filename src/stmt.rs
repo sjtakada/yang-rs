@@ -47,12 +47,12 @@ pub trait Stmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(_arg: Self::Arg) -> StmtType where Self: Sized {
+    fn new_with_arg(_arg: Self::Arg) -> YangStmt where Self: Sized {
         panic!("{:?}", Self::keyword());
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(_arg: Self::Arg, _substmts: Self::SubStmts) -> StmtType where Self: Sized {
+    fn new_with_substmts(_arg: Self::Arg, _substmts: Self::SubStmts) -> YangStmt where Self: Sized {
         panic!("{:?}", Self::keyword());
     }
 
@@ -62,7 +62,7 @@ pub trait Stmt {
     }
 
     /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError>  where Self::Arg: StmtArg, Self: Sized {
+    fn parse(parser: &mut Parser) -> Result<YangStmt, YangError>  where Self::Arg: StmtArg, Self: Sized {
         let arg = Self::Arg::parse_arg(parser)?;
 
         if Self::has_substmts() {
@@ -150,8 +150,8 @@ impl Stmt for ModuleStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::ModuleStmt(ModuleStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::ModuleStmt(ModuleStmt {
             arg,
             module_header: substmts.0,
             linkage: substmts.1,
@@ -215,8 +215,8 @@ impl Stmt for SubmoduleStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::SubmoduleStmt(SubmoduleStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::SubmoduleStmt(SubmoduleStmt {
             arg,
             submodule_header: substmts.0,
             linkage: substmts.1,
@@ -260,8 +260,8 @@ impl Stmt for YangVersionStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::YangVersionStmt(YangVersionStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::YangVersionStmt(YangVersionStmt {
             arg,
         })
     }
@@ -315,8 +315,8 @@ impl Stmt for ImportStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::ImportStmt(ImportStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::ImportStmt(ImportStmt {
             arg,
             prefix: substmts.0,
             revision_date: substmts.1,
@@ -380,8 +380,8 @@ impl Stmt for IncludeStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::IncludeStmt(IncludeStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::IncludeStmt(IncludeStmt {
             arg,
             revision_date: None,
             description: None,
@@ -390,8 +390,8 @@ impl Stmt for IncludeStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::IncludeStmt(IncludeStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::IncludeStmt(IncludeStmt {
             arg,
             revision_date: substmts.0,
             description: substmts.1,
@@ -431,8 +431,8 @@ impl Stmt for NamespaceStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::NamespaceStmt(NamespaceStmt { arg })
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::NamespaceStmt(NamespaceStmt { arg })
     }
 }
 
@@ -458,8 +458,8 @@ impl Stmt for PrefixStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::PrefixStmt(PrefixStmt { arg })
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::PrefixStmt(PrefixStmt { arg })
     }
 }
 
@@ -499,8 +499,8 @@ impl Stmt for BelongsToStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::BelongsToStmt(BelongsToStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::BelongsToStmt(BelongsToStmt {
             arg,
             prefix: substmts.0,
         })
@@ -536,8 +536,8 @@ impl Stmt for OrganizationStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::OrganizationStmt(OrganizationStmt { arg })
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::OrganizationStmt(OrganizationStmt { arg })
     }
 }
 
@@ -563,8 +563,8 @@ impl Stmt for ContactStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::ContactStmt(ContactStmt { arg })
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::ContactStmt(ContactStmt { arg })
     }
 }
 
@@ -590,8 +590,8 @@ impl Stmt for DescriptionStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::DescriptionStmt(DescriptionStmt { arg })
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::DescriptionStmt(DescriptionStmt { arg })
     }
 }
 
@@ -617,8 +617,8 @@ impl Stmt for ReferenceStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::ReferenceStmt(ReferenceStmt { arg })
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::ReferenceStmt(ReferenceStmt { arg })
     }
 }
 
@@ -644,8 +644,8 @@ impl Stmt for UnitsStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::UnitsStmt(UnitsStmt { arg })
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::UnitsStmt(UnitsStmt { arg })
     }
 }
 
@@ -689,8 +689,8 @@ impl Stmt for RevisionStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::RevisionStmt(RevisionStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::RevisionStmt(RevisionStmt {
             arg,
             description: None,
             reference: None,
@@ -698,8 +698,8 @@ impl Stmt for RevisionStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::RevisionStmt(RevisionStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::RevisionStmt(RevisionStmt {
             arg,
             description: substmts.0,
             reference: substmts.1,
@@ -737,8 +737,8 @@ impl Stmt for RevisionDateStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::RevisionDateStmt(RevisionDateStmt { arg })
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::RevisionDateStmt(RevisionDateStmt { arg })
     }
 }
 
@@ -790,8 +790,8 @@ impl Stmt for ExtensionStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::ExtensionStmt(ExtensionStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::ExtensionStmt(ExtensionStmt {
             arg,
             argument: None,
             status: None,
@@ -801,8 +801,8 @@ impl Stmt for ExtensionStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::ExtensionStmt(ExtensionStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::ExtensionStmt(ExtensionStmt {
             arg,
             argument: substmts.0,
             status: substmts.1,
@@ -858,16 +858,16 @@ impl Stmt for ArgumentStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::ArgumentStmt(ArgumentStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::ArgumentStmt(ArgumentStmt {
             arg,
             yin_element: None,
         })
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::ArgumentStmt(ArgumentStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::ArgumentStmt(ArgumentStmt {
             arg,
             yin_element: substmts.0,
         })
@@ -903,8 +903,8 @@ impl Stmt for YinElementStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::YinElementStmt(YinElementStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::YinElementStmt(YinElementStmt {
             arg,
         })
     }
@@ -962,8 +962,8 @@ impl Stmt for IdentityStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::IdentityStmt(IdentityStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::IdentityStmt(IdentityStmt {
             arg,
             if_feature: Vec::new(),
             base: Vec::new(),
@@ -974,8 +974,8 @@ impl Stmt for IdentityStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::IdentityStmt(IdentityStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::IdentityStmt(IdentityStmt {
             arg,
             if_feature: substmts.0,
             base: substmts.1,
@@ -1019,8 +1019,8 @@ impl Stmt for BaseStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::BaseStmt(BaseStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::BaseStmt(BaseStmt {
             arg,
         })
     }
@@ -1074,8 +1074,8 @@ impl Stmt for FeatureStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::FeatureStmt(FeatureStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::FeatureStmt(FeatureStmt {
             arg,
             if_feature: Vec::new(),
             status: None,
@@ -1085,8 +1085,8 @@ impl Stmt for FeatureStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::FeatureStmt(FeatureStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::FeatureStmt(FeatureStmt {
             arg,
             if_feature: substmts.0,
             status: substmts.1,
@@ -1128,8 +1128,8 @@ impl Stmt for IfFeatureStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::IfFeatureStmt(IfFeatureStmt { arg })
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::IfFeatureStmt(IfFeatureStmt { arg })
     }
 }
 
@@ -1190,8 +1190,8 @@ impl Stmt for TypedefStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::TypedefStmt(TypedefStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::TypedefStmt(TypedefStmt {
             arg,
             type_: substmts.0,
             units: substmts.1,
@@ -1245,16 +1245,16 @@ impl Stmt for TypeStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::TypeStmt(TypeStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::TypeStmt(TypeStmt {
             arg,
             type_body: None,
         })
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::TypeStmt(TypeStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::TypeStmt(TypeStmt {
             arg,
             type_body: substmts,
         })
@@ -1316,8 +1316,8 @@ impl Stmt for RangeStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::RangeStmt(RangeStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::RangeStmt(RangeStmt {
             arg,
             error_message: None,
             error_app_tag: None,
@@ -1327,8 +1327,8 @@ impl Stmt for RangeStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::RangeStmt(RangeStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::RangeStmt(RangeStmt {
             arg,
             error_message: substmts.0,
             error_app_tag: substmts.1,
@@ -1370,8 +1370,8 @@ impl Stmt for FractionDigitsStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::FractionDigitsStmt(FractionDigitsStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::FractionDigitsStmt(FractionDigitsStmt {
             arg,
         })
     }
@@ -1425,8 +1425,8 @@ impl Stmt for LengthStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::LengthStmt(LengthStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::LengthStmt(LengthStmt {
             arg,
             error_message: None,
             error_app_tag: None,
@@ -1436,8 +1436,8 @@ impl Stmt for LengthStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::LengthStmt(LengthStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::LengthStmt(LengthStmt {
             arg,
             error_message: substmts.0,
             error_app_tag: substmts.1,
@@ -1510,8 +1510,8 @@ impl Stmt for PatternStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::PatternStmt(PatternStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::PatternStmt(PatternStmt {
             arg,
             modifier: None,
             error_message: None,
@@ -1522,8 +1522,8 @@ impl Stmt for PatternStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::PatternStmt(PatternStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::PatternStmt(PatternStmt {
             arg,
             modifier: substmts.0,
             error_message: substmts.1,
@@ -1567,8 +1567,8 @@ impl Stmt for ModifierStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::ModifierStmt(ModifierStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::ModifierStmt(ModifierStmt {
             arg,
         })
     }
@@ -1596,8 +1596,8 @@ impl Stmt for DefaultStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::DefaultStmt(DefaultStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::DefaultStmt(DefaultStmt {
             arg,
         })
     }
@@ -1655,8 +1655,8 @@ impl Stmt for EnumStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::EnumStmt(EnumStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::EnumStmt(EnumStmt {
             arg,
             if_feature: Vec::new(),
             value: None,
@@ -1667,8 +1667,8 @@ impl Stmt for EnumStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::EnumStmt(EnumStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::EnumStmt(EnumStmt {
             arg,
             if_feature: substmts.0,
             value: substmts.1,
@@ -1712,8 +1712,8 @@ impl Stmt for PathStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::PathStmt(PathStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::PathStmt(PathStmt {
             arg,
         })
     }
@@ -1741,8 +1741,8 @@ impl Stmt for RequireInstanceStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::RequireInstanceStmt(RequireInstanceStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::RequireInstanceStmt(RequireInstanceStmt {
             arg,
         })
     }
@@ -1800,8 +1800,8 @@ impl Stmt for BitStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::BitStmt(BitStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::BitStmt(BitStmt {
             arg,
             if_feature: Vec::new(),
             position: None,
@@ -1812,8 +1812,8 @@ impl Stmt for BitStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::BitStmt(BitStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::BitStmt(BitStmt {
             arg,
             if_feature: substmts.0,
             position: substmts.1,
@@ -1857,8 +1857,8 @@ impl Stmt for PositionStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::PositionStmt(PositionStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::PositionStmt(PositionStmt {
             arg,
         })
     }
@@ -1886,8 +1886,8 @@ impl Stmt for StatusStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::StatusStmt(StatusStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::StatusStmt(StatusStmt {
             arg,
         })
     }
@@ -1916,8 +1916,8 @@ impl Stmt for ConfigStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::ConfigStmt(ConfigStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::ConfigStmt(ConfigStmt {
             arg,
         })
     }
@@ -1945,8 +1945,8 @@ impl Stmt for MandatoryStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::MandatoryStmt(MandatoryStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::MandatoryStmt(MandatoryStmt {
             arg,
         })
     }
@@ -1974,8 +1974,8 @@ impl Stmt for PresenceStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::PresenceStmt(PresenceStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::PresenceStmt(PresenceStmt {
             arg,
         })
     }
@@ -2003,8 +2003,8 @@ impl Stmt for OrderedByStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::OrderedByStmt(OrderedByStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::OrderedByStmt(OrderedByStmt {
             arg,
         })
     }
@@ -2058,8 +2058,8 @@ impl Stmt for MustStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::MustStmt(MustStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::MustStmt(MustStmt {
             arg,
             error_message: None,
             error_app_tag: None,
@@ -2069,8 +2069,8 @@ impl Stmt for MustStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::MustStmt(MustStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::MustStmt(MustStmt {
             arg,
             error_message: substmts.0,
             error_app_tag: substmts.1,
@@ -2112,8 +2112,8 @@ impl Stmt for ErrorMessageStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::ErrorMessageStmt(ErrorMessageStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::ErrorMessageStmt(ErrorMessageStmt {
             arg,
         })
     }
@@ -2141,8 +2141,8 @@ impl Stmt for ErrorAppTagStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::ErrorAppTagStmt(ErrorAppTagStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::ErrorAppTagStmt(ErrorAppTagStmt {
             arg,
         })
     }
@@ -2170,8 +2170,8 @@ impl Stmt for MinElementsStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::MinElementsStmt(MinElementsStmt { arg })
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::MinElementsStmt(MinElementsStmt { arg })
     }
 }
 
@@ -2197,8 +2197,8 @@ impl Stmt for MaxElementsStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::MaxElementsStmt(MaxElementsStmt { arg })
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::MaxElementsStmt(MaxElementsStmt { arg })
     }
 }
 
@@ -2224,8 +2224,8 @@ impl Stmt for ValueStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::ValueStmt(ValueStmt { arg })
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::ValueStmt(ValueStmt { arg })
     }
 }
 
@@ -2290,8 +2290,8 @@ impl Stmt for GroupingStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::GroupingStmt(GroupingStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::GroupingStmt(GroupingStmt {
             arg,
             status: None,
             description: None,
@@ -2304,8 +2304,8 @@ impl Stmt for GroupingStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::GroupingStmt(GroupingStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::GroupingStmt(GroupingStmt {
             arg,
             status: substmts.0,
             description: substmts.1,
@@ -2424,8 +2424,8 @@ impl Stmt for ContainerStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::ContainerStmt(ContainerStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::ContainerStmt(ContainerStmt {
             arg,
             when: None,
             if_feature: Vec::new(),
@@ -2443,8 +2443,8 @@ impl Stmt for ContainerStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::ContainerStmt(ContainerStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::ContainerStmt(ContainerStmt {
             arg,
             when: substmts.0,
             if_feature: substmts.1,
@@ -2569,8 +2569,8 @@ impl Stmt for LeafStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::LeafStmt(LeafStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::LeafStmt(LeafStmt {
             arg,
             when: substmts.0,
             if_feature: substmts.1,
@@ -2691,8 +2691,8 @@ impl Stmt for LeafListStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::LeafListStmt(LeafListStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::LeafListStmt(LeafListStmt {
             arg,
             when: substmts.0,
             if_feature: substmts.1,
@@ -2830,8 +2830,8 @@ impl Stmt for ListStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::ListStmt(ListStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::ListStmt(ListStmt {
             arg,
             when: substmts.0,
             if_feature: substmts.1,
@@ -2908,8 +2908,8 @@ impl Stmt for KeyStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::KeyStmt(KeyStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::KeyStmt(KeyStmt {
             arg,
         })
     }
@@ -2937,8 +2937,8 @@ impl Stmt for UniqueStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::UniqueStmt(UniqueStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::UniqueStmt(UniqueStmt {
             arg,
         })
     }
@@ -3014,8 +3014,8 @@ impl Stmt for ChoiceStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::ChoiceStmt(ChoiceStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::ChoiceStmt(ChoiceStmt {
             arg,
             when: None,
             if_feature: Vec::new(),
@@ -3030,8 +3030,8 @@ impl Stmt for ChoiceStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::ChoiceStmt(ChoiceStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::ChoiceStmt(ChoiceStmt {
             arg,
             when: substmts.0,
             if_feature: substmts.1,
@@ -3128,8 +3128,8 @@ impl Stmt for CaseStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::CaseStmt(CaseStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::CaseStmt(CaseStmt {
             arg,
             when: None,
             if_feature: Vec::new(),
@@ -3141,8 +3141,8 @@ impl Stmt for CaseStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::CaseStmt(CaseStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::CaseStmt(CaseStmt {
             arg,
             when: substmts.0,
             if_feature: substmts.1,
@@ -3240,8 +3240,8 @@ impl Stmt for AnydataStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::AnydataStmt(AnydataStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::AnydataStmt(AnydataStmt {
             arg,
             when: None,
             if_feature: Vec::new(),
@@ -3255,8 +3255,8 @@ impl Stmt for AnydataStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::AnydataStmt(AnydataStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::AnydataStmt(AnydataStmt {
             arg,
             when: substmts.0,
             if_feature: substmts.1,
@@ -3349,8 +3349,8 @@ impl Stmt for AnyxmlStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::AnyxmlStmt(AnyxmlStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::AnyxmlStmt(AnyxmlStmt {
             arg,
             when: None,
             if_feature: Vec::new(),
@@ -3364,8 +3364,8 @@ impl Stmt for AnyxmlStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::AnyxmlStmt(AnyxmlStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::AnyxmlStmt(AnyxmlStmt {
             arg,
             when: substmts.0,
             if_feature: substmts.1,
@@ -3454,8 +3454,8 @@ impl Stmt for UsesStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::UsesStmt(UsesStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::UsesStmt(UsesStmt {
             arg,
             when: None,
             if_feature: Vec::new(),
@@ -3468,8 +3468,8 @@ impl Stmt for UsesStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::UsesStmt(UsesStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::UsesStmt(UsesStmt {
             arg,
             when: substmts.0,
             if_feature: substmts.1,
@@ -3569,8 +3569,8 @@ impl Stmt for RefineStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::RefineStmt(RefineStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::RefineStmt(RefineStmt {
             arg,
             if_feature: Vec::new(),
             must: Vec::new(),
@@ -3586,8 +3586,8 @@ impl Stmt for RefineStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::RefineStmt(RefineStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::RefineStmt(RefineStmt {
             arg,
             if_feature: substmts.0,
             must: substmts.1,
@@ -3676,8 +3676,8 @@ impl Stmt for AugmentStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::AugmentStmt(AugmentStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::AugmentStmt(AugmentStmt {
             arg,
             when: substmts.0,
             if_feature: substmts.1,
@@ -3754,8 +3754,8 @@ impl Stmt for WhenStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::WhenStmt(WhenStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::WhenStmt(WhenStmt {
             arg,
             description: None,
             reference: None,
@@ -3763,8 +3763,8 @@ impl Stmt for WhenStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::WhenStmt(WhenStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::WhenStmt(WhenStmt {
             arg,
             description: substmts.0,
             reference: substmts.1,
@@ -3841,8 +3841,8 @@ impl Stmt for RpcStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::RpcStmt(RpcStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::RpcStmt(RpcStmt {
             arg,
             if_feature: Vec::new(),
             status: None,
@@ -3855,8 +3855,8 @@ impl Stmt for RpcStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::RpcStmt(RpcStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::RpcStmt(RpcStmt {
             arg,
             if_feature: substmts.0,
             status: substmts.1,
@@ -3947,8 +3947,8 @@ impl Stmt for ActionStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::ActionStmt(ActionStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::ActionStmt(ActionStmt {
             arg,
             if_feature: Vec::new(),
             status: None,
@@ -3961,8 +3961,8 @@ impl Stmt for ActionStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::ActionStmt(ActionStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::ActionStmt(ActionStmt {
             arg,
             if_feature: substmts.0,
             status: substmts.1,
@@ -4033,8 +4033,8 @@ impl Stmt for InputStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(_arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::InputStmt(InputStmt {
+    fn new_with_substmts(_arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::InputStmt(InputStmt {
             must: substmts.0,
             typedef_or_grouping: substmts.1,
             data_def: substmts.2,
@@ -4104,8 +4104,8 @@ impl Stmt for OutputStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(_arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::OutputStmt(OutputStmt {
+    fn new_with_substmts(_arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::OutputStmt(OutputStmt {
             must: substmts.0,
             typedef_or_grouping: substmts.1,
             data_def: substmts.2,
@@ -4194,8 +4194,8 @@ impl Stmt for NotificationStmt {
     }
 
     /// Constructor with a single arg. Panic if it is not defined.
-    fn new_with_arg(arg: Self::Arg) -> StmtType where Self: Sized {
-        StmtType::NotificationStmt(NotificationStmt {
+    fn new_with_arg(arg: Self::Arg) -> YangStmt where Self: Sized {
+        YangStmt::NotificationStmt(NotificationStmt {
             arg,
             if_feature: Vec::new(),
             must: Vec::new(),
@@ -4208,8 +4208,8 @@ impl Stmt for NotificationStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::NotificationStmt(NotificationStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::NotificationStmt(NotificationStmt {
             arg,
             if_feature: substmts.0,
             must: substmts.1,
@@ -4290,8 +4290,8 @@ impl Stmt for DeviationStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> StmtType where Self: Sized {
-        StmtType::DeviationStmt(DeviationStmt {
+    fn new_with_substmts(arg: Self::Arg, substmts: Self::SubStmts) -> YangStmt where Self: Sized {
+        YangStmt::DeviationStmt(DeviationStmt {
             arg,
             description: substmts.0,
             reference: substmts.1,
@@ -4340,26 +4340,26 @@ impl Stmt for DeviateStmt {
     }
 
     /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError>  where Self::Arg: StmtArg, Self: Sized {
+    fn parse(parser: &mut Parser) -> Result<YangStmt, YangError>  where Self::Arg: StmtArg, Self: Sized {
         let arg = Self::Arg::parse_arg(parser)?;
 
         match &arg as &str {
             "add" => {
                 let stmt = DeviateAddStmt::parse(parser)?;
-                Ok(StmtType::DeviateStmt(DeviateStmt::Add(stmt)))
+                Ok(YangStmt::DeviateStmt(DeviateStmt::Add(stmt)))
             }
             "delete" => {
                 let stmt = DeviateDeleteStmt::parse(parser)?;
-                Ok(StmtType::DeviateStmt(DeviateStmt::Delete(stmt)))
+                Ok(YangStmt::DeviateStmt(DeviateStmt::Delete(stmt)))
             }
             "replace" => {
                 let stmt = DeviateReplaceStmt::parse(parser)?;
-                Ok(StmtType::DeviateStmt(DeviateStmt::Replace(stmt)))
+                Ok(YangStmt::DeviateStmt(DeviateStmt::Replace(stmt)))
             }
             "not-supported" => {
                 let token = parser.get_token()?;
                 match token {
-                    Token::StatementEnd => Ok(StmtType::DeviateStmt(DeviateStmt::NotSupported)),
+                    Token::StatementEnd => Ok(YangStmt::DeviateStmt(DeviateStmt::NotSupported)),
                     _ => Err(YangError::UnexpectedToken(token.to_string())),
                 }
             }
@@ -4614,7 +4614,7 @@ pub struct UnknownStmt {
 
 impl UnknownStmt {
     /// Parse a statement and return the object wrapped in enum.
-    pub fn parse_unknown(parser: &mut Parser) -> Result<StmtType, YangError>  where Self: Sized {
+    pub fn parse_unknown(parser: &mut Parser) -> Result<YangStmt, YangError>  where Self: Sized {
         Self::parse(parser)
     }
 }
@@ -4632,7 +4632,7 @@ impl Stmt for UnknownStmt {
     }
 
     /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<StmtType, YangError>  where Self::Arg: StmtArg, Self: Sized {
+    fn parse(parser: &mut Parser) -> Result<YangStmt, YangError>  where Self::Arg: StmtArg, Self: Sized {
 /*
         let token = parser.get_token()?;
         let keyword = match token {
@@ -4655,7 +4655,7 @@ impl Stmt for UnknownStmt {
             _ => return Err(YangError::UnexpectedToken(token.to_string()))
         }
 
-        Ok(StmtType::UnknownStmt(UnknownStmt {
+        Ok(YangStmt::UnknownStmt(UnknownStmt {
             keyword,
             arg,
         }))
@@ -4678,7 +4678,7 @@ mod tests {
         match ImportStmt::parse(&mut parser) {
             Ok(stmt) => {
                 assert_eq!(stmt,
-                           StmtType::ImportStmt(ImportStmt {
+                           YangStmt::ImportStmt(ImportStmt {
                                arg: Identifier::from_str("openconfig-inet-types").unwrap(),
                                prefix: PrefixStmt { arg: Identifier::from_str("oc-inet").unwrap() },
                                revision_date: Some(RevisionDateStmt { arg: DateArg::from_str("2017-07-06").unwrap() } ),
@@ -4700,7 +4700,7 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
         match IncludeStmt::parse(&mut parser) {
             Ok(stmt) => panic!("{:?}", stmt),
-            Err(err) => assert_eq!(err.to_string(), "Unexpected token at line 1"),
+            Err(err) => assert_eq!(err.to_string(), "Unexpected token Identifier '\"prefix\"'"),
         }
 
         let s = r#"openconfig-inet-types {
@@ -4713,7 +4713,7 @@ mod tests {
                 println!("{:?}", stmt);
 
                 assert_eq!(stmt,
-                           StmtType::IncludeStmt(IncludeStmt {
+                           YangStmt::IncludeStmt(IncludeStmt {
                                arg: Identifier::from_str("openconfig-inet-types").unwrap(),
                                revision_date: Some(RevisionDateStmt { arg: DateArg::from_str("2017-07-06").unwrap() } ),
                                description: None,
@@ -4739,7 +4739,7 @@ mod tests {
         match ExtensionStmt::parse(&mut parser) {
             Ok(stmt) => {
                 assert_eq!(stmt,
-                           StmtType::ExtensionStmt(ExtensionStmt {
+                           YangStmt::ExtensionStmt(ExtensionStmt {
                                arg: Identifier::from_str("openconfig-version").unwrap(),
                                argument: Some(ArgumentStmt { arg: Identifier::from_str("semver").unwrap(),
                                                              yin_element: Some(YinElementStmt { arg: YinElementArg::from_str("false").unwrap() })}),
@@ -4765,7 +4765,7 @@ mod tests {
         match IdentityStmt::parse(&mut parser) {
             Ok(stmt) => {
                 assert_eq!(stmt,
-                           StmtType::IdentityStmt(IdentityStmt {
+                           YangStmt::IdentityStmt(IdentityStmt {
                                arg: Identifier::from_str("SFP").unwrap(),
                                if_feature: vec![],
                                base: vec![BaseStmt { arg: IdentifierRef::from_str("TRANSCEIVER_FORM_FACTOR_TYPE").unwrap() }],
@@ -4793,7 +4793,7 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
         match DeviationStmt::parse(&mut parser) {
             Ok(stmt) => {
-                assert_eq!(stmt, StmtType::DeviationStmt(DeviationStmt {
+                assert_eq!(stmt, YangStmt::DeviationStmt(DeviationStmt {
                     arg: AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-if:hold-time/oc-if:config/oc-if:up").unwrap(),
                     description: None,
                     reference: None,
@@ -4823,7 +4823,7 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
         match DeviationStmt::parse(&mut parser) {
             Ok(stmt) => {
-                assert_eq!(stmt, StmtType::DeviationStmt(DeviationStmt {
+                assert_eq!(stmt, YangStmt::DeviationStmt(DeviationStmt {
                     arg: AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-if:hold-time/oc-if:config/oc-if:up").unwrap(),
                     description: Some(DescriptionStmt { arg: String::from("Hold-time 0 is not configurable on XE, use no dampening.") }),
                     reference: None,
@@ -4848,7 +4848,7 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
         match DeviationStmt::parse(&mut parser) {
             Ok(stmt) => {
-                assert_eq!(stmt, StmtType::DeviationStmt(DeviationStmt {
+                assert_eq!(stmt, YangStmt::DeviationStmt(DeviationStmt {
                     arg: AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-if:state/oc-if:last-change").unwrap(),
                     description: Some(DescriptionStmt { arg: String::from("Change the type of the last-change flag to date-and-time") }),
                     reference: None,
@@ -4876,7 +4876,7 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
         match DeviationStmt::parse(&mut parser) {
             Ok(stmt) => {
-                assert_eq!(stmt, StmtType::DeviationStmt(DeviationStmt {
+                assert_eq!(stmt, YangStmt::DeviationStmt(DeviationStmt {
                     arg: AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp").unwrap(),
                     description: Some(DescriptionStmt { arg: String::from("IPv4 VRRP not supported in 16.6.1.") }),
                     reference: None,

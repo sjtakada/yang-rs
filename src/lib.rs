@@ -23,7 +23,7 @@ macro_rules! collect_a_stmt {
         match $stmts.get_mut(<$st>::keyword()) {
             Some(v) => match v.pop() {
                 Some(en) => match en {
-                    StmtType::$st(stmt) => Ok(stmt),
+                    YangStmt::$st(stmt) => Ok(stmt),
                     _ => Err(YangError::MissingStatement(<$st>::keyword())),
                 }
                 None => Err(YangError::MissingStatement(<$st>::keyword())),
@@ -41,7 +41,7 @@ macro_rules! collect_vec_stmt {
                 let mut error = false;
                 let mut w = Vec::new();
                 for en in v.drain(..) {
-                    if let StmtType::$st(stmt) = en {
+                    if let YangStmt::$st(stmt) = en {
                         w.push(stmt)
                     } else {
                         error = true;
@@ -65,7 +65,7 @@ macro_rules! collect_opt_stmt {
         match $stmts.get_mut(<$st>::keyword()) {
             Some(v) => match v.pop() {
                 Some(en) => match en {
-                    StmtType::$st(stmt) => Ok(Some(stmt)),
+                    YangStmt::$st(stmt) => Ok(Some(stmt)),
                     _ => Err(YangError::MissingStatement(<$st>::keyword())),
                 }
                 None => Ok(None),
@@ -79,7 +79,7 @@ macro_rules! collect_opt_stmt {
 macro_rules! parse_a_stmt {
     ($st:ident, $parser:ident) => {
         match <$st>::parse($parser)? {
-            StmtType::$st(stmt) => Ok(stmt),
+            YangStmt::$st(stmt) => Ok(stmt),
             _ => Err(YangError::UnexpectedStatement($parser.line())),
         }
     };

@@ -21,7 +21,7 @@ quick_error! {
             display("Unexpected end of file")
         }
         UnexpectedToken(s: String) {
-            display("Unexpected token at line {}", s)
+            display("Unexpected token {}", s)
         }
         UnexpectedStatement(line: usize) {
             display("Unexpected statement at line {}", line)

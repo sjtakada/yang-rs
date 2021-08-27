@@ -477,7 +477,7 @@ impl Parser {
     }
 
     /// Entry point of YANG parser. It will return a module or submodule statement.
-    pub fn parse_yang(&mut self) -> Result<StmtType, YangError> {
+    pub fn parse_yang(&mut self) -> Result<YangStmt, YangError> {
 
 //        println!("*** size_of {}", size_of::<ModuleStmt>());
 
@@ -485,10 +485,10 @@ impl Parser {
 
         if stmts.contains_key("module") {
             let module = collect_a_stmt!(stmts, ModuleStmt)?;
-            Ok(StmtType::ModuleStmt(module))
+            Ok(YangStmt::ModuleStmt(module))
         } else if stmts.contains_key("submodule") {
             let submodule = collect_a_stmt!(stmts, SubmoduleStmt)?;
-            Ok(StmtType::SubmoduleStmt(submodule))
+            Ok(YangStmt::SubmoduleStmt(submodule))
         } else {
             Err(YangError::UnexpectedEof)
         }
