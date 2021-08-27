@@ -8,6 +8,7 @@ use std::collections::HashMap;
 use super::core::*;
 use super::parser::*;
 use super::error::*;
+use super::stmt::UnknownStmt;
 
 pub type StmtKeywordFn = fn() -> Keyword;
 pub type SelectionKeywordFn = fn() -> Vec<Keyword>;
@@ -30,16 +31,6 @@ pub enum SubStmtDef {
     OneOrMore(SubStmtWith),
 }
 
-pub trait Compound {
-    /// Return a list of statements keyword.
-    fn keywords() -> Vec<Keyword>;
-
-    /// Return if the compound is anonymous.
-    fn anonymous() -> bool {
-        false
-    }
-}
-
 #[derive(Debug, Clone)]
 pub struct RepeatCount {
     pub count: usize,
@@ -54,7 +45,7 @@ pub struct SubStmtUtil;
 
 impl SubStmtUtil {
     // Parse a single statement.
-    fn call_stmt_parser(parser: &mut Parser, keyword: &str) -> Result<StmtType, YangError> {
+    fn call_stmt_parser(parser: &mut Parser, keyword: &str) -> Result<YangStmt, YangError> {
         let f = STMT_PARSER.get(keyword).unwrap();
         f(parser)
     }
@@ -109,10 +100,14 @@ println!("*** [DEBUG] parse_substmts_default {:?}", token);
                             };
                             v.push(stmt);
                             rep.count += 1;
-                            // TODO: maybe we should validate number.
+                            // maybe we should validate number.
                         } else {
                             break;
                         }
+                    } else if !STMT_PARSER.contains_key(keyword as &str) {
+                        // This is "unknown" statement.
+                        let _stmt = UnknownStmt::parse_unknown(parser)?;
+                        // TBD: just parse and ignore it for now.
                     } else {
                         parser.save_token(token);
                         break;
@@ -124,6 +119,23 @@ println!("*** [DEBUG] parse_substmts_default {:?}", token);
                 }
             }
         }
+
+        // Validation.
+        for k in stmts.keys() {
+            match k2i.get(k as &str) {
+                Some(i) => {
+                    let rep = i2rep.get(i).unwrap();
+                    if rep.count < rep.min {
+                        return Err(YangError::TooFewStatement(parser.line(), k.clone()));
+                    }
+                    if rep.max < rep.count {
+                        return Err(YangError::TooManyStatements(parser.line(), k.clone()));
+                    }
+                }
+                None => return Err(YangError::UnexpectedStatement(parser.line())),
+            }
+        }
+
 println!("*** [DEBUG] end");
 
         Ok(stmts)

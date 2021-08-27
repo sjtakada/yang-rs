@@ -14,13 +14,14 @@ use std::path::Path;
 
 use super::core::*;
 use super::error::*;
+use super::config::Config;
 use super::stmt::*;
 use super::substmt::*;
 
 use crate::collect_a_stmt;
 
 /// Open and parse a YANG file.
-pub fn parse_file(filename: &str) -> std::io::Result<()> {
+pub fn parse_file(filename: &str, config: Config) -> std::io::Result<()> {
     let mut f = File::open(filename)?;
     let mut s = String::new();
     let p = Path::new(filename)
@@ -32,12 +33,11 @@ pub fn parse_file(filename: &str) -> std::io::Result<()> {
     let _n2 = str::replace(n1, ".", "_");
 
     f.read_to_string(&mut s)?;
-    let mut parser = Parser::new(s);
-//    parser.init_stmt_parsers();
+    let mut parser = Parser::new_with_config(config, s);
 
     match parser.parse_yang() {
-        Ok(_yang) => {
-//            println!("{:?}", yang)
+        Ok(yang) => {
+            println!("{:?}", yang)
         }
         Err(err) => {
             println!(
@@ -148,9 +148,27 @@ pub enum Token {
     EndOfInput,
 }
 
-/// Parser.
+impl ToString for Token {
+    fn to_string(&self) -> String {
+        match &self {
+            Token::Whitespace(_) => String::from("Whitespace"),
+            Token::Comment(_) => String::from("Comment"),
+            Token::PlusSign => String::from("PlusSign"),
+            Token::BlockBegin => String::from("BlockBegin"),
+            Token::BlockEnd => String::from("BlockEnd"),
+            Token::QuotedString(_) => String::from("QuotedString"),
+            Token::Identifier(s) => format!("Identifier '{:?}'", s),
+            Token::StatementEnd => String::from("StatementEnd"),
+            Token::EndOfInput => String::from("EndOfInput"),
+        }
+    }
+}
 
+/// Parser.
 pub struct Parser {
+    /// Config.
+    config: Config,
+
     /// Input string.
     input: String,
 
@@ -171,6 +189,19 @@ impl Parser {
     /// Constructor.
     pub fn new(s: String) -> Parser {
         Parser {
+            config: Config::new(),
+            input: s,
+            pos: Cell::new(0),
+            line: Cell::new(0),
+            column: Cell::new(0),
+            saved: Cell::new(None),
+        }
+    }
+
+    /// Constructor with config.
+    pub fn new_with_config(config: Config, s: String) -> Parser {
+        Parser {
+            config,
             input: s,
             pos: Cell::new(0),
             line: Cell::new(0),
@@ -241,6 +272,7 @@ impl Parser {
     pub fn get_token(&mut self) -> Result<Token, YangError> {
         let mut st = String::new();
         let mut concat_str = false;
+        let mut string_parsed = false;
 
         if let Some(token) = self.load_token() {
             return Ok(token)
@@ -265,6 +297,7 @@ impl Parser {
                     if st.len() == 0 || concat_str {
                         st.push_str(&s);
                         concat_str = false;
+                        string_parsed = true;
                     } else {
                         return Err(YangError::InvalidString);
                     }
@@ -281,7 +314,7 @@ impl Parser {
                         return Err(YangError::InvalidString);
                     }
 
-                    if st.len() > 0 {
+                    if string_parsed {
                         self.save_token(token);
                         return Ok(Token::QuotedString(st));
                     }
@@ -436,15 +469,6 @@ impl Parser {
         Ok((token, pos))
     }
 
-    /// Expect a given keyword.
-    pub fn expect_keyword(&mut self, keyword: &str) -> Result<bool, YangError> {
-        let token = self.peek_token()?;
-        match token {
-            Token::Identifier(k) => Ok(k == keyword),
-            _ => Err(YangError::UnexpectedToken(self.line())),
-        }
-    }
-
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
         vec![SubStmtDef::Optional(SubStmtWith::Stmt(ModuleStmt::keyword)),
@@ -453,7 +477,7 @@ impl Parser {
     }
 
     /// Entry point of YANG parser. It will return a module or submodule statement.
-    pub fn parse_yang(&mut self) -> Result<StmtType, YangError> {
+    pub fn parse_yang(&mut self) -> Result<YangStmt, YangError> {
 
 //        println!("*** size_of {}", size_of::<ModuleStmt>());
 
@@ -461,10 +485,10 @@ impl Parser {
 
         if stmts.contains_key("module") {
             let module = collect_a_stmt!(stmts, ModuleStmt)?;
-            Ok(StmtType::ModuleStmt(module))
+            Ok(YangStmt::ModuleStmt(module))
         } else if stmts.contains_key("submodule") {
             let submodule = collect_a_stmt!(stmts, SubmoduleStmt)?;
-            Ok(StmtType::SubmoduleStmt(submodule))
+            Ok(YangStmt::SubmoduleStmt(submodule))
         } else {
             Err(YangError::UnexpectedEof)
         }
@@ -476,7 +500,7 @@ mod tests {
     use super::*;
 
     #[test]
-    pub fn test_get_token_1() {
+    pub fn test_get_token() {
         let s = "module { }";
         let mut parser = Parser::new(s.to_string());
 
@@ -491,7 +515,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_get_token_2() {
+    pub fn test_get_token_comment_1() {
         let s = "module; /* comment */ statement";
         let mut parser = Parser::new(s.to_string());
 
@@ -506,7 +530,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_get_token_3() {
+    pub fn test_get_token_comment_2() {
         let s = "module // comment
 ";
         let mut parser = Parser::new(s.to_string());
@@ -519,7 +543,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_get_token_4() {
+    pub fn test_get_token_comment_3() {
         let s = "/* comment // */ module";
         let mut parser = Parser::new(s.to_string());
         
@@ -531,7 +555,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_get_token_5() {
+    pub fn test_get_token_comment_4() {
         let s = "// /* comment */ module";
         let mut parser = Parser::new(s.to_string());
 
@@ -540,7 +564,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_get_token_6() {
+    pub fn test_get_token_string_1() {
         let s = r#" "string" "#;
         let mut parser = Parser::new(s.to_string());
         
@@ -552,7 +576,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_get_token_7() {
+    pub fn test_get_token_string_2() {
         let s = r#" '"string"' "#;
         let mut parser = Parser::new(s.to_string());
         
@@ -564,7 +588,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_get_token_8() {
+    pub fn test_get_token_string_3() {
         let s = r#" "Hello" + "World" { }"#;
         let mut parser = Parser::new(s.to_string());
 
@@ -582,7 +606,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_get_token_9() {
+    pub fn test_get_token_string_4() {
         let s = r#" 'string1
  string2 ' "#;
 
@@ -596,7 +620,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_get_token_10() {
+    pub fn test_get_token_string_5() {
         let s = r#"    "string1
      string2" "#;
 
@@ -610,7 +634,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_get_token_11() {
+    pub fn test_get_token_string_6() {
         let s = r#"/**/"string1
 
       string2   	 
@@ -624,5 +648,26 @@ mod tests {
 
         let token = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
+    }
+
+    #[test]
+    pub fn test_get_token_empty() {
+        let s = r#"identifier " ";"#;
+        let mut parser = Parser::new(s.to_string());
+
+        let token = parser.get_token().unwrap();
+        assert_eq!(token, Token::Identifier(String::from("identifier")));
+
+        let token = parser.get_token().unwrap();
+        assert_eq!(token, Token::QuotedString(String::from(" ")));
+
+        let s = r#"identifier "";"#;
+        let mut parser = Parser::new(s.to_string());
+
+        let token = parser.get_token().unwrap();
+        assert_eq!(token, Token::Identifier(String::from("identifier")));
+
+        let token = parser.get_token().unwrap();
+        assert_eq!(token, Token::QuotedString(String::from("")));
     }
 }

@@ -74,7 +74,6 @@ lazy_static! {
         m.insert("anyxml", AnyxmlStmt::parse as StmtParserFn);
         m.insert("uses", UsesStmt::parse as StmtParserFn);
         m.insert("refine", RefineStmt::parse as StmtParserFn);
-        m.insert("uses-augment", UsesAugmentStmt::parse as StmtParserFn);
         m.insert("augment", AugmentStmt::parse as StmtParserFn);
         m.insert("when", WhenStmt::parse as StmtParserFn);
         m.insert("rpc", RpcStmt::parse as StmtParserFn);
@@ -92,31 +91,14 @@ lazy_static! {
 pub type Keyword = &'static str;
 
 // Statement collection.
-pub type StmtCollection = HashMap<String, Vec<StmtType>>;
+pub type StmtCollection = HashMap<String, Vec<YangStmt>>;
 
 // Statement Parser callback type.
-type StmtParserFn = fn(&mut Parser) -> Result<StmtType, YangError>;
-
-/*  TBD maybe not needed.
-// Expect one of statements from given set.
-pub fn expect_a_stmt(parser: &mut Parser, set: HashSet<Keyword>) -> Result<StmtType, YangError> {
-    let token = parser.get_token()?;
-println!("*** parse_stmts {:?}", token);
-    match token {
-        Token::Identifier(ref keyword) => {
-            if set.contains(keyword as &str) {
-                Ok(call_stmt_parser(parser, &keyword)?)
-            } else {
-                Err(YangError::UnexpectedStatement(parser.line()))
-            }
-        }
-        _ => Err(YangError::UnexpectedStatement(parser.line())),
-    }
-}
-*/
+type StmtParserFn = fn(&mut Parser) -> Result<YangStmt, YangError>;
 
 // Yang Statement
-pub enum StmtType {
+#[derive(Clone, PartialEq)]
+pub enum YangStmt {
     ModuleStmt(ModuleStmt),
     SubmoduleStmt(SubmoduleStmt),
     YangVersionStmt(YangVersionStmt),
@@ -176,7 +158,6 @@ pub enum StmtType {
     AnyxmlStmt(AnyxmlStmt),
     UsesStmt(UsesStmt),
     RefineStmt(RefineStmt),
-    UsesAugmentStmt(UsesAugmentStmt),
     AugmentStmt(AugmentStmt),
     WhenStmt(WhenStmt),
     RpcStmt(RpcStmt),
@@ -186,80 +167,81 @@ pub enum StmtType {
     NotificationStmt(NotificationStmt),
     DeviationStmt(DeviationStmt),
     DeviateStmt(DeviateStmt),
+    UnknownStmt(UnknownStmt),
 }
 
-impl fmt::Debug for StmtType {
+impl fmt::Debug for YangStmt {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 	match &*self {
-            StmtType::ModuleStmt(stmt) => write!(f, "module-stmt {:?}", stmt),
-            StmtType::SubmoduleStmt(stmt) => write!(f, "submodule-stmt {:?}", stmt),
-            StmtType::YangVersionStmt(stmt) => write!(f, "yang-version-stmt {:?}", stmt),
-            StmtType::ImportStmt(stmt) => write!(f, "import-stmt {:?}", stmt),
-            StmtType::IncludeStmt(stmt) => write!(f, "include-stmt {:?}", stmt),
-            StmtType::NamespaceStmt(stmt) => write!(f, "namespace-stmt {:?}", stmt),
-            StmtType::PrefixStmt(stmt) => write!(f, "prefix-stmt {:?}", stmt),
-            StmtType::BelongsToStmt(stmt) => write!(f, "belongs-to-stmt {:?}", stmt),
-            StmtType::OrganizationStmt(stmt) => write!(f, "organization-stmt {:?}", stmt),
-            StmtType::ContactStmt(stmt) => write!(f, "contact-stmt {:?}", stmt),
-            StmtType::DescriptionStmt(stmt) => write!(f, "description-stmt {:?}", stmt),
-            StmtType::ReferenceStmt(stmt) => write!(f, "reference-stmt {:?}", stmt),
-            StmtType::UnitsStmt(stmt) => write!(f, "units-stmt {:?}", stmt),
-            StmtType::RevisionStmt(stmt) => write!(f, "revision-stmt {:?}", stmt),
-            StmtType::RevisionDateStmt(stmt) => write!(f, "revision-date-stmt {:?}", stmt),
-            StmtType::ExtensionStmt(stmt) => write!(f, "extension-stmt {:?}", stmt),
-            StmtType::ArgumentStmt(stmt) => write!(f, "argument-stmt {:?}", stmt),
-            StmtType::YinElementStmt(stmt) => write!(f, "yin-element-stmt {:?}", stmt),
-            StmtType::IdentityStmt(stmt) => write!(f, "identity-stmt {:?}", stmt),
-            StmtType::BaseStmt(stmt) => write!(f, "base-stmt {:?}", stmt),
-            StmtType::FeatureStmt(stmt) => write!(f, "feature-stmt {:?}", stmt),
-            StmtType::IfFeatureStmt(stmt) => write!(f, "if-feature-stmt {:?}", stmt),
-            StmtType::TypedefStmt(stmt) => write!(f, "typedef-stmt {:?}", stmt),
-            StmtType::TypeStmt(stmt) => write!(f, "type-stmt {:?}", stmt),
-            StmtType::RangeStmt(stmt) => write!(f, "range-stmt {:?}", stmt),
-            StmtType::FractionDigitsStmt(stmt) => write!(f, "fraction-digits-stmt {:?}", stmt),
-            StmtType::LengthStmt(stmt) => write!(f, "length-stmt {:?}", stmt),
-            StmtType::PatternStmt(stmt) => write!(f, "pattern-stmt {:?}", stmt),
-            StmtType::ModifierStmt(stmt) => write!(f, "modifier-stmt {:?}", stmt),
-            StmtType::DefaultStmt(stmt) => write!(f, "default-stmt {:?}", stmt),
-            StmtType::EnumStmt(stmt) => write!(f, "enum-stmt {:?}", stmt),
-            StmtType::PathStmt(stmt) => write!(f, "path-stmt {:?}", stmt),
-            StmtType::RequireInstanceStmt(stmt) => write!(f, "require-instance-stmt {:?}", stmt),
-            StmtType::BitStmt(stmt) => write!(f, "bit-stmt {:?}", stmt),
-            StmtType::PositionStmt(stmt) => write!(f, "position-stmt {:?}", stmt),
-            StmtType::StatusStmt(stmt) => write!(f, "status-stmt {:?}", stmt),
-            StmtType::ConfigStmt(stmt) => write!(f, "config-stmt {:?}", stmt),
-            StmtType::MandatoryStmt(stmt) => write!(f, "mandatory-stmt {:?}", stmt),
-            StmtType::PresenceStmt(stmt) => write!(f, "presence-stmt {:?}", stmt),
-            StmtType::OrderedByStmt(stmt) => write!(f, "ordered-by-stmt {:?}", stmt),
-            StmtType::MustStmt(stmt) => write!(f, "must-stmt {:?}", stmt),
-            StmtType::ErrorMessageStmt(stmt) => write!(f, "error-message-stmt {:?}", stmt),
-            StmtType::ErrorAppTagStmt(stmt) => write!(f, "error-app-tag-stmt {:?}", stmt),
-            StmtType::MinElementsStmt(stmt) => write!(f, "min-elements-stmt {:?}", stmt),
-            StmtType::MaxElementsStmt(stmt) => write!(f, "max-elements-stmt {:?}", stmt),
-            StmtType::ValueStmt(stmt) => write!(f, "value-stmt {:?}", stmt),
-            StmtType::GroupingStmt(stmt) => write!(f, "grouping-stmt {:?}", stmt),
-            StmtType::ContainerStmt(stmt) => write!(f, "container-stmt {:?}", stmt),
-            StmtType::LeafStmt(stmt) => write!(f, "leaf-stmt {:?}", stmt),
-            StmtType::LeafListStmt(stmt) => write!(f, "leaf-list-stmt {:?}", stmt),
-            StmtType::ListStmt(stmt) => write!(f, "list-stmt {:?}", stmt),
-            StmtType::KeyStmt(stmt) => write!(f, "key-stmt {:?}", stmt),
-            StmtType::UniqueStmt(stmt) => write!(f, "unique-stmt {:?}", stmt),
-            StmtType::ChoiceStmt(stmt) => write!(f, "choice-stmt {:?}", stmt),
-            StmtType::CaseStmt(stmt) => write!(f, "case-stmt {:?}", stmt),
-            StmtType::AnydataStmt(stmt) => write!(f, "anydata-stmt {:?}", stmt),
-            StmtType::AnyxmlStmt(stmt) => write!(f, "anyxml-stmt {:?}", stmt),
-            StmtType::UsesStmt(stmt) => write!(f, "uses-stmt {:?}", stmt),
-            StmtType::RefineStmt(stmt) => write!(f, "refine-stmt {:?}", stmt),
-            StmtType::UsesAugmentStmt(stmt) => write!(f, "uses-augment-stmt {:?}", stmt),
-            StmtType::AugmentStmt(stmt) => write!(f, "augment-stmt {:?}", stmt),
-            StmtType::WhenStmt(stmt) => write!(f, "when-stmt {:?}", stmt),
-            StmtType::RpcStmt(stmt) => write!(f, "rpc-stmt {:?}", stmt),
-            StmtType::ActionStmt(stmt) => write!(f, "action-stmt {:?}", stmt),
-            StmtType::InputStmt(stmt) => write!(f, "input-stmt {:?}", stmt),
-            StmtType::OutputStmt(stmt) => write!(f, "output-stmt {:?}", stmt),
-            StmtType::NotificationStmt(stmt) => write!(f, "notification-stmt {:?}", stmt),
-            StmtType::DeviationStmt(stmt) => write!(f, "deviation-stmt {:?}", stmt),
-            StmtType::DeviateStmt(stmt) => write!(f, "deviate-stmt {:?}", stmt),
+            YangStmt::ModuleStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::SubmoduleStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::YangVersionStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::ImportStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::IncludeStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::NamespaceStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::PrefixStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::BelongsToStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::OrganizationStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::ContactStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::DescriptionStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::ReferenceStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::UnitsStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::RevisionStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::RevisionDateStmt(stmt) => write!(f,"{:?}", stmt),
+            YangStmt::ExtensionStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::ArgumentStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::YinElementStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::IdentityStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::BaseStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::FeatureStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::IfFeatureStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::TypedefStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::TypeStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::RangeStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::FractionDigitsStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::LengthStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::PatternStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::ModifierStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::DefaultStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::EnumStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::PathStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::RequireInstanceStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::BitStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::PositionStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::StatusStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::ConfigStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::MandatoryStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::PresenceStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::OrderedByStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::MustStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::ErrorMessageStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::ErrorAppTagStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::MinElementsStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::MaxElementsStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::ValueStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::GroupingStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::ContainerStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::LeafStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::LeafListStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::ListStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::KeyStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::UniqueStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::ChoiceStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::CaseStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::AnydataStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::AnyxmlStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::UsesStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::RefineStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::AugmentStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::WhenStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::RpcStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::ActionStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::InputStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::OutputStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::NotificationStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::DeviationStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::DeviateStmt(stmt) => write!(f, "{:?}", stmt),
+            YangStmt::UnknownStmt(stmt) => write!(f, "{:?}", stmt),
         }
     }
 }
@@ -358,7 +340,6 @@ pub fn is_decimal_value(s: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-
 
     #[test]
     pub fn test_current_function_invocation() {

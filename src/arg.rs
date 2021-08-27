@@ -54,7 +54,7 @@ fn parse_string(parser: &mut Parser) -> Result<String, YangError> {
         // End of Input.
         Token::EndOfInput => Err(YangError::UnexpectedEof),
         // Unexpected Token.
-        _ => Err(YangError::UnexpectedToken(parser.line())),
+        _ => Err(YangError::UnexpectedToken(token.to_string())),
     }
 }
 
@@ -222,6 +222,43 @@ impl StmtArg for NodeIdentifier {
     }
 }
 
+///
+/// "unknown-stmt" keyword.
+///
+#[derive(Clone, PartialEq)]
+pub struct UnknownStmtKeyword {
+    prefix:Prefix,
+    identifier: Identifier,
+}
+
+impl fmt::Debug for UnknownStmtKeyword {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}:{}", self.prefix, self.identifier)
+    }
+}
+
+impl ToString for UnknownStmtKeyword {
+    fn to_string(&self) -> String {
+        format!("{}:{}", self.prefix, self.identifier)
+    }
+}
+
+impl FromStr for UnknownStmtKeyword {
+    type Err = ArgError;
+
+    fn from_str(str: &str) -> Result<Self, Self::Err> {
+        match str.find(":") {
+            Some(p) => {
+                let prefix = Identifier::from_str(&str[..p])?;
+                let identifier = Identifier::from_str(&str[p + 1..])?;
+
+                Ok(UnknownStmtKeyword { prefix, identifier})
+            }
+            None => Err(ArgError::new("unknown-stmt keyword")),
+        }
+    }
+}
+
 
 // Yang String.
 impl StmtArg for String {
@@ -245,7 +282,7 @@ impl StmtArg for Url {
 ///
 /// "yang-version-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct YangVersionArg {
     str: String,
 }
@@ -265,7 +302,7 @@ impl StmtArg for YangVersionArg {
 ///
 /// "date-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DateArg {
     str: String,
 }
@@ -273,6 +310,14 @@ pub struct DateArg {
 impl ToString for DateArg {
     fn to_string(&self) -> String {
         self.str.clone()
+    }
+}
+
+impl FromStr for DateArg {
+    type Err = ArgError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(DateArg { str: s.to_string() })
     }
 }
 
@@ -303,28 +348,37 @@ impl StmtArg for DateArg {
 ///
 /// "yin-element-arg". 
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct YinElementArg {
     arg: bool,
+}
+
+impl FromStr for YinElementArg {
+    type Err = ArgError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s == "true" {
+            Ok(YinElementArg { arg: true })
+        } else if s == "false" {
+            Ok(YinElementArg { arg: false })
+        } else {
+            Err(ArgError::new("yin-element-arg"))
+        }
+    }
 }
 
 impl StmtArg for YinElementArg {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
-        if str == "true" {
-            Ok(YinElementArg { arg: true })
-        } else if str == "false" {
-            Ok(YinElementArg { arg: false })
-        } else {
-            Err(YangError::ArgumentParseError("yin-element-arg", parser.line()))
-        }
+
+        YinElementArg::from_str(&str).map_err(|_| YangError::ArgumentParseError("yin-element-arg", parser.line()))
     }
 }
 
 ///
 /// "fraction-digits-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct FractionDigitsArg {
     digits: u8,
 }
@@ -363,7 +417,7 @@ pub enum Status {
 ///
 /// "status-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StatusArg {
     arg: Status,
 }
@@ -386,7 +440,7 @@ impl StmtArg for StatusArg {
 ///
 /// "config-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ConfigArg {
     arg: bool,
 }
@@ -407,7 +461,7 @@ impl StmtArg for ConfigArg {
 ///
 /// "mandatory-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct MandatoryArg {
     arg: bool,
 }
@@ -434,7 +488,7 @@ pub enum OrderedBy {
 ///
 /// "order-by-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OrderedByArg {
     arg: OrderedBy,
 }
@@ -455,7 +509,7 @@ impl StmtArg for OrderedByArg {
 ///
 /// "min-value-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct MinValueArg {
     val: u64,
 }
@@ -474,7 +528,7 @@ impl StmtArg for MinValueArg {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum MaxValue {
     Unbounded,
     Value(u64),
@@ -492,7 +546,7 @@ impl fmt::Debug for MaxValue {
 ///
 /// "max-value-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct MaxValueArg {
     val: MaxValue,
 }
@@ -517,7 +571,7 @@ impl StmtArg for MaxValueArg {
 ///
 /// "integer-value".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct IntegerValue {
     val: i64,
 }
@@ -967,8 +1021,6 @@ impl FromStr for PathKeyExpr {
         let paths: Vec<_> = str.split("/").map(|s| s.trim()).collect();
         // Minimum of "current() / .. / node-identifier".
         if paths.len() < 3 {
-            println!("*** hoge");
-
             return Err(ArgError::new("path-key-expr"))
         // Invalid current function invocation.
         } else if !is_current_function_invocation(&paths[0]) {
@@ -1245,7 +1297,7 @@ impl ToString for IfFeatureFactor {
 ///
 /// "require-instance-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct RequireInstanceArg {
     arg: bool,
 }
@@ -1298,12 +1350,31 @@ impl StmtArg for KeyArg {
 ///
 /// "schema-nodeid".  TODO - may consolidate.
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
+pub enum SchemaNodeid {
+    Absolute(AbsoluteSchemaNodeid),
+    Descendant(DescendantSchemaNodeid),
+}
+
+impl StmtArg for SchemaNodeid {
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
+        let str = parse_string(parser)?;
+        if str.starts_with('/') {
+            Ok(SchemaNodeid::Absolute(
+                AbsoluteSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?))
+        } else {
+            Ok(SchemaNodeid::Descendant(
+                DescendantSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?))
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct AbsoluteSchemaNodeid {
     nodes: Vec<NodeIdentifier>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescendantSchemaNodeid {
     nodes: Vec<NodeIdentifier>,
 }
@@ -1379,7 +1450,7 @@ impl ToString for DescendantSchemaNodeid {
 ///
 /// "unique-arg".
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct UniqueArg {
     nodeids: Vec<DescendantSchemaNodeid>,
 }
