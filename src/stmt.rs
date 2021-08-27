@@ -3,6 +3,7 @@
 //  Copyright (C) 2021 Toshiaki Takada
 //
 
+use std::str::FromStr;
 use url::Url;
 
 use super::core::*;
@@ -4596,6 +4597,70 @@ impl DeviateReplaceStmt {
     }
 }
 
+///
+/// Unknown Statement.
+///
+#[derive(Debug, Clone, PartialEq)]
+pub struct UnknownStmt {
+    /// Keyword
+    keyword: UnknownStmtKeyword,
+
+    /// Optional arg.
+    arg: Option<String>,
+
+    // YANG statement.
+    
+}
+
+impl UnknownStmt {
+    /// Parse a statement and return the object wrapped in enum.
+    pub fn parse_unknown(parser: &mut Parser) -> Result<StmtType, YangError>  where Self: Sized {
+        Self::parse(parser)
+    }
+}
+
+impl Stmt for UnknownStmt {
+    /// Arg type.
+    type Arg = String;
+
+    /// Sub Statements.
+    type SubStmts = ();
+
+    /// Return statement keyword.
+    fn keyword() -> Keyword {
+        "unknown"
+    }
+
+    /// Parse a statement and return the object wrapped in enum.
+    fn parse(parser: &mut Parser) -> Result<StmtType, YangError>  where Self::Arg: StmtArg, Self: Sized {
+/*
+        let token = parser.get_token()?;
+        let keyword = match token {
+            Token::Identifier(s) => {
+                UnknownStmtKeyword::from_str(&s).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?
+            }
+            _ => return Err(YangError::UnexpectedToken(token.to_string()))
+        };
+*/
+        let keyword = UnknownStmtKeyword::from_str("hoge:hgoe").unwrap();
+
+        let token = parser.get_token()?;
+        let mut arg = None;
+        match token {
+            Token::Identifier(s) => {
+                arg = Some(s);
+            }
+            Token::StatementEnd => {
+            }
+            _ => return Err(YangError::UnexpectedToken(token.to_string()))
+        }
+
+        Ok(StmtType::UnknownStmt(UnknownStmt {
+            keyword,
+            arg,
+        }))
+    }
+}
 
 #[cfg(test)]
 mod tests {

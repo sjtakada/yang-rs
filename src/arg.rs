@@ -222,6 +222,43 @@ impl StmtArg for NodeIdentifier {
     }
 }
 
+///
+/// "unknown-stmt" keyword.
+///
+#[derive(Clone, PartialEq)]
+pub struct UnknownStmtKeyword {
+    prefix:Prefix,
+    identifier: Identifier,
+}
+
+impl fmt::Debug for UnknownStmtKeyword {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}:{}", self.prefix, self.identifier)
+    }
+}
+
+impl ToString for UnknownStmtKeyword {
+    fn to_string(&self) -> String {
+        format!("{}:{}", self.prefix, self.identifier)
+    }
+}
+
+impl FromStr for UnknownStmtKeyword {
+    type Err = ArgError;
+
+    fn from_str(str: &str) -> Result<Self, Self::Err> {
+        match str.find(":") {
+            Some(p) => {
+                let prefix = Identifier::from_str(&str[..p])?;
+                let identifier = Identifier::from_str(&str[p + 1..])?;
+
+                Ok(UnknownStmtKeyword { prefix, identifier})
+            }
+            None => Err(ArgError::new("unknown-stmt keyword")),
+        }
+    }
+}
+
 
 // Yang String.
 impl StmtArg for String {

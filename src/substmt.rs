@@ -8,6 +8,7 @@ use std::collections::HashMap;
 use super::core::*;
 use super::parser::*;
 use super::error::*;
+use super::stmt::UnknownStmt;
 
 pub type StmtKeywordFn = fn() -> Keyword;
 pub type SelectionKeywordFn = fn() -> Vec<Keyword>;
@@ -99,10 +100,14 @@ println!("*** [DEBUG] parse_substmts_default {:?}", token);
                             };
                             v.push(stmt);
                             rep.count += 1;
-                            // TODO: maybe we should validate number.
+                            // maybe we should validate number.
                         } else {
                             break;
                         }
+                    } else if !STMT_PARSER.contains_key(keyword as &str) {
+                        // This is "unknown" statement.
+                        let _stmt = UnknownStmt::parse_unknown(parser)?;
+                        // TBD: just parse and ignore it for now.
                     } else {
                         parser.save_token(token);
                         break;

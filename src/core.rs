@@ -97,7 +97,7 @@ pub type StmtCollection = HashMap<String, Vec<StmtType>>;
 type StmtParserFn = fn(&mut Parser) -> Result<StmtType, YangError>;
 
 // Yang Statement
-#[derive(PartialEq)]
+#[derive(Clone, PartialEq)]
 pub enum StmtType {
     ModuleStmt(ModuleStmt),
     SubmoduleStmt(SubmoduleStmt),
@@ -167,6 +167,7 @@ pub enum StmtType {
     NotificationStmt(NotificationStmt),
     DeviationStmt(DeviationStmt),
     DeviateStmt(DeviateStmt),
+    UnknownStmt(UnknownStmt),
 }
 
 impl fmt::Debug for StmtType {
@@ -240,6 +241,7 @@ impl fmt::Debug for StmtType {
             StmtType::NotificationStmt(stmt) => write!(f, "{:?}", stmt),
             StmtType::DeviationStmt(stmt) => write!(f, "{:?}", stmt),
             StmtType::DeviateStmt(stmt) => write!(f, "{:?}", stmt),
+            StmtType::UnknownStmt(stmt) => write!(f, "{:?}", stmt),
         }
     }
 }
