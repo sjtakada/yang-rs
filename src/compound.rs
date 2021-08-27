@@ -479,12 +479,12 @@ pub trait Selection {
 
     /// Constructor with empty substatements.
     fn new() -> Self where Self: Sized {
-        panic!();
+        panic!("{:?}", Self::keywords());
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(_substmts: Self::SubStmts) -> Self where Self: Sized {
-        panic!();
+        panic!("{:?}", Self::keywords());
     }
 }
 
