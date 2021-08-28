@@ -64,14 +64,14 @@ impl ModuleHeaderStmts {
 ///
 #[derive(Debug, Clone, PartialEq)]
 pub struct SubmoduleHeaderStmts {
-    yang_version: YangVersionStmt,
+    yang_version: Option<YangVersionStmt>,
     belongs_to: BelongsToStmt,
 }
 
 impl Compound for SubmoduleHeaderStmts {
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::HasOne(SubStmtWith::Stmt(YangVersionStmt::keyword)),
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(YangVersionStmt::keyword)),
              SubStmtDef::HasOne(SubStmtWith::Stmt(BelongsToStmt::keyword)),
         ]
     }
@@ -82,7 +82,7 @@ impl SubmoduleHeaderStmts {
         let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok(SubmoduleHeaderStmts {
-            yang_version: collect_a_stmt!(stmts, YangVersionStmt)?,
+            yang_version: collect_opt_stmt!(stmts, YangVersionStmt)?,
             belongs_to: collect_a_stmt!(stmts, BelongsToStmt)?,
         })
     }

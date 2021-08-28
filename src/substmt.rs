@@ -85,7 +85,10 @@ impl SubStmtUtil {
 
         loop {
             let token = parser.get_token()?;
-println!("*** [DEBUG] parse_substmts_default {:?}", token);
+
+            if parser.config().debug() {
+                println!("*** [DEBUG] parse_substmts_default {:?}", token);
+            }
             match token {
                 Token::Identifier(ref keyword) => {
                     if k2i.contains_key(keyword as &str) {
@@ -136,7 +139,9 @@ println!("*** [DEBUG] parse_substmts_default {:?}", token);
             }
         }
 
-println!("*** [DEBUG] end");
+        if parser.config().debug() {
+            println!("*** [DEBUG] end");
+        }
 
         Ok(stmts)
     }

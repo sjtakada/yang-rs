@@ -31,6 +31,7 @@ fn main() {
     opts.optopt("y", "yang-version", "Set explicit yang version", "YANG-VERSION");
     opts.optflag("h", "help", "Display this help and exit");
     opts.optflag("v", "version", "Print program version");
+    opts.optflag("d", "debug", "Run parser in debug mode");
 
     let matches = match opts.parse(&args[1..]) {
         Ok(matches) => matches,
@@ -53,6 +54,9 @@ fn main() {
 
     let mut config = Config::new();
     config.set_yang_version(matches.opt_str("y"));
+    if matches.opt_present("d") {
+        config.set_debug(true);
+    }
 
     if !matches.free.is_empty() {
         let file = matches.free[0].clone();
