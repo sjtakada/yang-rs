@@ -20,9 +20,9 @@ use crate::collect_a_stmt;
 use crate::collect_vec_stmt;
 use crate::collect_opt_stmt;
 
-//
-// Trait for a single YANG statement.
-//
+///
+/// Trait for a single YANG statement.
+///
 pub trait Stmt {
     /// Arg type.
     type Arg;
@@ -178,7 +178,7 @@ impl Stmt for ModuleStmt {
 ///
 /// The "submodule" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct SubmoduleStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -243,7 +243,7 @@ impl Stmt for SubmoduleStmt {
 ///
 /// The "yang-version" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct YangVersionStmt {
     /// Yang version arg.
     arg: YangVersionArg,
@@ -272,7 +272,7 @@ impl Stmt for YangVersionStmt {
 ///
 /// The "import" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ImportStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -341,7 +341,7 @@ impl Stmt for ImportStmt {
 ///
 /// The "include" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct IncludeStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -414,7 +414,7 @@ impl Stmt for IncludeStmt {
 ///
 /// The "namespace" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct NamespaceStmt {
     /// URI.
     arg: Url,
@@ -441,7 +441,7 @@ impl Stmt for NamespaceStmt {
 ///
 /// The "prefix" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PrefixStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -468,7 +468,7 @@ impl Stmt for PrefixStmt {
 ///
 /// The "belongs-to" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct BelongsToStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -519,7 +519,7 @@ impl Stmt for BelongsToStmt {
 ///
 /// The "organization" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct OrganizationStmt {
     /// String.
     arg: String,
@@ -546,7 +546,7 @@ impl Stmt for OrganizationStmt {
 ///
 /// The "contact" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ContactStmt {
     /// String.
     arg: String,
@@ -573,7 +573,7 @@ impl Stmt for ContactStmt {
 ///
 /// The "description" Statement.
 /// 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DescriptionStmt {
     /// String.
     arg: String,
@@ -600,7 +600,7 @@ impl Stmt for DescriptionStmt {
 ///
 /// The "reference" Statement.
 /// 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ReferenceStmt {
     /// String.
     arg: String,
@@ -627,7 +627,7 @@ impl Stmt for ReferenceStmt {
 ///
 /// The "units" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct UnitsStmt {
     /// String.
     arg: String,
@@ -654,7 +654,7 @@ impl Stmt for UnitsStmt {
 ///
 /// The "revision" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RevisionStmt {
     /// Revision date.
     arg: DateArg,
@@ -720,7 +720,7 @@ impl Stmt for RevisionStmt {
 ///
 /// The "revision-date" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RevisionDateStmt {
     /// Revision date.
     arg: DateArg,
@@ -747,7 +747,7 @@ impl Stmt for RevisionDateStmt {
 ///
 /// The "extension" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ExtensionStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -827,7 +827,7 @@ impl Stmt for ExtensionStmt {
 ///
 /// The "argument" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ArgumentStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -886,7 +886,7 @@ impl Stmt for ArgumentStmt {
 ///
 /// The "yin-element" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct YinElementStmt {
     /// Yin element arg.
     arg: YinElementArg,
@@ -915,7 +915,7 @@ impl Stmt for YinElementStmt {
 ///
 /// The "identity" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct IdentityStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -1002,7 +1002,7 @@ impl Stmt for IdentityStmt {
 ///
 /// The "base" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct BaseStmt {
     /// Identifier-ref arg.
     arg: IdentifierRef,
@@ -1031,7 +1031,7 @@ impl Stmt for BaseStmt {
 ///
 /// The "feature" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct FeatureStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -1111,7 +1111,7 @@ impl Stmt for FeatureStmt {
 ///
 /// The "if-feature" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct IfFeatureStmt {
     /// If-feature-expr str.
     arg: IfFeatureExpr,
@@ -1138,7 +1138,7 @@ impl Stmt for IfFeatureStmt {
 ///
 /// The "typedef" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct TypedefStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -1220,7 +1220,7 @@ impl Stmt for TypedefStmt {
 ///
 /// The "type" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct TypeStmt {
     /// Identifier ref arg.
     arg: IdentifierRef,
@@ -1273,7 +1273,7 @@ impl Stmt for TypeStmt {
 ///
 /// The "range" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RangeStmt {
     /// Range Arg.
     arg: RangeArg,
@@ -1353,7 +1353,7 @@ impl Stmt for RangeStmt {
 ///
 /// The "fraction-digits" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct FractionDigitsStmt {
     /// Fraction-digits arg.
     arg: FractionDigitsArg,
@@ -1382,7 +1382,7 @@ impl Stmt for FractionDigitsStmt {
 ///
 /// The "length" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct LengthStmt {
     /// Length arg.
     arg: LengthArg,
@@ -1462,7 +1462,7 @@ impl Stmt for LengthStmt {
 ///
 /// The "pattern" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PatternStmt {
     /// String.
     arg: String,
@@ -1550,7 +1550,7 @@ impl Stmt for PatternStmt {
 ///
 /// The "modifier" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ModifierStmt {
     /// Modifier arg.
     arg: ModifierArg,
@@ -1579,7 +1579,7 @@ impl Stmt for ModifierStmt {
 ///
 /// The "default" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DefaultStmt {
     /// String.
     arg: String,
@@ -1608,7 +1608,7 @@ impl Stmt for DefaultStmt {
 ///
 /// The "enum" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct EnumStmt {
     /// String.
     arg: String,
@@ -1695,7 +1695,7 @@ impl Stmt for EnumStmt {
 ///
 /// The "path" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PathStmt {
     /// Path arg.
     arg: PathArg,
@@ -1724,7 +1724,7 @@ impl Stmt for PathStmt {
 ///
 /// The "require-instance" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RequireInstanceStmt {
     /// Require-instance arg.
     arg: RequireInstanceArg,
@@ -1753,7 +1753,7 @@ impl Stmt for RequireInstanceStmt {
 ///
 /// The "bit" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct BitStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -1840,7 +1840,7 @@ impl Stmt for BitStmt {
 ///
 /// The "position" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PositionStmt {
     /// Position value arg.
     arg: PositionValueArg,
@@ -1869,7 +1869,7 @@ impl Stmt for PositionStmt {
 ///
 /// The "status" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct StatusStmt {
     /// Status arg.
     arg: StatusArg,
@@ -1895,11 +1895,10 @@ impl Stmt for StatusStmt {
     }
 }
 
-
 ///
 /// The "config" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ConfigStmt {
     /// Config arg.
     arg: ConfigArg,
@@ -1928,7 +1927,7 @@ impl Stmt for ConfigStmt {
 ///
 /// The "mandatory" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct MandatoryStmt {
     /// Mandatory arg.
     arg: MandatoryArg,
@@ -1957,7 +1956,7 @@ impl Stmt for MandatoryStmt {
 ///
 /// The "presence" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PresenceStmt {
     /// String.
     arg: String,
@@ -1986,7 +1985,7 @@ impl Stmt for PresenceStmt {
 ///
 /// The "ordered-by" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct OrderedByStmt {
     /// Ordered-by arg.
     arg: OrderedByArg,
@@ -2015,7 +2014,7 @@ impl Stmt for OrderedByStmt {
 ///
 /// The "must" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct MustStmt {
     /// String.
     arg: String,
@@ -2095,7 +2094,7 @@ impl Stmt for MustStmt {
 ///
 /// The "error-message" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ErrorMessageStmt {
     /// String.
     arg: String,
@@ -2124,7 +2123,7 @@ impl Stmt for ErrorMessageStmt {
 ///
 /// The "error-app-tag" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ErrorAppTagStmt {
     /// String.
     arg: String,
@@ -2153,7 +2152,7 @@ impl Stmt for ErrorAppTagStmt {
 ///
 /// The "min-elements" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct MinElementsStmt {
     /// Min-value arg.
     arg: MinValueArg,
@@ -2180,7 +2179,7 @@ impl Stmt for MinElementsStmt {
 ///
 /// The "max-elements" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct MaxElementsStmt {
     /// Max-value arg.
     arg: MaxValueArg,
@@ -2207,7 +2206,7 @@ impl Stmt for MaxElementsStmt {
 ///
 /// The "value" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ValueStmt {
     /// Integer-value.
     arg: IntegerValue,
@@ -2234,7 +2233,7 @@ impl Stmt for ValueStmt {
 ///
 /// The "grouping" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct GroupingStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -2347,7 +2346,7 @@ impl Stmt for GroupingStmt {
 ///
 /// The "container" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ContainerStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -2496,7 +2495,7 @@ impl Stmt for ContainerStmt {
 ///
 /// The "leaf" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct LeafStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -2610,7 +2609,7 @@ impl Stmt for LeafStmt {
 ///
 /// The "leaf-list" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct LeafListStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -2736,7 +2735,7 @@ impl Stmt for LeafListStmt {
 ///
 /// The "list" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ListStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -2891,7 +2890,7 @@ impl Stmt for ListStmt {
 ///
 /// The "key" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct KeyStmt {
     /// Key arg.
     arg: KeyArg,
@@ -2920,7 +2919,7 @@ impl Stmt for KeyStmt {
 ///
 /// The list's "unique" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct UniqueStmt {
     /// Unique arg.
     arg: UniqueArg,
@@ -2949,7 +2948,7 @@ impl Stmt for UniqueStmt {
 ///
 /// The "choice" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ChoiceStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -3076,7 +3075,7 @@ impl Stmt for ChoiceStmt {
 ///
 /// The "case" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct CaseStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -3180,7 +3179,7 @@ impl Stmt for CaseStmt {
 ///
 /// The "anydata" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct AnydataStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -3289,7 +3288,7 @@ impl Stmt for AnydataStmt {
 ///
 /// The "anyxml" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct AnyxmlStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -3398,7 +3397,7 @@ impl Stmt for AnyxmlStmt {
 ///
 /// The "uses" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct UsesStmt {
     /// Identifier-ref arg.
     arg: IdentifierRef,
@@ -3500,7 +3499,7 @@ impl Stmt for UsesStmt {
 ///
 /// The "refine" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RefineStmt {
     /// Refine arg.
     arg: RefineArg,
@@ -3624,7 +3623,7 @@ impl Stmt for RefineStmt {
 ///
 /// The "augment" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct AugmentStmt {
     /// Augment arg.
     arg: SchemaNodeid,
@@ -3719,7 +3718,7 @@ impl Stmt for AugmentStmt {
 ///
 /// The "when" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct WhenStmt {
     /// String.
     arg: String,
@@ -3785,7 +3784,7 @@ impl Stmt for WhenStmt {
 ///
 /// The "rpc" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RpcStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -3891,7 +3890,7 @@ impl Stmt for RpcStmt {
 ///
 /// The "action" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ActionStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -3997,7 +3996,7 @@ impl Stmt for ActionStmt {
 ///
 /// The "input" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct InputStmt {
     /// Must statement.
     must: Vec<MustStmt>,
@@ -4067,7 +4066,7 @@ impl Stmt for InputStmt {
 ///
 /// The "output" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct OutputStmt {
     /// Must statement.
     must: Vec<MustStmt>,
@@ -4138,7 +4137,7 @@ impl Stmt for OutputStmt {
 ///
 /// The "notification" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct NotificationStmt {
     /// Identifier arg.
     arg: Identifier,
@@ -4251,7 +4250,7 @@ impl Stmt for NotificationStmt {
 ///
 /// The "deviation" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DeviationStmt {
     /// Deviation arg.
     arg: DeviationArg,
@@ -4373,7 +4372,7 @@ impl Stmt for DeviateStmt {
 ///
 /// The "deviate add" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DeviateAddStmt {
     /// Units statement.
     units: Option<UnitsStmt>,
@@ -4459,7 +4458,7 @@ impl DeviateAddStmt {
 ///
 /// The "deviate delete" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DeviateDeleteStmt {
     /// Units statement.
     units: Option<UnitsStmt>,
@@ -4522,7 +4521,7 @@ impl DeviateDeleteStmt {
 ///
 /// The "deviate replace" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DeviateReplaceStmt {
     /// Type statement.
     type_: Option<TypeStmt>,
@@ -4602,7 +4601,7 @@ impl DeviateReplaceStmt {
 ///
 /// Unknown Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct UnknownStmt {
     /// Keyword
     keyword: UnknownStmtKeyword,

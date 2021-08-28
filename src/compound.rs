@@ -100,19 +100,38 @@ impl SubmoduleHeaderStmts {
 }
 
 ///
-/// Body Statements.
+/// "body" Statements.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct BodyStmts {
+    /// "extension" statment.
     extension: Vec<ExtensionStmt>,
+
+    /// "feature" statement.
     feature: Vec<FeatureStmt>,
+
+    /// "identity" statement.
     identity: Vec<IdentityStmt>,
+
+    /// "typedef" statement.
     typedef: Vec<TypedefStmt>,
+
+    /// "grouping" statement.
     grouping: Vec<GroupingStmt>,
+
+    /// "data-def" statement.
     data_def: DataDefStmt,
+
+    /// "augment" statement.
     augment: Vec<AugmentStmt>,
+
+    /// "rpc" statement.
     rpc: Vec<RpcStmt>,
+
+    /// "notification" statement.
     notification: Vec<NotificationStmt>,
+
+    /// "deviation" statement.
     deviation: Vec<DeviationStmt>,
 }
 
