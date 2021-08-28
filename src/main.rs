@@ -99,6 +99,7 @@ fn main() {
             println!("Error: {:?}", e.to_string());
             std::process::exit(1);
         }
+        // Successful.
     } else {
         print_help(&program, opts);
         std::process::exit(1);

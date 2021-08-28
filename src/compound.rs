@@ -3,6 +3,8 @@
 //  Copyright (C) 2021 Toshiaki Takada
 //
 
+use derive_getters::Getters;
+
 use super::core::*;
 use super::error::*;
 use super::parser::*;
@@ -13,9 +15,9 @@ use crate::collect_a_stmt;
 use crate::collect_vec_stmt;
 use crate::collect_opt_stmt;
 
-//
-// Trait for compound YANG statements.
-//
+///
+/// Trait for compound YANG statements.
+///
 pub trait Compound {
     /// Return list fo statement keyword.
     fn keywords() -> Vec<Keyword> {
@@ -27,12 +29,17 @@ pub trait Compound {
 }
 
 ///
-/// Module Header Statements.
+/// "module-header" statements.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ModuleHeaderStmts {
+    /// "yang-version" statement.
     yang_version: Option<YangVersionStmt>,
+
+    /// "namespace" statement.
     namespace: NamespaceStmt,
+
+    /// "prefix" statement.
     prefix: PrefixStmt,
 }
 
@@ -47,6 +54,7 @@ impl Compound for ModuleHeaderStmts {
 }
 
 impl ModuleHeaderStmts {
+    /// Parse sub statements.
     pub fn parse(parser: &mut Parser) -> Result<ModuleHeaderStmts, YangError> {
         let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
@@ -58,13 +66,15 @@ impl ModuleHeaderStmts {
     }
 }
 
-
 ///
-/// Submodule Header Statements.
+/// "submodule-header" statements.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct SubmoduleHeaderStmts {
+    /// "yang-version" statement.
     yang_version: Option<YangVersionStmt>,
+
+    /// "belongs-to" statement.
     belongs_to: BelongsToStmt,
 }
 
@@ -78,6 +88,7 @@ impl Compound for SubmoduleHeaderStmts {
 }
 
 impl SubmoduleHeaderStmts {
+    /// Parse sub statements.
     pub fn parse(parser: &mut Parser) -> Result<SubmoduleHeaderStmts, YangError> {
         let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 

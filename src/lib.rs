@@ -16,6 +16,7 @@ pub mod compound;
 
 #[macro_use]
 extern crate lazy_static;
+extern crate derive_getters;
 
 #[macro_export]
 macro_rules! collect_a_stmt {

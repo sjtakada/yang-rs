@@ -6,6 +6,8 @@
 use std::str::FromStr;
 use url::Url;
 
+use derive_getters::Getters;
+
 use super::core::*;
 use super::error::*;
 use super::parser::*;
@@ -111,7 +113,7 @@ pub trait Stmt {
 ///
 /// The "module" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ModuleStmt {
     /// Identifier arg.
     arg: Identifier,
