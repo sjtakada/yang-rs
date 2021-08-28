@@ -9,6 +9,8 @@ use std::str::FromStr;
 use std::string::ToString;
 use url::Url;
 
+use derive_getters::Getters;
+
 use super::core::*;
 use super::error::*;
 use super::parser::*;
@@ -81,7 +83,7 @@ impl StmtArg for NoArg {
 ///
 /// Yang Identifier.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct Identifier {
     str: String,
 }
@@ -118,7 +120,7 @@ impl StmtArg for Identifier {
 ///
 /// "identity-ref".
 ///
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Getters)]
 pub struct IdentifierRef {
     prefix: Option<Prefix>,
     identifier: Identifier,
@@ -171,7 +173,7 @@ impl StmtArg for IdentifierRef {
 ///
 /// "node-identifier".
 ///
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Getters)]
 pub struct NodeIdentifier {
     prefix: Option<Prefix>,
     identifier: Identifier,
@@ -225,7 +227,7 @@ impl StmtArg for NodeIdentifier {
 ///
 /// "unknown-stmt" keyword.
 ///
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Getters)]
 pub struct UnknownStmtKeyword {
     prefix:Prefix,
     identifier: Identifier,
@@ -282,7 +284,7 @@ impl StmtArg for Url {
 ///
 /// "yang-version-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct YangVersionArg {
     str: String,
 }
@@ -311,7 +313,7 @@ impl StmtArg for YangVersionArg {
 ///
 /// "date-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DateArg {
     str: String,
 }
@@ -357,7 +359,7 @@ impl StmtArg for DateArg {
 ///
 /// "yin-element-arg". 
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct YinElementArg {
     arg: bool,
 }
@@ -387,16 +389,9 @@ impl StmtArg for YinElementArg {
 ///
 /// "fraction-digits-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct FractionDigitsArg {
     digits: u8,
-}
-
-impl FractionDigitsArg {
-    /// Return fraction digits in unsigned integer.
-    fn digits(&self) -> u8 {
-        self.digits
-    }
 }
 
 impl ToString for FractionDigitsArg {
@@ -426,7 +421,7 @@ pub enum Status {
 ///
 /// "status-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct StatusArg {
     arg: Status,
 }
@@ -449,7 +444,7 @@ impl StmtArg for StatusArg {
 ///
 /// "config-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ConfigArg {
     arg: bool,
 }
@@ -470,7 +465,7 @@ impl StmtArg for ConfigArg {
 ///
 /// "mandatory-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct MandatoryArg {
     arg: bool,
 }
@@ -497,7 +492,7 @@ pub enum OrderedBy {
 ///
 /// "order-by-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct OrderedByArg {
     arg: OrderedBy,
 }
@@ -518,7 +513,7 @@ impl StmtArg for OrderedByArg {
 ///
 /// "min-value-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct MinValueArg {
     val: u64,
 }
@@ -555,7 +550,7 @@ impl fmt::Debug for MaxValue {
 ///
 /// "max-value-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct MaxValueArg {
     val: MaxValue,
 }
@@ -580,7 +575,7 @@ impl StmtArg for MaxValueArg {
 ///
 /// "integer-value".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct IntegerValue {
     val: i64,
 }
@@ -638,7 +633,7 @@ pub type RangePart = (RangeBoundary, Option<RangeBoundary>);
 ///
 /// "range-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RangeArg {
     parts: Vec<RangePart>,
 }
@@ -711,7 +706,7 @@ pub type LengthPart = (LengthBoundary, Option<LengthBoundary>);
 ///
 /// "length-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct LengthArg {
     parts: Vec<LengthPart>,
 }
@@ -754,7 +749,7 @@ impl StmtArg for LengthArg {
 ///
 /// "modifier-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ModifierArg {
 }
 
@@ -772,7 +767,7 @@ impl StmtArg for ModifierArg {
 ///
 /// "position-value-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PositionValueArg {
     val: u64,
 }
@@ -820,7 +815,7 @@ impl StmtArg for PathArg {
 }
 
 /// "absolute-path".
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct AbsolutePath {
     nodes: Vec<PathNode>,
 }
@@ -875,14 +870,14 @@ impl FromStr for AbsolutePath {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PathNode {
     node_identifier: NodeIdentifier,
     path_predicate: Vec<PathPredicate>,
 }
 
 /// "relative-path".
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RelativePath {
     up: u32,
     descendant_path: DescendantPath,
@@ -911,7 +906,7 @@ impl FromStr for RelativePath {
 }
 
 /// "descendant-path".
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DescendantPath {
     node_identifier: NodeIdentifier,
     path_predicate: Vec<PathPredicate>,
@@ -966,7 +961,7 @@ impl FromStr for DescendantPath {
 
 
 /// "path-predicate".
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PathPredicate {
     path_equality_expr: PathEqualityExpr,
 }
@@ -986,7 +981,7 @@ impl FromStr for PathPredicate {
 }
 
 /// "path-equality-expr".
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PathEqualityExpr {
     node_identifier: NodeIdentifier,
     path_key_expr: PathKeyExpr,
@@ -1017,7 +1012,7 @@ impl FromStr for PathEqualityExpr {
 ///                       *(node-identifier *WSP "/" *WSP)
 ///                       node-identifier
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PathKeyExpr {
     rel_path_keyexpr: String,
 }
@@ -1133,7 +1128,7 @@ impl Tokenizer {
 }
 
 /// "if-feature-expr".
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Getters)]
 pub struct IfFeatureExpr {
     terms: Vec<IfFeatureTerm>,
 }
@@ -1263,7 +1258,7 @@ impl StmtArg for IfFeatureExpr {
 }
 
 /// "if-feature-term".
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct IfFeatureTerm {
     factors: Vec<IfFeatureFactor>,
 }
@@ -1306,7 +1301,7 @@ impl ToString for IfFeatureFactor {
 ///
 /// "require-instance-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RequireInstanceArg {
     arg: bool,
 }
@@ -1328,7 +1323,7 @@ impl StmtArg for RequireInstanceArg {
 ///
 /// "key-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct KeyArg {
     keys: Vec<NodeIdentifier>,
 }
@@ -1357,7 +1352,7 @@ impl StmtArg for KeyArg {
 }
 
 ///
-/// "schema-nodeid".  TODO - may consolidate.
+/// "schema-nodeid".
 ///
 #[derive(Debug, Clone, PartialEq)]
 pub enum SchemaNodeid {
@@ -1378,12 +1373,12 @@ impl StmtArg for SchemaNodeid {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct AbsoluteSchemaNodeid {
     nodes: Vec<NodeIdentifier>,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DescendantSchemaNodeid {
     nodes: Vec<NodeIdentifier>,
 }
@@ -1459,7 +1454,7 @@ impl ToString for DescendantSchemaNodeid {
 ///
 /// "unique-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct UniqueArg {
     nodeids: Vec<DescendantSchemaNodeid>,
 }
