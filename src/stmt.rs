@@ -4616,14 +4616,31 @@ impl UnknownStmt {
     /// Parse a statement and return the object wrapped in enum.
     pub fn parse(parser: &mut Parser, keyword: &str) -> Result<YangStmt, YangError>  where Self: Sized {
         let keyword = UnknownStmtKeyword::from_str(keyword).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?;
-        let token = parser.get_token()?;
-        let mut arg = None;
 
-        match token {
-            Token::Identifier(s) => {
-                arg = Some(s);
+        let token = parser.get_token()?;
+        let arg = match token {
+            Token::Identifier(s) |
+            Token::QuotedString(s) => {
+                Some(s)
             }
             Token::StatementEnd => {
+                parser.save_token(token);
+                None
+            }
+            _ => return Err(YangError::UnexpectedToken(token.to_string()))
+        };
+
+        let token = parser.get_token()?;
+        match token {
+            Token::StatementEnd => {
+            }
+            Token::BlockBegin => {
+                let token = parser.get_token()?;
+                match token {
+                    Token::BlockEnd => {
+                    }
+                    _ => return Err(YangError::UnexpectedToken(token.to_string()))
+                }
             }
             _ => return Err(YangError::UnexpectedToken(token.to_string()))
         }
