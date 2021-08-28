@@ -291,10 +291,19 @@ impl StmtArg for YangVersionArg {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
-        if str == "1.1" {
-            Ok(YangVersionArg { str })
-        } else {
-            Err(YangError::ArgumentParseError("yang-version", parser.line()))
+        // According to RFC7950, the version should be "1.1", but we relax it.
+
+        match parser.config().yang_version() {
+            Some(yang_version) => {
+                if str == yang_version {
+                    Ok(YangVersionArg { str })
+                } else {
+                    Err(YangError::ArgumentParseError("yang-version", parser.line()))
+                }
+            }
+            None => {
+                Ok(YangVersionArg { str })
+            }
         }
     }
 }

@@ -210,6 +210,11 @@ impl Parser {
         }
     }
 
+    /// Get config reference.
+    pub fn config(&self) -> &Config {
+        &self.config
+    }
+
     /// Get input string at current position.
     pub fn input(&self) -> &str {
         &self.input[self.pos.get()..]
