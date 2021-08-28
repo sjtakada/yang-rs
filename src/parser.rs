@@ -6,11 +6,6 @@
 //use std::mem::size_of;
 
 use std::cell::Cell;
-use std::fs::File;
-use std::io::prelude::*;
-use std::io::Error;
-use std::io::ErrorKind;
-use std::path::Path;
 
 use super::core::*;
 use super::error::*;
@@ -19,38 +14,6 @@ use super::stmt::*;
 use super::substmt::*;
 
 use crate::collect_a_stmt;
-
-/// Open and parse a YANG file.
-pub fn parse_file(filename: &str, config: Config) -> std::io::Result<()> {
-    let mut f = File::open(filename)?;
-    let mut s = String::new();
-    let p = Path::new(filename)
-        .file_stem()
-        .ok_or(Error::new(ErrorKind::Other, "Invalid filename"))?;
-    let n1 = p
-        .to_str()
-        .ok_or(Error::new(ErrorKind::Other, "Invalid filename"))?;
-    let _n2 = str::replace(n1, ".", "_");
-
-    f.read_to_string(&mut s)?;
-    let mut parser = Parser::new_with_config(config, s);
-
-    match parser.parse_yang() {
-        Ok(yang) => {
-            println!("{:?}", yang)
-        }
-        Err(err) => {
-            println!(
-                "Error: {:?} at line {}, pos {}",
-                err,
-                parser.line(),
-                parser.pos()
-            );
-        }
-    }
-
-    Ok(())
-}
 
 /// 6.1.3. Quoting
 ///

@@ -4,8 +4,15 @@
 //
 
 use std::env;
+use std::fs::File;
+use std::io::prelude::*;
+use std::io::Error;
+use std::io::ErrorKind;
+use std::path::Path;
+
 use getopts::Options;
-use yang_rs::parser;
+
+use yang_rs::parser::Parser;
 use yang_rs::config::Config;
 
 const YANG_RS_VERSION: &str = "0.1.0";
@@ -22,6 +29,34 @@ fn print_version(program: &str) {
     println!("");
 }
 
+/// Open and parse a YANG file.
+pub fn parse_file(filename: &str, config: Config) -> std::io::Result<()> {
+    let mut f = File::open(filename)?;
+    let mut s = String::new();
+    let p = Path::new(filename)
+        .file_stem()
+        .ok_or(Error::new(ErrorKind::Other, "Invalid filename"))?;
+    let n1 = p
+        .to_str()
+        .ok_or(Error::new(ErrorKind::Other, "Invalid filename"))?;
+    let _n2 = str::replace(n1, ".", "_");
+
+    f.read_to_string(&mut s)?;
+    let mut parser = Parser::new_with_config(config, s);
+
+    match parser.parse_yang() {
+        Ok(yang) => {
+            println!("{:?}", yang);
+            Ok(())
+        }
+        Err(err) => {
+            Err(Error::new(ErrorKind::Other, format!("YangError: {:?} at line {}, pos {}",
+                err, parser.line(), parser.pos())))
+        }
+    }
+}
+
+/// Main.
 fn main() {
     // Command line arguments.                                                                                                  
     let args: Vec<String> = env::args().collect();
@@ -38,7 +73,7 @@ fn main() {
         Err(_) => {
             println!("Invalid option");
             print_help(&program, opts);
-            return;
+            std::process::exit(1);
         }
     };
 
@@ -60,10 +95,12 @@ fn main() {
 
     if !matches.free.is_empty() {
         let file = matches.free[0].clone();
-        if let Err(e) = parser::parse_file(&file, config) {
+        if let Err(e) = parse_file(&file, config) {
             println!("Error: {:?}", e.to_string());
+            std::process::exit(1);
         }
     } else {
         print_help(&program, opts);
+        std::process::exit(1);
     }
 }
