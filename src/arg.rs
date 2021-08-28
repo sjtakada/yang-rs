@@ -112,7 +112,7 @@ impl StmtArg for Identifier {
 
         match Identifier::from_str(&str) {
             Ok(arg) => Ok(arg),
-            Err(e) => Err(YangError::ArgumentParseError(e.str, parser.line())),
+            Err(e) => Err(YangError::ArgumentParseError(e.str)),
         }
     }
 }
@@ -166,7 +166,7 @@ impl FromStr for IdentifierRef {
 impl StmtArg for IdentifierRef {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
-        IdentifierRef::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))
+        IdentifierRef::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str))
     }
 }
 
@@ -220,7 +220,7 @@ impl StmtArg for NodeIdentifier {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         NodeIdentifier::from_str(&str)
-            .map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))
+            .map_err(|e| YangError::ArgumentParseError(e.str))
     }
 }
 
@@ -276,7 +276,7 @@ impl StmtArg for Url {
 
         match Url::parse(&s) {
             Ok(url) => Ok(url),
-            Err(_) => Err(YangError::ArgumentParseError("url", parser.line()))
+            Err(_) => Err(YangError::ArgumentParseError("url"))
         }
     }
 }
@@ -300,7 +300,7 @@ impl StmtArg for YangVersionArg {
                 if str == yang_version {
                     Ok(YangVersionArg { str })
                 } else {
-                    Err(YangError::ArgumentParseError("yang-version", parser.line()))
+                    Err(YangError::ArgumentParseError("yang-version"))
                 }
             }
             None => {
@@ -338,20 +338,20 @@ impl StmtArg for DateArg {
 
         if str.chars().count() == 10 {
             if let Some(_) = &str[0..4].find(|c: char| !c.is_ascii_digit()) {
-                Err(YangError::ArgumentParseError("date-arg", parser.line()))
+                Err(YangError::ArgumentParseError("date-arg"))
             } else if str.chars().nth(4).unwrap() != '-' {
-                Err(YangError::ArgumentParseError("date-arg", parser.line()))
+                Err(YangError::ArgumentParseError("date-arg"))
             } else if let Some(_) = &str[5..7].find(|c: char| !c.is_ascii_digit()) {
-                Err(YangError::ArgumentParseError("date-arg", parser.line()))
+                Err(YangError::ArgumentParseError("date-arg"))
             } else if str.chars().nth(7).unwrap() != '-' {
-                Err(YangError::ArgumentParseError("date-arg", parser.line()))
+                Err(YangError::ArgumentParseError("date-arg"))
             } else if let Some(_) = &str[8..10].find(|c: char| !c.is_ascii_digit()) {
-                Err(YangError::ArgumentParseError("date-arg", parser.line()))
+                Err(YangError::ArgumentParseError("date-arg"))
             } else {
                 Ok(DateArg { str })
             }
         } else {
-            Err(YangError::ArgumentParseError("date-arg", parser.line()))
+            Err(YangError::ArgumentParseError("date-arg"))
         }
     }
 }
@@ -382,7 +382,7 @@ impl StmtArg for YinElementArg {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
-        YinElementArg::from_str(&str).map_err(|_| YangError::ArgumentParseError("yin-element-arg", parser.line()))
+        YinElementArg::from_str(&str).map_err(|_| YangError::ArgumentParseError("yin-element-arg"))
     }
 }
 
@@ -405,7 +405,7 @@ impl StmtArg for FractionDigitsArg {
         let str = parse_string(parser)?;
         match str.parse::<u8>() {
             Ok(num) if num >= 1 && num <= 18 => Ok(FractionDigitsArg { digits: num }),
-            _ => Err(YangError::ArgumentParseError("fraction-digits-arg", parser.line()))
+            _ => Err(YangError::ArgumentParseError("fraction-digits-arg"))
         }
     }
 }
@@ -436,7 +436,7 @@ impl StmtArg for StatusArg {
         } else if str == "deprecated" {
             Ok(StatusArg { arg: Status::Deprecated })
         } else {
-            Err(YangError::ArgumentParseError("status-arg", parser.line()))
+            Err(YangError::ArgumentParseError("status-arg"))
         }
     }
 }
@@ -457,7 +457,7 @@ impl StmtArg for ConfigArg {
         } else if str == "false" {
             Ok(ConfigArg { arg: false })
         } else {
-            Err(YangError::ArgumentParseError("config-arg", parser.line()))
+            Err(YangError::ArgumentParseError("config-arg"))
         }
     }
 }
@@ -478,7 +478,7 @@ impl StmtArg for MandatoryArg {
         } else if str == "false" {
             Ok(MandatoryArg { arg: false })
         } else {
-            Err(YangError::ArgumentParseError("mandatory-arg", parser.line()))
+            Err(YangError::ArgumentParseError("mandatory-arg"))
         }
     }
 }
@@ -505,7 +505,7 @@ impl StmtArg for OrderedByArg {
         } else if str == "system" {
             Ok(OrderedByArg { arg: OrderedBy::System })
         } else {
-            Err(YangError::ArgumentParseError("ordered-by-arg", parser.line()))
+            Err(YangError::ArgumentParseError("ordered-by-arg"))
         }
     }
 }
@@ -524,10 +524,10 @@ impl StmtArg for MinValueArg {
         if is_non_negative_integer_value(&str) {
             match str.parse::<u64>() {
                 Ok(num) => Ok(MinValueArg { val: num }),
-                Err(_) => Err(YangError::ArgumentParseError("min-value-arg", parser.line())),
+                Err(_) => Err(YangError::ArgumentParseError("min-value-arg")),
             }
         } else {
-            Err(YangError::ArgumentParseError("min-value-arg", parser.line()))
+            Err(YangError::ArgumentParseError("min-value-arg"))
         }
     }
 }
@@ -564,10 +564,10 @@ impl StmtArg for MaxValueArg {
         } else if is_positive_integer_value(&str) {
             match str.parse::<u64>() {
                 Ok(num) => Ok(MaxValueArg { val: MaxValue::Value(num) }),
-                Err(_) => Err(YangError::ArgumentParseError("max-value-arg", parser.line()))
+                Err(_) => Err(YangError::ArgumentParseError("max-value-arg"))
             }
         } else {
-            Err(YangError::ArgumentParseError("max-value-arg", parser.line()))
+            Err(YangError::ArgumentParseError("max-value-arg"))
         }
     }
 }
@@ -586,10 +586,10 @@ impl StmtArg for IntegerValue {
         if is_integer_value(&str) {
             match str.parse::<i64>() {
                 Ok(num) => Ok(IntegerValue { val: num }),
-                Err(_) => Err(YangError::ArgumentParseError("integer-value", parser.line())),
+                Err(_) => Err(YangError::ArgumentParseError("integer-value")),
             }
         } else {
-            Err(YangError::ArgumentParseError("integer-value", parser.line()))
+            Err(YangError::ArgumentParseError("integer-value"))
         }
     }
 }
@@ -651,19 +651,19 @@ impl StmtArg for RangeArg {
             let bounds: Vec<_> = p.split("..").collect();
             if bounds.len() == 1 {
                 if bounds[0] == "" {
-                    return Err(YangError::ArgumentParseError("range-arg", parser.line()));
+                    return Err(YangError::ArgumentParseError("range-arg"));
                 }
 
-                lower = RangeBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?;
+                lower = RangeBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str))?;
                 upper = None;
             } else if bounds.len() == 2 {
                 if bounds[0] == "" || bounds[1] == "" {
-                    return Err(YangError::ArgumentParseError("range-arg", parser.line()));
+                    return Err(YangError::ArgumentParseError("range-arg"));
                 }
-                lower = RangeBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?;
-                upper = Some(RangeBoundary::from_str(bounds[1]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?);
+                lower = RangeBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str))?;
+                upper = Some(RangeBoundary::from_str(bounds[1]).map_err(|e| YangError::ArgumentParseError(e.str))?);
             } else {
-                return Err(YangError::ArgumentParseError("range-arg", parser.line()));
+                return Err(YangError::ArgumentParseError("range-arg"));
             }
 
             v.push((lower, upper));
@@ -724,19 +724,19 @@ impl StmtArg for LengthArg {
             let bounds: Vec<_> = p.split("..").collect();
             if bounds.len() == 1 {
                 if bounds[0] == "" {
-                    return Err(YangError::ArgumentParseError("length-arg", parser.line()));
+                    return Err(YangError::ArgumentParseError("length-arg"));
                 }
 
-                lower = LengthBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?;
+                lower = LengthBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str))?;
                 upper = None;
             } else if bounds.len() == 2 {
                 if bounds[0] == "" || bounds[1] == "" {
-                    return Err(YangError::ArgumentParseError("length-arg", parser.line()));
+                    return Err(YangError::ArgumentParseError("length-arg"));
                 }
-                lower = LengthBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?;
-                upper = Some(LengthBoundary::from_str(bounds[1]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?);
+                lower = LengthBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str))?;
+                upper = Some(LengthBoundary::from_str(bounds[1]).map_err(|e| YangError::ArgumentParseError(e.str))?);
             } else {
-                return Err(YangError::ArgumentParseError("length-arg", parser.line()));
+                return Err(YangError::ArgumentParseError("length-arg"));
             }
 
             v.push((lower, upper));
@@ -759,7 +759,7 @@ impl StmtArg for ModifierArg {
         if str == "invert-match" {
             Ok(ModifierArg { })
         } else {
-            Err(YangError::ArgumentParseError("modifier-arg", parser.line()))
+            Err(YangError::ArgumentParseError("modifier-arg"))
         }
     }
 }
@@ -778,10 +778,10 @@ impl StmtArg for PositionValueArg {
         if is_non_negative_integer_value(&str) {
             match str.parse::<u64>() {
                 Ok(num) => Ok(PositionValueArg { val: num }),
-                Err(_) => Err(YangError::ArgumentParseError("position-value-arg", parser.line())),
+                Err(_) => Err(YangError::ArgumentParseError("position-value-arg")),
             }
         } else {
-            Err(YangError::ArgumentParseError("position-value-arg", parser.line()))
+            Err(YangError::ArgumentParseError("position-value-arg"))
         }
     }
 }
@@ -802,14 +802,14 @@ impl StmtArg for PathArg {
 
         if str.starts_with('/') {
             Ok(PathArg::AbsolutePath(AbsolutePath::from_str(&str)
-                                     .map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?
+                                     .map_err(|e| YangError::ArgumentParseError(e.str))?
             ))
         } else if str.starts_with("..") {
             Ok(PathArg::RelativePath(RelativePath::from_str(&str)
-                                     .map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?
+                                     .map_err(|e| YangError::ArgumentParseError(e.str))?
             ))
         } else {
-            Err(YangError::ArgumentParseError("path-arg", parser.line()))
+            Err(YangError::ArgumentParseError("path-arg"))
         }
     }
 }
@@ -1253,7 +1253,7 @@ impl StmtArg for IfFeatureExpr {
         let str = parse_string(parser)?;
         let mut tokenizer = Tokenizer::new(str);
 
-        IfFeatureExpr::parse(&mut tokenizer).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))
+        IfFeatureExpr::parse(&mut tokenizer).map_err(|e| YangError::ArgumentParseError(e.str))
     }
 }
 
@@ -1314,7 +1314,7 @@ impl StmtArg for RequireInstanceArg {
         } else if str == "false" {
             Ok(RequireInstanceArg { arg: false })
         } else {
-            Err(YangError::ArgumentParseError("require-instance-arg", parser.line()))
+            Err(YangError::ArgumentParseError("require-instance-arg"))
         }
     }
 }
@@ -1340,7 +1340,7 @@ impl StmtArg for KeyArg {
                 None => s.len(),
             };
 
-            let node_identifier = NodeIdentifier::from_str(&s[..pos]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?;
+            let node_identifier = NodeIdentifier::from_str(&s[..pos]).map_err(|e| YangError::ArgumentParseError(e.str))?;
             keys.push(node_identifier);
             
             s = &s[pos..].trim();
@@ -1365,10 +1365,10 @@ impl StmtArg for SchemaNodeid {
         let str = parse_string(parser)?;
         if str.starts_with('/') {
             Ok(SchemaNodeid::Absolute(
-                AbsoluteSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?))
+                AbsoluteSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str))?))
         } else {
             Ok(SchemaNodeid::Descendant(
-                DescendantSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?))
+                DescendantSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str))?))
         }
     }
 }
@@ -1427,7 +1427,7 @@ impl StmtArg for AbsoluteSchemaNodeid {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
-        AbsoluteSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))
+        AbsoluteSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str))
     }
 }
 
@@ -1435,7 +1435,7 @@ impl StmtArg for DescendantSchemaNodeid {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
-        DescendantSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))
+        DescendantSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str))
     }
 }
 
@@ -1462,7 +1462,7 @@ pub struct UniqueArg {
 impl StmtArg for UniqueArg {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
-        UniqueArg::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))
+        UniqueArg::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str))
     }
 }
 

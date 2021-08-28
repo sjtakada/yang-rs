@@ -267,19 +267,19 @@ impl Parser {
                         concat_str = false;
                         string_parsed = true;
                     } else {
-                        return Err(YangError::InvalidString);
+                        return Err(YangError::InvalidString(s));
                     }
                 }
                 Token::PlusSign => {
                     if concat_str {
-                        return Err(YangError::InvalidString);
+                        return Err(YangError::InvalidString(st));
                     } else {
                         concat_str = true;
                     }
                 }
                 _ => {
                     if concat_str {
-                        return Err(YangError::InvalidString);
+                        return Err(YangError::InvalidString(st));
                     }
 
                     if string_parsed {
@@ -363,16 +363,16 @@ impl Parser {
             loop {
                 let c = match chars.next() {
                     Some(c) => c,
-                    None => return Err(YangError::InvalidString),
+                    None => return Err(YangError::InvalidString("String not terminated".to_string())),
                 };
 
                 if c == '\\' {
                     let d = match chars.next() {
                         Some(d) => d,
-                        None => return Err(YangError::InvalidString),
+                        None => return Err(YangError::InvalidString("String not terminated".to_string())),
                     };
                     if d != 'n' && d != 't' && d != '"' && d != '\\' {
-                        return Err(YangError::InvalidString);
+                        return Err(YangError::InvalidString(format!("backslash followed by invalid char '{}'", d)));
                     } 
                     pos += 2;
                 } else if c == '"' {
@@ -399,7 +399,7 @@ impl Parser {
             let l = &input[1..];
             pos = match l.find("'") {
                 Some(pos) => pos,
-                None => return Err(YangError::InvalidString),
+                None => return Err(YangError::InvalidString("String not terminated".to_string())),
             };
 
             let line = l[..pos].matches("\n").count();

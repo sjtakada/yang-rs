@@ -4615,7 +4615,7 @@ pub struct UnknownStmt {
 impl UnknownStmt {
     /// Parse a statement and return the object wrapped in enum.
     pub fn parse(parser: &mut Parser, keyword: &str) -> Result<YangStmt, YangError>  where Self: Sized {
-        let keyword = UnknownStmtKeyword::from_str(keyword).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?;
+        let keyword = UnknownStmtKeyword::from_str(keyword).map_err(|e| YangError::ArgumentParseError(e.str))?;
 
         let token = parser.get_token()?;
         let arg = match token {

@@ -129,13 +129,13 @@ impl SubStmtUtil {
                 Some(i) => {
                     let rep = i2rep.get(i).unwrap();
                     if rep.count < rep.min {
-                        return Err(YangError::TooFewStatement(parser.line(), k.clone()));
+                        return Err(YangError::TooFewStatement(k.clone()));
                     }
                     if rep.max < rep.count {
-                        return Err(YangError::TooManyStatements(parser.line(), k.clone()));
+                        return Err(YangError::TooManyStatements(k.clone()));
                     }
                 }
-                None => return Err(YangError::UnexpectedStatement(parser.line())),
+                None => return Err(YangError::UnexpectedStatement(k.clone())),
             }
         }
 

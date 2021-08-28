@@ -81,7 +81,7 @@ macro_rules! parse_a_stmt {
     ($st:ident, $parser:ident) => {
         match <$st>::parse($parser)? {
             YangStmt::$st(stmt) => Ok(stmt),
-            _ => Err(YangError::UnexpectedStatement($parser.line())),
+            _ => Err(YangError::MissingStatement(String::from(<$st>::keyword()))),
         }
     };
 }
