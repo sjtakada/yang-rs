@@ -115,22 +115,22 @@ pub trait Stmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ModuleStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// Module header statements.
+    /// "module-header" statements.
     module_header: ModuleHeaderStmts,
 
-    /// Linkage statements.
+    /// "linkage" statements.
     linkage: LinkageStmts,
 
-    /// Meta statements.
+    /// "meta" statements.
     meta: MetaStmts,
 
-    /// Revision statements.
+    /// "revision" statements.
     revision: RevisionStmts,
 
-    /// Body statements.
+    /// "body" statements.
     body: BodyStmts,
 }
 
@@ -180,22 +180,22 @@ impl Stmt for ModuleStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct SubmoduleStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// Submodule header statements.
+    /// "submodule-header" statements.
     submodule_header: SubmoduleHeaderStmts,
 
-    /// Linkage statements.
+    /// "linkage" statements.
     linkage: LinkageStmts,
 
-    /// Meta statements.
+    /// "meta" statements.
     meta: MetaStmts,
 
-    /// Revision statements.
+    /// "revision" statements.
     revision: RevisionStmts,
 
-    /// Body statements.
+    /// "body" statements.
     body: BodyStmts,
 }
 
@@ -274,19 +274,19 @@ impl Stmt for YangVersionStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ImportStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// Prefix statement.
+    /// "prefix" statement.
     prefix: PrefixStmt,
 
-    /// Revision date statement.
+    /// "revision-date" statement.
     revision_date: Option<RevisionDateStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -343,16 +343,16 @@ impl Stmt for ImportStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct IncludeStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// Revision date statement.
+    /// "revision-date" statement.
     revision_date: Option<RevisionDateStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -443,7 +443,7 @@ impl Stmt for NamespaceStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PrefixStmt {
-    /// Identifier arg.
+    /// "dentifier-arg".
     arg: Identifier,
 }
 
@@ -470,10 +470,10 @@ impl Stmt for PrefixStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct BelongsToStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// Prefix statement.
+    /// "prefix" statement.
     prefix: PrefixStmt,
 }
 
@@ -656,13 +656,13 @@ impl Stmt for UnitsStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RevisionStmt {
-    /// Revision date.
+    /// "revision-date".
     arg: DateArg,
 
-    /// Description statement..
+    /// "description" statement..
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -722,7 +722,7 @@ impl Stmt for RevisionStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RevisionDateStmt {
-    /// Revision date.
+    /// "revision-date".
     arg: DateArg,
 }
 
@@ -749,19 +749,19 @@ impl Stmt for RevisionDateStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ExtensionStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// Argument statement.
+    /// "argument" statement.
     argument: Option<ArgumentStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -829,10 +829,10 @@ impl Stmt for ExtensionStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ArgumentStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// Yin element statement.
+    /// "yin-element" statement.
     yin_element: Option<YinElementStmt>,
 }
 
@@ -888,7 +888,7 @@ impl Stmt for ArgumentStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct YinElementStmt {
-    /// Yin element arg.
+    /// "yin-element-arg".
     arg: YinElementArg,
 }
 
@@ -917,22 +917,22 @@ impl Stmt for YinElementStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct IdentityStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Base statement.
+    /// "base" statement.
     base: Vec<BaseStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1004,7 +1004,7 @@ impl Stmt for IdentityStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct BaseStmt {
-    /// Identifier-ref arg.
+    /// "dentifier-ref-arg".
     arg: IdentifierRef,
 }
 
@@ -1033,19 +1033,19 @@ impl Stmt for BaseStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct FeatureStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1113,7 +1113,7 @@ impl Stmt for FeatureStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct IfFeatureStmt {
-    /// If-feature-expr str.
+    /// "if-feature-expr-str".
     arg: IfFeatureExpr,
 }
 
@@ -1140,25 +1140,25 @@ impl Stmt for IfFeatureStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct TypedefStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// Type statement.
+    /// "type" statement.
     type_: TypeStmt,
 
-    /// Units statement.
+    /// "units" statement.
     units: Option<UnitsStmt>,
 
-    /// Default statement.
+    /// "default" statement.
     default: Option<DefaultStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1222,10 +1222,10 @@ impl Stmt for TypedefStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct TypeStmt {
-    /// Identifier ref arg.
+    /// "identifier-ref-arg".
     arg: IdentifierRef,
 
-    /// Type-body statements.
+    /// "type-body" statements.
     type_body: Option<TypeBodyStmts>,
 }
 
@@ -1275,19 +1275,19 @@ impl Stmt for TypeStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RangeStmt {
-    /// Range Arg.
+    /// "range-arg".
     arg: RangeArg,
 
-    /// Error Message Statement.
+    /// "error-message" statement.
     error_message: Option<ErrorMessageStmt>,
     
-    /// Error App Tag Statement.
+    /// "error-app-tag" statement.
     error_app_tag: Option<ErrorAppTagStmt>,
 
-    /// Description Statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference Statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1355,7 +1355,7 @@ impl Stmt for RangeStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct FractionDigitsStmt {
-    /// Fraction-digits arg.
+    /// "fraction-digits-arg".
     arg: FractionDigitsArg,
 }
 
@@ -1384,19 +1384,19 @@ impl Stmt for FractionDigitsStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct LengthStmt {
-    /// Length arg.
+    /// "length-arg".
     arg: LengthArg,
 
-    /// Error-message statement.
+    /// "error-message" statement.
     error_message: Option<ErrorMessageStmt>,
 
-    /// Error-app-tag statement.
+    /// "error-app-tag" statement.
     error_app_tag: Option<ErrorAppTagStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1467,19 +1467,19 @@ pub struct PatternStmt {
     /// String.
     arg: String,
 
-    /// Modifier statement.
+    /// "modifier" statement.
     modifier: Option<ModifierStmt>,
 
-    /// Error-message statement.
+    /// "error-message" statement.
     error_message: Option<ErrorMessageStmt>,
 
-    /// Error-app-tag statement.
+    /// "error-app-tag" statement.
     error_app_tag: Option<ErrorAppTagStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1494,7 +1494,6 @@ impl Stmt for PatternStmt {
     fn keyword() -> Keyword {
         "pattern"
     }
-
 
     /// Return true if this statement has sub-statements optionally.
     fn opt_substmts() -> bool {
@@ -1552,7 +1551,7 @@ impl Stmt for PatternStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ModifierStmt {
-    /// Modifier arg.
+    /// "modifier-arg".
     arg: ModifierArg,
 }
 
@@ -1613,19 +1612,19 @@ pub struct EnumStmt {
     /// String.
     arg: String,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Value statement.
+    /// "value" statement.
     value: Option<ValueStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1697,7 +1696,7 @@ impl Stmt for EnumStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PathStmt {
-    /// Path arg.
+    /// "path" arg.
     arg: PathArg,
 }
 
@@ -1726,7 +1725,7 @@ impl Stmt for PathStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RequireInstanceStmt {
-    /// Require-instance arg.
+    /// "require-instance" arg.
     arg: RequireInstanceArg,
 }
 
@@ -1755,22 +1754,22 @@ impl Stmt for RequireInstanceStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct BitStmt {
-    /// Identifier arg.
+    /// "identifier" arg.
     arg: Identifier,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Position statement.
+    /// "position" statement.
     position: Option<PositionStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1842,7 +1841,7 @@ impl Stmt for BitStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PositionStmt {
-    /// Position value arg.
+    /// "position-value-arg".
     arg: PositionValueArg,
 }
 
@@ -1871,7 +1870,7 @@ impl Stmt for PositionStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct StatusStmt {
-    /// Status arg.
+    /// "status-arg".
     arg: StatusArg,
 }
 
@@ -1900,7 +1899,7 @@ impl Stmt for StatusStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ConfigStmt {
-    /// Config arg.
+    /// "config-arg".
     arg: ConfigArg,
 }
 
@@ -1929,7 +1928,7 @@ impl Stmt for ConfigStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct MandatoryStmt {
-    /// Mandatory arg.
+    /// "mandatory-arg".
     arg: MandatoryArg,
 }
 
@@ -1987,7 +1986,7 @@ impl Stmt for PresenceStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct OrderedByStmt {
-    /// Ordered-by arg.
+    /// "ordered-by-arg".
     arg: OrderedByArg,
 }
 
@@ -2025,10 +2024,10 @@ pub struct MustStmt {
     /// Error-app-tag statement.
     error_app_tag: Option<ErrorAppTagStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -2154,7 +2153,7 @@ impl Stmt for ErrorAppTagStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct MinElementsStmt {
-    /// Min-value arg.
+    /// "min-value-arg".
     arg: MinValueArg,
 }
 
@@ -2181,7 +2180,7 @@ impl Stmt for MinElementsStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct MaxElementsStmt {
-    /// Max-value arg.
+    /// "max-value-arg".
     arg: MaxValueArg,
 }
 
@@ -2208,7 +2207,7 @@ impl Stmt for MaxElementsStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ValueStmt {
-    /// Integer-value.
+    /// "integer-value".
     arg: IntegerValue,
 }
 
@@ -2235,28 +2234,28 @@ impl Stmt for ValueStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct GroupingStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Typedef / Grouping statement.
+    /// "typedef" / "grouping" statement.
     typedef_or_grouping: TypedefOrGrouping,
 
-    /// Data-def statement.
+    /// "data-def" statement.
     data_def: DataDefStmt,
 
-    /// Action statement.
+    /// "action" statement.
     action: Vec<ActionStmt>,
 
-    /// Notification statement.
+    /// "notification" statement.
     notification: Vec<NotificationStmt>,
 }
 
@@ -2348,43 +2347,43 @@ impl Stmt for GroupingStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ContainerStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// When statement.
+    /// "when" statement.
     when: Option<WhenStmt>,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Presence statement.
+    /// "presence" statement.
     presence: Option<PresenceStmt>,
 
-    /// Config statement.
+    /// "config" statement.
     config: Option<ConfigStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Typedef / Grouping statement.
+    /// "typedef" / "grouping" statement.
     typedef_or_grouping: TypedefOrGrouping,
 
-    /// Data-def statement.
+    /// "data-def" statement.
     data_def: DataDefStmt,
 
-    /// Action statement.
+    /// "action" statement.
     action: Vec<ActionStmt>,
 
-    /// Notification statement.
+    /// "notification" statement.
     notification: Vec<NotificationStmt>,
 }
 
@@ -2497,40 +2496,40 @@ impl Stmt for ContainerStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct LeafStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// When statement.
+    /// "when" statement.
     when: Option<WhenStmt>,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Type statement.
+    /// "type" statement.
     type_: TypeStmt,
 
-    /// Units statement.
+    /// "units" statement.
     units: Option<UnitsStmt>,
 
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Default statement.
+    /// "default" statement.
     default: Option<DefaultStmt>,
 
-    /// Config statement.
+    /// "config" statement.
     config: Option<ConfigStmt>,
 
-    /// Mandatory statement.
+    /// "mandatory" statement.
     mandatory: Option<MandatoryStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -2611,46 +2610,46 @@ impl Stmt for LeafStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct LeafListStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// When statement.
+    /// "when" statement.
     when: Option<WhenStmt>,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Type statement.
+    /// "type" statement.
     type_: TypeStmt,
 
-    /// Units statement.
+    /// "units" statement.
     units: Option<UnitsStmt>,
 
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Default statement.
+    /// "default" statement.
     default: Vec<DefaultStmt>,
 
-    /// Config statement.
+    /// "config" statement.
     config: Option<ConfigStmt>,
 
-    /// Min-elements statement.
+    /// "min-elements" statement.
     min_elements: Option<MinElementsStmt>,
 
-    /// Max-elements statement.
+    /// "max-elements" statement.
     max_elements: Option<MaxElementsStmt>,
 
-    /// Ordered-by statement.
+    /// "ordered-by" statement.
     ordered_by: Option<OrderedByStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -2737,55 +2736,55 @@ impl Stmt for LeafListStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ListStmt {
-    /// Identifier arg.
+    /// "Identifier-arg".
     arg: Identifier,
 
-    /// When statement.
+    /// "when" statement.
     when: Option<WhenStmt>,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Key statement.
+    /// "key" statement.
     key: Option<KeyStmt>,
 
-    /// Unique statement.
+    /// "unique" statement.
     unique: Vec<UniqueStmt>,
 
-    /// Config statement.
+    /// "config" statement.
     config: Option<ConfigStmt>,
 
-    /// Min-elements statement.
+    /// "min-elements" statement.
     min_elements: Option<MinElementsStmt>,
 
-    /// Max-elements statement.
+    /// "max-elements" statement.
     max_elements: Option<MaxElementsStmt>,
 
-    /// Ordered-by statement.
+    /// "ordered-by" statement.
     ordered_by: Option<OrderedByStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Typedef / Grouping statement.
+    /// "typedef" / "grouping" statement.
     typedef_or_grouping: TypedefOrGrouping,
 
-    /// Data-def statement.
+    /// "data-def" statement.
     data_def: DataDefStmt,
 
-    /// Action statement.
+    /// "action" statement.
     action: Vec<ActionStmt>,
 
-    /// Notification statement.
+    /// "notification" statement.
     notification: Vec<NotificationStmt>,
 }
 
@@ -2892,7 +2891,7 @@ impl Stmt for ListStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct KeyStmt {
-    /// Key arg.
+    /// "key-arg".
     arg: KeyArg,
 }
 
@@ -2921,7 +2920,7 @@ impl Stmt for KeyStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct UniqueStmt {
-    /// Unique arg.
+    /// "unique-arg".
     arg: UniqueArg,
 }
 
@@ -2950,34 +2949,34 @@ impl Stmt for UniqueStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ChoiceStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// When statement.
+    /// "when" statement.
     when: Option<WhenStmt>,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Default statement.
+    /// "default" statement.
     default: Option<DefaultStmt>,
 
-    /// Config statement.
+    /// "config" statement.
     config: Option<ConfigStmt>,
 
-    /// Mandatory statement.
+    /// "mandatory" statement.
     mandatory: Option<MandatoryStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Short-case / Case statement.
+    /// "short-case" / "case" statement.
     short_case_or_case: ShortCaseOrCaseStmt,
 }
 
@@ -3077,25 +3076,25 @@ impl Stmt for ChoiceStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct CaseStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// When statement.
+    /// "when" statement.
     when: Option<WhenStmt>,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Data-def statement.
+    /// "data-def" statement.
     data_def: DataDefStmt,
 }
 
@@ -3181,31 +3180,31 @@ impl Stmt for CaseStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct AnydataStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// When statement.
+    /// "when" statement.
     when: Option<WhenStmt>,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Config statement.
+    /// "config" statement.
     config: Option<ConfigStmt>,
 
-    /// Mandatory statement.
+    /// "mandatory" statement.
     mandatory: Option<MandatoryStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -3290,31 +3289,31 @@ impl Stmt for AnydataStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct AnyxmlStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// When statement.
+    /// "when" statement.
     when: Option<WhenStmt>,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Config statement.
+    /// "config" statement.
     config: Option<ConfigStmt>,
 
-    /// Mandatory statement.
+    /// "mandatory" statement.
     mandatory: Option<MandatoryStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -3399,28 +3398,28 @@ impl Stmt for AnyxmlStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct UsesStmt {
-    /// Identifier-ref arg.
+    /// "identifier-ref-arg".
     arg: IdentifierRef,
 
-    /// When statement.
+    /// "when" statement.
     when: Option<WhenStmt>,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Refine statement.
+    /// "refine" statement.
     refine: Vec<RefineStmt>,
 
-    /// Uses statement.
+    /// "uses" statement.
     uses_augment: Vec<AugmentStmt>,
 }
 
@@ -3501,37 +3500,37 @@ impl Stmt for UsesStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RefineStmt {
-    /// Refine arg.
+    /// "refine-arg".
     arg: RefineArg,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Presence statement.
+    /// "presence" statement.
     presence: Option<PresenceStmt>,
 
-    /// Default statement.
+    /// "default" statement.
     default: Vec<DefaultStmt>,
 
-    /// Config statement.
+    /// "config" statement.
     config: Option<ConfigStmt>,
 
-    /// Mandatory statement.
+    /// "mandatory" statement.
     mandatory: Option<MandatoryStmt>,
 
-    /// Min-elements statement.
+    /// "min-elements" statement.
     min_elements: Option<MinElementsStmt>,
 
-    /// Max-elements statement.
+    /// "max-elements" statement.
     max_elements: Option<MaxElementsStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -3625,25 +3624,25 @@ impl Stmt for RefineStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct AugmentStmt {
-    /// Augment arg.
+    /// "augment-arg".
     arg: SchemaNodeid,
 
-    /// When statement.
+    /// "when" statement.
     when: Option<WhenStmt>,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Data-def / case / action / notification statement.
+    /// "data-def" / "case" / "action" / "notification" statement.
     data_def_or_else: DataDefOrElse,
 }
 
@@ -3723,10 +3722,10 @@ pub struct WhenStmt {
     /// String.
     arg: String,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -3786,28 +3785,28 @@ impl Stmt for WhenStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RpcStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Typedef / grouping statement.
+    /// "typedef" / "grouping" statement.
     typedef_or_grouping: TypedefOrGrouping,
 
-    /// Input statement.
+    /// "input" statement.
     input: Option<InputStmt>,
 
-    /// Output statement.
+    /// "output" statement.
     output: Option<OutputStmt>,
 }
 
@@ -3892,28 +3891,28 @@ impl Stmt for RpcStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ActionStmt {
-    /// Identifier arg.
+    /// "identifier" arg.
     arg: Identifier,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Typedef / Grouping statement.
+    /// "typedef" / "grouping" statement.
     typedef_or_grouping: TypedefOrGrouping,
 
-    /// Input statement.
+    /// "input" statement.
     input: Option<InputStmt>,
 
-    /// Output statement.
+    /// "output" statement.
     output: Option<OutputStmt>,
 }
 
@@ -3998,13 +3997,13 @@ impl Stmt for ActionStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct InputStmt {
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Typedef / Grouping statement.
+    /// "typedef" / "grouping" statement.
     typedef_or_grouping: TypedefOrGrouping,
 
-    /// Data-def statement.
+    /// "data-def" statement.
     data_def: DataDefStmt,
 }
 
@@ -4068,13 +4067,13 @@ impl Stmt for InputStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct OutputStmt {
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Typedef / Grouping statement.
+    /// "typedef" / "grouping" statement.
     typedef_or_grouping: TypedefOrGrouping,
 
-    /// Data-def statement.
+    /// "data-def" statement.
     data_def: DataDefStmt,
 }
 
@@ -4139,28 +4138,28 @@ impl Stmt for OutputStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct NotificationStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Typedef / Grouping statement.
+    /// "typedef" / "grouping" statement.
     typedef_or_grouping: TypedefOrGrouping,
 
-    /// Data-def statement.
+    /// "data-def" statement.
     data_def: DataDefStmt,
 }
 
@@ -4252,16 +4251,16 @@ impl Stmt for NotificationStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DeviationStmt {
-    /// Deviation arg.
+    /// "deviation-arg".
     arg: DeviationArg,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Deviate statement.
+    /// "deviate" statement.
     deviate: Vec<DeviateStmt>,
 }
 
@@ -4374,28 +4373,28 @@ impl Stmt for DeviateStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DeviateAddStmt {
-    /// Units statement.
+    /// "units" statement.
     units: Option<UnitsStmt>,
 
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Unique statement.
+    /// "unique" statement.
     unique: Vec<UniqueStmt>,
 
-    /// Default statement.
+    /// "default" statement.
     default: Vec<DefaultStmt>,
 
-    /// Config statement.
+    /// "config" statement.
     config: Option<ConfigStmt>,
 
-    /// Mandatory statement.
+    /// "mandatory" statement.
     mandatory: Option<MandatoryStmt>,
 
-    /// Min-elements statement.
+    /// "min-elements" statement.
     min_elements: Option<MinElementsStmt>,
 
-    /// Max-elements statement.
+    /// "max-elements" statement.
     max_elements: Option<MaxElementsStmt>,
 }
 
@@ -4460,16 +4459,16 @@ impl DeviateAddStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DeviateDeleteStmt {
-    /// Units statement.
+    /// "units" statement.
     units: Option<UnitsStmt>,
 
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Unique statement.
+    /// "unique" statement.
     unique: Vec<UniqueStmt>,
 
-    /// Default statement.
+    /// "default" statement.
     default: Vec<DefaultStmt>,
 }
 
@@ -4523,25 +4522,25 @@ impl DeviateDeleteStmt {
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DeviateReplaceStmt {
-    /// Type statement.
+    /// "type" statement.
     type_: Option<TypeStmt>,
 
-    /// Units statement.
+    /// "units" statement.
     units: Option<UnitsStmt>,
 
-    /// Default statement.
+    /// "default" statement.
     default: Option<DefaultStmt>,
 
-    /// Config statement.
+    /// "config" statement.
     config: Option<ConfigStmt>,
 
-    /// Mandatory statement.
+    /// "mandatory" statement.
     mandatory: Option<MandatoryStmt>,
 
-    /// Min-elements statement.
+    /// "min-elements" statement.
     min_elements: Option<MinElementsStmt>,
 
-    /// Max-elements statement.
+    /// "max-elements" statement.
     max_elements: Option<MaxElementsStmt>,
 }
 
