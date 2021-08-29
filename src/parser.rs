@@ -3,8 +3,8 @@
 //  Copyright (C) 2021 Toshiaki Takada
 //
 
-//use std::mem::size_of;
-
+use std::io::Error;
+use std::io::ErrorKind;
 use std::cell::Cell;
 
 use super::core::*;
@@ -162,7 +162,7 @@ impl Parser {
     }
 
     /// Constructor with config.
-    pub fn new_with_config(config: Config, s: String) -> Parser {
+    pub fn new_with_config(s: String, config: Config) -> Parser {
         Parser {
             config,
             input: s,
@@ -444,11 +444,9 @@ impl Parser {
         ]
     }
 
-    /// Entry point of YANG parser. It will return a module or submodule statement.
+    /// Entry point of YANG parser.  An input and a config has to be set.
+    /// It will return a module or submodule statement.
     pub fn parse_yang(&mut self) -> Result<YangStmt, YangError> {
-
-//        println!("*** size_of {}", size_of::<ModuleStmt>());
-
         let mut stmts = SubStmtUtil::parse_substmts(self, Self::substmts_def())?;
 
         if stmts.contains_key("module") {
@@ -460,6 +458,15 @@ impl Parser {
         } else {
             Err(YangError::UnexpectedEof)
         }
+    }
+
+    /// Parse string as an input, and return YangStmt. Encapsulate YangError into io::Error.
+    pub fn parse_yang_from_string(s: String, config: Config) -> Result<YangStmt, std::io::Error> {
+    let mut parser = Parser::new_with_config(s, config);
+        parser.parse_yang()
+            .map_err(|err| Error::new(ErrorKind::Other,
+                                      format!("YangError: {:?} at line {}, pos {}",
+                                              err, parser.line(), parser.pos())))
     }
 }
 

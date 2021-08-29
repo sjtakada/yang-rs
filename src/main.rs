@@ -42,18 +42,10 @@ pub fn parse_file(filename: &str, config: Config) -> std::io::Result<()> {
     let _n2 = str::replace(n1, ".", "_");
 
     f.read_to_string(&mut s)?;
-    let mut parser = Parser::new_with_config(config, s);
 
-    match parser.parse_yang() {
-        Ok(yang) => {
-            println!("{:?}", yang);
-            Ok(())
-        }
-        Err(err) => {
-            Err(Error::new(ErrorKind::Other, format!("YangError: {:?} at line {}, pos {}",
-                err, parser.line(), parser.pos())))
-        }
-    }
+    let yang = Parser::parse_yang_from_string(s, config)?;
+    println!("{:?}", yang);
+    Ok(())
 }
 
 /// Main.

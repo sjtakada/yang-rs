@@ -8,6 +8,9 @@ use quick_error::*;
 quick_error! {
     #[derive(Debug)]
     pub enum YangError {
+        IoError(s: String) {
+            display("io::Error: {}", s)
+        }
         InvalidComment {
             display("Invalid comment")
         }
