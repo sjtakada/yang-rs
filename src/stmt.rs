@@ -2259,6 +2259,48 @@ pub struct GroupingStmt {
     notification: Vec<NotificationStmt>,
 }
 
+impl GroupingStmt {
+    pub fn typedef(&self) -> &Vec<TypedefStmt> {
+        &self.typedef_or_grouping.typedef()
+    }
+
+    pub fn grouping(&self) -> &Vec<GroupingStmt> {
+        &self.typedef_or_grouping.grouping()
+    }
+
+    pub fn container(&self) -> &Vec<ContainerStmt> {
+        &self.data_def.container()
+    }
+
+    pub fn leaf(&self) -> &Vec<LeafStmt> {
+        &self.data_def.leaf()
+    }
+
+    pub fn leaf_list(&self) -> &Vec<LeafListStmt> {
+        &self.data_def.leaf_list()
+    }
+
+    pub fn list(&self) -> &Vec<ListStmt> {
+        &self.data_def.list()
+    }
+
+    pub fn choice(&self) -> &Vec<ChoiceStmt> {
+        &self.data_def.choice()
+    }
+
+    pub fn anydata(&self) -> &Vec<AnydataStmt> {
+        &self.data_def.anydata()
+    }
+
+    pub fn anyxml(&self) -> &Vec<AnyxmlStmt> {
+        &self.data_def.anyxml()
+    }
+
+    pub fn uses(&self) -> &Vec<UsesStmt> {
+        &self.data_def.uses()
+    }
+}
+
 impl Stmt for GroupingStmt {
     /// Arg type.
     type Arg = Identifier;
@@ -2385,6 +2427,48 @@ pub struct ContainerStmt {
 
     /// "notification" statement.
     notification: Vec<NotificationStmt>,
+}
+
+impl ContainerStmt {
+    pub fn typedef(&self) -> &Vec<TypedefStmt> {
+        &self.typedef_or_grouping.typedef()
+    }
+
+    pub fn grouping(&self) -> &Vec<GroupingStmt> {
+        &self.typedef_or_grouping.grouping()
+    }
+
+    pub fn container(&self) -> &Vec<ContainerStmt> {
+        &self.data_def.container()
+    }
+
+    pub fn leaf(&self) -> &Vec<LeafStmt> {
+        &self.data_def.leaf()
+    }
+
+    pub fn leaf_list(&self) -> &Vec<LeafListStmt> {
+        &self.data_def.leaf_list()
+    }
+
+    pub fn list(&self) -> &Vec<ListStmt> {
+        &self.data_def.list()
+    }
+
+    pub fn choice(&self) -> &Vec<ChoiceStmt> {
+        &self.data_def.choice()
+    }
+
+    pub fn anydata(&self) -> &Vec<AnydataStmt> {
+        &self.data_def.anydata()
+    }
+
+    pub fn anyxml(&self) -> &Vec<AnyxmlStmt> {
+        &self.data_def.anyxml()
+    }
+
+    pub fn uses(&self) -> &Vec<UsesStmt> {
+        &self.data_def.uses()
+    }
 }
 
 impl Stmt for ContainerStmt {
@@ -2788,6 +2872,48 @@ pub struct ListStmt {
     notification: Vec<NotificationStmt>,
 }
 
+impl ListStmt {
+    pub fn typedef(&self) -> &Vec<TypedefStmt> {
+        &self.typedef_or_grouping.typedef()
+    }
+
+    pub fn grouping(&self) -> &Vec<GroupingStmt> {
+        &self.typedef_or_grouping.grouping()
+    }
+
+    pub fn container(&self) -> &Vec<ContainerStmt> {
+        &self.data_def.container()
+    }
+
+    pub fn leaf(&self) -> &Vec<LeafStmt> {
+        &self.data_def.leaf()
+    }
+
+    pub fn leaf_list(&self) -> &Vec<LeafListStmt> {
+        &self.data_def.leaf_list()
+    }
+
+    pub fn list(&self) -> &Vec<ListStmt> {
+        &self.data_def.list()
+    }
+
+    pub fn choice(&self) -> &Vec<ChoiceStmt> {
+        &self.data_def.choice()
+    }
+
+    pub fn anydata(&self) -> &Vec<AnydataStmt> {
+        &self.data_def.anydata()
+    }
+
+    pub fn anyxml(&self) -> &Vec<AnyxmlStmt> {
+        &self.data_def.anyxml()
+    }
+
+    pub fn uses(&self) -> &Vec<UsesStmt> {
+        &self.data_def.uses()
+    }
+}
+
 impl Stmt for ListStmt {
     /// Arg type.
     type Arg = Identifier;
@@ -2980,6 +3106,40 @@ pub struct ChoiceStmt {
     short_case_or_case: ShortCaseOrCaseStmt,
 }
 
+impl ChoiceStmt {
+    pub fn choice(&self) -> &Vec<ChoiceStmt> {
+        &self.short_case_or_case.choice()
+    }
+
+    pub fn container(&self) -> &Vec<ContainerStmt> {
+        &self.short_case_or_case.container()
+    }
+
+    pub fn leaf(&self) -> &Vec<LeafStmt> {
+        &self.short_case_or_case.leaf()
+    }
+
+    pub fn leaf_list(&self) -> &Vec<LeafListStmt> {
+        &self.short_case_or_case.leaf_list()
+    }
+
+    pub fn list(&self) -> &Vec<ListStmt> {
+        &self.short_case_or_case.list()
+    }
+
+    pub fn anydata(&self) -> &Vec<AnydataStmt> {
+        &self.short_case_or_case.anydata()
+    }
+
+    pub fn anyxml(&self) -> &Vec<AnyxmlStmt> {
+        &self.short_case_or_case.anyxml()
+    }
+
+    pub fn case(&self) -> &Vec<CaseStmt> {
+        &self.short_case_or_case.case()
+    }
+}
+
 impl Stmt for ChoiceStmt {
     /// Arg type.
     type Arg = Identifier;
@@ -3096,6 +3256,40 @@ pub struct CaseStmt {
 
     /// "data-def" statement.
     data_def: DataDefStmt,
+}
+
+impl CaseStmt {
+    pub fn container(&self) -> &Vec<ContainerStmt> {
+        &self.data_def.container()
+    }
+
+    pub fn leaf(&self) -> &Vec<LeafStmt> {
+        &self.data_def.leaf()
+    }
+
+    pub fn leaf_list(&self) -> &Vec<LeafListStmt> {
+        &self.data_def.leaf_list()
+    }
+
+    pub fn list(&self) -> &Vec<ListStmt> {
+        &self.data_def.list()
+    }
+
+    pub fn choice(&self) -> &Vec<ChoiceStmt> {
+        &self.data_def.choice()
+    }
+
+    pub fn anydata(&self) -> &Vec<AnydataStmt> {
+        &self.data_def.anydata()
+    }
+
+    pub fn anyxml(&self) -> &Vec<AnyxmlStmt> {
+        &self.data_def.anyxml()
+    }
+
+    pub fn uses(&self) -> &Vec<UsesStmt> {
+        &self.data_def.uses()
+    }
 }
 
 impl Stmt for CaseStmt {
@@ -3646,6 +3840,50 @@ pub struct AugmentStmt {
     data_def_or_else: DataDefOrElse,
 }
 
+impl AugmentStmt {
+    pub fn container(&self) -> &Vec<ContainerStmt> {
+        &self.data_def_or_else.container()
+    }
+
+    pub fn leaf(&self) -> &Vec<LeafStmt> {
+        &self.data_def_or_else.leaf()
+    }
+
+    pub fn leaf_list(&self) -> &Vec<LeafListStmt> {
+        &self.data_def_or_else.leaf_list()
+    }
+
+    pub fn list(&self) -> &Vec<ListStmt> {
+        &self.data_def_or_else.list()
+    }
+
+    pub fn choice(&self) -> &Vec<ChoiceStmt> {
+        &self.data_def_or_else.choice()
+    }
+
+    pub fn anydata(&self) -> &Vec<AnydataStmt> {
+        &self.data_def_or_else.anydata()
+    }
+
+    pub fn anyxml(&self) -> &Vec<AnyxmlStmt> {
+        &self.data_def_or_else.anyxml()
+    }
+
+    pub fn uses(&self) -> &Vec<UsesStmt> {
+        &self.data_def_or_else.uses()
+    }
+
+    pub fn case(&self) -> &Vec<CaseStmt> {
+        &self.data_def_or_else.case()
+    }
+    pub fn action(&self) -> &Vec<ActionStmt> {
+        &self.data_def_or_else.action()
+    }
+    pub fn notification(&self) -> &Vec<NotificationStmt> {
+        &self.data_def_or_else.notification()
+    }
+}
+
 impl Stmt for AugmentStmt {
     /// Arg type.
     type Arg = SchemaNodeid;
@@ -3810,6 +4048,16 @@ pub struct RpcStmt {
     output: Option<OutputStmt>,
 }
 
+impl RpcStmt {
+    pub fn typedef(&self) -> &Vec<TypedefStmt> {
+        &self.typedef_or_grouping.typedef()
+    }
+
+    pub fn grouping(&self) -> &Vec<GroupingStmt> {
+        &self.typedef_or_grouping.grouping()
+    }
+}
+
 impl Stmt for RpcStmt {
     /// Arg type.
     type Arg = Identifier;
@@ -3916,6 +4164,16 @@ pub struct ActionStmt {
     output: Option<OutputStmt>,
 }
 
+impl ActionStmt {
+    pub fn typedef(&self) -> &Vec<TypedefStmt> {
+        &self.typedef_or_grouping.typedef()
+    }
+
+    pub fn grouping(&self) -> &Vec<GroupingStmt> {
+        &self.typedef_or_grouping.grouping()
+    }
+}
+
 impl Stmt for ActionStmt {
     /// Arg type.
     type Arg = Identifier;
@@ -4007,6 +4265,48 @@ pub struct InputStmt {
     data_def: DataDefStmt,
 }
 
+impl InputStmt {
+    pub fn typedef(&self) -> &Vec<TypedefStmt> {
+        &self.typedef_or_grouping.typedef()
+    }
+
+    pub fn grouping(&self) -> &Vec<GroupingStmt> {
+        &self.typedef_or_grouping.grouping()
+    }
+
+    pub fn container(&self) -> &Vec<ContainerStmt> {
+        &self.data_def.container()
+    }
+
+    pub fn leaf(&self) -> &Vec<LeafStmt> {
+        &self.data_def.leaf()
+    }
+
+    pub fn leaf_list(&self) -> &Vec<LeafListStmt> {
+        &self.data_def.leaf_list()
+    }
+
+    pub fn list(&self) -> &Vec<ListStmt> {
+        &self.data_def.list()
+    }
+
+    pub fn choice(&self) -> &Vec<ChoiceStmt> {
+        &self.data_def.choice()
+    }
+
+    pub fn anydata(&self) -> &Vec<AnydataStmt> {
+        &self.data_def.anydata()
+    }
+
+    pub fn anyxml(&self) -> &Vec<AnyxmlStmt> {
+        &self.data_def.anyxml()
+    }
+
+    pub fn uses(&self) -> &Vec<UsesStmt> {
+        &self.data_def.uses()
+    }
+}
+
 impl Stmt for InputStmt {
     /// Arg type.
     type Arg = NoArg;
@@ -4075,6 +4375,48 @@ pub struct OutputStmt {
 
     /// "data-def" statement.
     data_def: DataDefStmt,
+}
+
+impl OutputStmt {
+    pub fn typedef(&self) -> &Vec<TypedefStmt> {
+        &self.typedef_or_grouping.typedef()
+    }
+
+    pub fn grouping(&self) -> &Vec<GroupingStmt> {
+        &self.typedef_or_grouping.grouping()
+    }
+
+    pub fn container(&self) -> &Vec<ContainerStmt> {
+        &self.data_def.container()
+    }
+
+    pub fn leaf(&self) -> &Vec<LeafStmt> {
+        &self.data_def.leaf()
+    }
+
+    pub fn leaf_list(&self) -> &Vec<LeafListStmt> {
+        &self.data_def.leaf_list()
+    }
+
+    pub fn list(&self) -> &Vec<ListStmt> {
+        &self.data_def.list()
+    }
+
+    pub fn choice(&self) -> &Vec<ChoiceStmt> {
+        &self.data_def.choice()
+    }
+
+    pub fn anydata(&self) -> &Vec<AnydataStmt> {
+        &self.data_def.anydata()
+    }
+
+    pub fn anyxml(&self) -> &Vec<AnyxmlStmt> {
+        &self.data_def.anyxml()
+    }
+
+    pub fn uses(&self) -> &Vec<UsesStmt> {
+        &self.data_def.uses()
+    }
 }
 
 impl Stmt for OutputStmt {
@@ -4161,6 +4503,48 @@ pub struct NotificationStmt {
 
     /// "data-def" statement.
     data_def: DataDefStmt,
+}
+
+impl NotificationStmt {
+    pub fn typedef(&self) -> &Vec<TypedefStmt> {
+        &self.typedef_or_grouping.typedef()
+    }
+
+    pub fn grouping(&self) -> &Vec<GroupingStmt> {
+        &self.typedef_or_grouping.grouping()
+    }
+
+    pub fn container(&self) -> &Vec<ContainerStmt> {
+        &self.data_def.container()
+    }
+
+    pub fn leaf(&self) -> &Vec<LeafStmt> {
+        &self.data_def.leaf()
+    }
+
+    pub fn leaf_list(&self) -> &Vec<LeafListStmt> {
+        &self.data_def.leaf_list()
+    }
+
+    pub fn list(&self) -> &Vec<ListStmt> {
+        &self.data_def.list()
+    }
+
+    pub fn choice(&self) -> &Vec<ChoiceStmt> {
+        &self.data_def.choice()
+    }
+
+    pub fn anydata(&self) -> &Vec<AnydataStmt> {
+        &self.data_def.anydata()
+    }
+
+    pub fn anyxml(&self) -> &Vec<AnyxmlStmt> {
+        &self.data_def.anyxml()
+    }
+
+    pub fn uses(&self) -> &Vec<UsesStmt> {
+        &self.data_def.uses()
+    }
 }
 
 impl Stmt for NotificationStmt {

@@ -182,7 +182,7 @@ impl BodyStmts {
 ///
 /// "meta" statements.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct MetaStmts {
     /// "organization" statement.
     organization: Option<OrganizationStmt>,
@@ -224,7 +224,7 @@ impl MetaStmts {
 ///
 /// "linkage" statements.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct LinkageStmts {
     /// "import" statement.
     import: Vec<ImportStmt>,
@@ -256,7 +256,7 @@ impl LinkageStmts {
 ///
 /// "revision" statements.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RevisionStmts {
     /// "revision" statement.
     revision: Vec<RevisionStmt>
@@ -283,7 +283,7 @@ impl RevisionStmts {
 ///
 /// "numerical-restrictions".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct NumericalRestrictions {
     /// "reange" statement.
     range: Option<RangeStmt>,
@@ -310,7 +310,7 @@ impl NumericalRestrictions {
 ///
 /// "decimal64-specification".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct Decimal64Specification {
     /// "fraction-digits" statement.
     fraction_digits: FractionDigitsStmt,
@@ -342,7 +342,7 @@ impl Decimal64Specification {
 ///
 /// "string-restrictions".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct StringRestrictions {
     /// "length" statement.
     length: Option<LengthStmt>,
@@ -354,7 +354,7 @@ pub struct StringRestrictions {
 ///
 /// "enum-specification".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct EnumSpecification {
     /// "enum" statement.
     enum_: Vec<EnumStmt>,
@@ -363,7 +363,7 @@ pub struct EnumSpecification {
 ///
 /// "leafref-specification".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct LeafrefSpecification {
     /// "path" statement.
     path: PathStmt,
@@ -375,7 +375,7 @@ pub struct LeafrefSpecification {
 ///
 /// "identityref-specification".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct IdentityrefSpecification {
     /// "base" statement.
     base: Vec<BaseStmt>,
@@ -384,7 +384,7 @@ pub struct IdentityrefSpecification {
 ///
 /// "instance-identifier-specification".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct InstanceIdentifierSpecification {
     /// "require-instance" statement.
     require_instance: Option<RequireInstanceStmt>,
@@ -393,7 +393,7 @@ pub struct InstanceIdentifierSpecification {
 ///
 /// "bits-specification".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct BitsSpecification {
     /// "bit" statement.
     bit: Vec<BitStmt>,
@@ -402,7 +402,7 @@ pub struct BitsSpecification {
 ///
 /// "union-specification".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct UnionSpecification {
     /// "type" statement.
     type_: Vec<TypeStmt>,
@@ -411,7 +411,7 @@ pub struct UnionSpecification {
 ///
 /// "binary-specification".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct BinarySpecification {
     /// "length" statement.
     length: Option<LengthStmt>,
@@ -546,9 +546,9 @@ pub trait Selection {
 }
 
 ///
-/// "typedef-stmt" / "grouping-stmt"
+/// "typedef" stmt / "grouping" stmt
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct TypedefOrGrouping {
     /// "typedef" statement.
     typedef: Vec<TypedefStmt>,
@@ -586,7 +586,7 @@ impl Selection for TypedefOrGrouping {
 ///
 /// "data-def-stmt".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DataDefStmt {
     /// "container" statement.
     container: Vec<ContainerStmt>,
@@ -656,7 +656,7 @@ impl Selection for DataDefStmt {
 ///
 /// "data-def-stmt" / "case-stmt" / "action-stmt" / "notification-stmt".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DataDefOrElse {
     /// "container" statement.
     container: Vec<ContainerStmt>,
@@ -743,7 +743,7 @@ impl Selection for DataDefOrElse {
 ///
 /// "short-case-stmt" / "case-stmt".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ShortCaseOrCaseStmt {
     /// "choice" statement.
     choice: Vec<ChoiceStmt>,
