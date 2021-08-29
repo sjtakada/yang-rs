@@ -1519,7 +1519,7 @@ mod tests {
 
         match Identifier::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: identifier at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error identifier"),
         }
 
         let s = " 123$ ";
@@ -1527,7 +1527,7 @@ mod tests {
 
         match Identifier::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: identifier at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error identifier"),
         }
     }
 
@@ -1554,7 +1554,7 @@ mod tests {
 
         match IdentifierRef::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: identifier at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error identifier"),
         }
 
         let s = " _123:_456 ";
@@ -1570,7 +1570,7 @@ mod tests {
 
         match IdentifierRef::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: identifier at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error identifier"),
         }
     }
 
@@ -1589,7 +1589,7 @@ mod tests {
 
         match DateArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: date-arg at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error date-arg"),
         }
 
         let s = " 08-01-2021 ";
@@ -1597,7 +1597,7 @@ mod tests {
 
         match DateArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: date-arg at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error date-arg"),
         }
 
         let s = " 2021-08-0x ";
@@ -1605,7 +1605,7 @@ mod tests {
 
         match DateArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: date-arg at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error date-arg"),
         }
     }
 
@@ -1615,7 +1615,7 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match FractionDigitsArg::parse_arg(&mut parser) {
-            Ok(arg) => assert_eq!(arg.digits(), 18),
+            Ok(arg) => assert_eq!(arg.digits(), &18),
             Err(err) => panic!("{:?}", err.to_string()),
         }
 
@@ -1624,7 +1624,7 @@ mod tests {
 
         match FractionDigitsArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: fraction-digits-arg at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error fraction-digits-arg"),
         }
 
         let s = "19";
@@ -1632,7 +1632,7 @@ mod tests {
 
         match FractionDigitsArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: fraction-digits-arg at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error fraction-digits-arg"),
         }
     }
 
@@ -1670,7 +1670,7 @@ mod tests {
 
         match RangeArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: range-arg at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error range-arg"),
         }
 
         let s = r#""1.01 .. 1.99""#;
@@ -1716,7 +1716,7 @@ mod tests {
 
         match LengthArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: length-arg at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error length-arg"),
         }
     }
 
@@ -1852,7 +1852,7 @@ mod tests {
 
         match IfFeatureExpr::parse_arg(&mut parser) {
             Ok(expr) => panic!("{:?}", expr),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: if-feature-expr at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error if-feature-expr"),
 
         }
     }

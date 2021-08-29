@@ -5153,10 +5153,10 @@ mod tests {
         }
     }
 
-    #[test]
-    pub fn test_feature_stmt() {
-        // TBD
-    }
+//    #[test]
+//    pub fn test_feature_stmt() {
+//        // TBD
+//    }
 
     #[test]
     pub fn test_deviation_stmt() {
