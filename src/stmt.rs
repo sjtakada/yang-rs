@@ -5044,6 +5044,7 @@ mod tests {
 
     #[test]
     pub fn test_import_stmt() {
+        // Assuming keyword is already parsed, and arg and body are given to stmt parser.
         let s = r#"openconfig-inet-types {
                        prefix oc-inet;
                        revision-date 2017-07-06;
@@ -5051,15 +5052,17 @@ mod tests {
 
         let mut parser = Parser::new(s.to_string());
         match ImportStmt::parse(&mut parser) {
-            Ok(stmt) => {
-                assert_eq!(stmt,
-                           YangStmt::ImportStmt(ImportStmt {
-                               arg: Identifier::from_str("openconfig-inet-types").unwrap(),
-                               prefix: PrefixStmt { arg: Identifier::from_str("oc-inet").unwrap() },
-                               revision_date: Some(RevisionDateStmt { arg: DateArg::from_str("2017-07-06").unwrap() } ),
-                               description: None,
-                               reference: None })
-                );
+            Ok(yang) => {
+                match yang {
+                    YangStmt::ImportStmt(stmt) => {
+                        assert_eq!(stmt.arg(), &Identifier::from_str("openconfig-inet-types").unwrap());
+                        assert_eq!(stmt.prefix(), &PrefixStmt { arg: Identifier::from_str("oc-inet").unwrap() });
+                        assert_eq!(stmt.revision_date(), &Some(RevisionDateStmt { arg: DateArg::from_str("2017-07-06").unwrap() } ));
+                        assert_eq!(stmt.description(), &None);
+                        assert_eq!(stmt.reference(), &None);
+                    }
+                    _ => panic!("Unexpected stmt {:?}", yang),
+                }
             }
             Err(err) => panic!("{}", err.to_string()),
         }
@@ -5067,6 +5070,7 @@ mod tests {
 
     #[test]
     pub fn test_include_stmt() {
+        // Assuming keyword is already parsed, and arg and body are given to stmt parser.
         let s = r#"openconfig-inet-types {
                        prefix oc-inet;
                        revision-date 2017-07-06;
@@ -5074,7 +5078,7 @@ mod tests {
 
         let mut parser = Parser::new(s.to_string());
         match IncludeStmt::parse(&mut parser) {
-            Ok(stmt) => panic!("{:?}", stmt),
+            Ok(yang) => panic!("{:?}", yang),
             Err(err) => assert_eq!(err.to_string(), "Unexpected token Identifier '\"prefix\"'"),
         }
 
@@ -5084,16 +5088,16 @@ mod tests {
 
         let mut parser = Parser::new(s.to_string());
         match IncludeStmt::parse(&mut parser) {
-            Ok(stmt) => {
-                println!("{:?}", stmt);
-
-                assert_eq!(stmt,
-                           YangStmt::IncludeStmt(IncludeStmt {
-                               arg: Identifier::from_str("openconfig-inet-types").unwrap(),
-                               revision_date: Some(RevisionDateStmt { arg: DateArg::from_str("2017-07-06").unwrap() } ),
-                               description: None,
-                               reference: None })
-                );
+            Ok(yang) => {
+                match yang {
+                    YangStmt::IncludeStmt(stmt) => {
+                        assert_eq!(stmt.arg(), &Identifier::from_str("openconfig-inet-types").unwrap());
+                        assert_eq!(stmt.revision_date(), &Some(RevisionDateStmt { arg: DateArg::from_str("2017-07-06").unwrap() } ));
+                        assert_eq!(stmt.description(), &None);
+                        assert_eq!(stmt.reference(), &None);
+                    }
+                    _ => panic!("Unexpected stmt {:?}", yang),
+                }
             }
             Err(err) => panic!("{}", err.to_string()),
         }
@@ -5101,6 +5105,7 @@ mod tests {
 
     #[test]
     pub fn test_extension_stmt() {
+        // Assuming keyword is already parsed, and arg and body are given to stmt parser.
         let s = r#"openconfig-version {
     argument "semver" {
       yin-element false;
@@ -5112,17 +5117,33 @@ mod tests {
 
         let mut parser = Parser::new(s.to_string());
         match ExtensionStmt::parse(&mut parser) {
-            Ok(stmt) => {
-                assert_eq!(stmt,
-                           YangStmt::ExtensionStmt(ExtensionStmt {
-                               arg: Identifier::from_str("openconfig-version").unwrap(),
-                               argument: Some(ArgumentStmt { arg: Identifier::from_str("semver").unwrap(),
-                                                             yin_element: Some(YinElementStmt { arg: YinElementArg::from_str("false").unwrap() })}),
-                               status: None,
-                               description: Some(DescriptionStmt { arg: String::from("The OpenConfig version number for the module. This is\n...") }),
-                               reference: None 
-                           })
-                );
+            Ok(yang) => {
+                match yang {
+                    YangStmt::ExtensionStmt(stmt) => {
+                        assert_eq!(stmt.arg(), &Identifier::from_str("openconfig-version").unwrap());
+                        match stmt.argument() {
+                            Some(argument_stmt) => {
+                                assert_eq!(argument_stmt.arg(), &Identifier::from_str("semver").unwrap());
+                                match argument_stmt.yin_element() {
+                                    Some(yin_element_stmt) => {
+                                        assert_eq!(yin_element_stmt.arg(), &YinElementArg::from_str("false").unwrap());
+                                    }
+                                    None => panic!("No yin-element-stmt"),
+                                }
+                            }
+                            None => panic!("No argument-stmt"),
+                        }
+                        assert_eq!(stmt.status(), &None);
+                        match stmt.description() {
+                            Some(description_stmt) => {
+                                assert_eq!(description_stmt.arg(), "The OpenConfig version number for the module. This is\n...");
+                            }
+                            None => panic!("No description-stmt"),
+                        }
+                        assert_eq!(stmt.reference(), &None);
+                    }
+                    _ => panic!("Unexpected stmt {:?}", yang),
+                }
             }
             Err(err) => panic!("{}", err.to_string()),
         }
@@ -5130,6 +5151,7 @@ mod tests {
     
     #[test]
     pub fn test_identity_stmt() {
+        // Assuming keyword is already parsed, and arg and body are given to stmt parser.
         let s = r#"SFP {
     base TRANSCEIVER_FORM_FACTOR_TYPE;
     description
@@ -5138,16 +5160,18 @@ mod tests {
     }"#;
         let mut parser = Parser::new(s.to_string());
         match IdentityStmt::parse(&mut parser) {
-            Ok(stmt) => {
-                assert_eq!(stmt,
-                           YangStmt::IdentityStmt(IdentityStmt {
-                               arg: Identifier::from_str("SFP").unwrap(),
-                               if_feature: vec![],
-                               base: vec![BaseStmt { arg: IdentifierRef::from_str("TRANSCEIVER_FORM_FACTOR_TYPE").unwrap() }],
-                               status: None,
-                               description: Some(DescriptionStmt { arg: String::from("Small form-factor pluggable transceiver supporting up to\n10 Gb/s signal") }),
-                               reference: None })
-                           );
+            Ok(yang) => {
+                match yang {
+                    YangStmt::IdentityStmt(stmt) => {
+                        assert_eq!(stmt.arg(), &Identifier::from_str("SFP").unwrap());
+                        assert_eq!(stmt.if_feature(), &vec![]);
+                        assert_eq!(stmt.base(), &vec![BaseStmt { arg: IdentifierRef::from_str("TRANSCEIVER_FORM_FACTOR_TYPE").unwrap()}]);
+                        assert_eq!(stmt.status(), &None);
+                        assert_eq!(stmt.description(), &Some(DescriptionStmt { arg: String::from("Small form-factor pluggable transceiver supporting up to\n10 Gb/s signal") }));
+                        assert_eq!(stmt.reference(), &None);
+                    }
+                    _ => panic!("Unexpected stmt {:?}", yang),
+                }
             }
             Err(err) => panic!("{}", err.to_string()),
         }
@@ -5160,6 +5184,8 @@ mod tests {
 
     #[test]
     pub fn test_deviation_stmt() {
+        // Assuming keyword is already parsed, and arg and body are given to stmt parser.
+
         // Deviation add.
         let s = r#""/oc-if:interfaces/oc-if:interface/oc-if:hold-time" +
             "/oc-if:config/oc-if:up" {
