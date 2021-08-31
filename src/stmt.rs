@@ -5183,6 +5183,38 @@ mod tests {
 //    }
 
     #[test]
+    pub fn test_typedef_stmt() {
+        let s = r#"zero-based-counter32 {
+    type yang:counter32;
+    default "0";
+    description
+     "The zero-based-counter32 type represents a counter32
+      that has the defined 'initial' value zero....";
+    reference
+      "RFC 4502: Remote Network Monitoring Management Information
+                 Base Version 2";
+    }"#;
+
+        let mut parser = Parser::new(s.to_string());
+        match TypedefStmt::parse(&mut parser) {
+            Ok(yang) => {
+                match yang {
+                    YangStmt::TypedefStmt(stmt) => {
+                        assert_eq!(stmt.arg(), &Identifier::from_str("zero-based-counter32").unwrap());
+                        assert_eq!(stmt.type_(), &TypeStmt { arg: IdentifierRef::from_str("yang:counter32").unwrap(), type_body: None });
+                        assert_eq!(stmt.units(), &None);
+                        assert_eq!(stmt.default(), &Some(DefaultStmt { arg: String::from("0") }));
+                        assert_eq!(stmt.description(), &Some(DescriptionStmt { arg: String::from("The zero-based-counter32 type represents a counter32\nthat has the defined 'initial' value zero....") }));
+                        assert_eq!(stmt.reference(), &Some(ReferenceStmt { arg: String::from("RFC 4502: Remote Network Monitoring Management Information\n          Base Version 2") }));
+                    }
+                    _ => panic!("Unexpected stmt {:?}", yang),
+                }
+            }
+            Err(err) => panic!("{}", err.to_string()),
+        }
+    }
+
+    #[test]
     pub fn test_deviation_stmt() {
         // Assuming keyword is already parsed, and arg and body are given to stmt parser.
 
@@ -5321,27 +5353,5 @@ mod tests {
             }
             Err(err) => panic!("{}", err.to_string()),
         }
-    }
-
-    #[test]
-    pub fn test_typedef_stmt() {
-// TBD
-        let s = r#"area-id {
-	type union {
-
-            type ipv4-address {
-
-            }
-
-            type uint32 {
-		range "0..4294967295";
-            }
-	}
-    }"#;
-
-        let mut parser = Parser::new(s.to_string());
-
-        let res = TypedefStmt::parse(&mut parser);
-        println!("{:?}", res);
     }
 }
