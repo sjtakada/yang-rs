@@ -5193,21 +5193,29 @@ mod tests {
   }"#;
         let mut parser = Parser::new(s.to_string());
         match DeviationStmt::parse(&mut parser) {
-            Ok(stmt) => {
-                assert_eq!(stmt, YangStmt::DeviationStmt(DeviationStmt {
-                    arg: AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-if:hold-time/oc-if:config/oc-if:up").unwrap(),
-                    description: None,
-                    reference: None,
-                    deviate: vec![DeviateStmt::Add(DeviateAddStmt { units: None,
-                                                                    must: vec![],
-                                                                    unique: vec![],
-                                                                    default: vec![],
-                                                                    config: None,
-                                                                    mandatory: None,
-                                                                    min_elements: None,
-                                                                    max_elements: None,
-                    })]
-                }));
+            Ok(yang) => {
+                match yang {
+                    YangStmt::DeviationStmt(stmt) => {
+                        assert_eq!(stmt.arg(), &AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-if:hold-time/oc-if:config/oc-if:up").unwrap());
+                        assert_eq!(stmt.description(), &None);
+                        assert_eq!(stmt.reference(), &None);
+                        assert_eq!(stmt.deviate().len(), 1);
+                        let deviate_stmt = stmt.deviate().get(0).unwrap();
+                        match deviate_stmt {
+                            DeviateStmt::Add(deviate_add_stmt) => {
+                                assert_eq!(deviate_add_stmt.units(), &None);
+                                assert_eq!(deviate_add_stmt.must().len(), 0);
+                                assert_eq!(deviate_add_stmt.unique().len(), 0);
+                                assert_eq!(deviate_add_stmt.config(), &None);
+                                assert_eq!(deviate_add_stmt.mandatory(), &None);
+                                assert_eq!(deviate_add_stmt.min_elements(), &None);
+                                assert_eq!(deviate_add_stmt.max_elements(), &None);
+                            },
+                            _ => panic!("Unexpected stmt {:?}", deviate_stmt),
+                        }
+                    }
+                    _ => panic!("Unexpected stmt {:?}", yang),
+                }
             }
             Err(err) => panic!("{}", err.to_string()),
         }
@@ -5223,16 +5231,26 @@ mod tests {
   }"#;
         let mut parser = Parser::new(s.to_string());
         match DeviationStmt::parse(&mut parser) {
-            Ok(stmt) => {
-                assert_eq!(stmt, YangStmt::DeviationStmt(DeviationStmt {
-                    arg: AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-if:hold-time/oc-if:config/oc-if:up").unwrap(),
-                    description: Some(DescriptionStmt { arg: String::from("Hold-time 0 is not configurable on XE, use no dampening.") }),
-                    reference: None,
-                    deviate: vec![DeviateStmt::Delete(DeviateDeleteStmt { units: None,
-                                                                          must: vec![],
-                                                                          unique: vec![],
-                                                                          default: vec![DefaultStmt { arg: String::from("0") }] })]
-                }));
+            Ok(yang) => {
+                match yang {
+                    YangStmt::DeviationStmt(stmt) => {
+                        assert_eq!(stmt.arg(), &AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-if:hold-time/oc-if:config/oc-if:up").unwrap());
+                        assert_eq!(stmt.description(), &Some(DescriptionStmt { arg: String::from("Hold-time 0 is not configurable on XE, use no dampening.") }));
+                        assert_eq!(stmt.reference(), &None);
+                        assert_eq!(stmt.deviate().len(), 1);
+                        let deviate_stmt = stmt.deviate().get(0).unwrap();
+                        match deviate_stmt {
+                            DeviateStmt::Delete(deviate_delete_stmt) => {
+                                assert_eq!(deviate_delete_stmt.units(), &None);
+                                assert_eq!(deviate_delete_stmt.must().len(), 0);
+                                assert_eq!(deviate_delete_stmt.unique().len(), 0);
+                                assert_eq!(deviate_delete_stmt.default(), &vec![DefaultStmt { arg: String::from("0") }]);
+                            },
+                            _ => panic!("Unexpected stmt {:?}", deviate_stmt),
+                        }
+                    }
+                    _ => panic!("Unexpected stmt {:?}", yang),
+                }
             }
             Err(err) => panic!("{}", err.to_string()),
         }
@@ -5248,21 +5266,29 @@ mod tests {
   }"#;
         let mut parser = Parser::new(s.to_string());
         match DeviationStmt::parse(&mut parser) {
-            Ok(stmt) => {
-                assert_eq!(stmt, YangStmt::DeviationStmt(DeviationStmt {
-                    arg: AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-if:state/oc-if:last-change").unwrap(),
-                    description: Some(DescriptionStmt { arg: String::from("Change the type of the last-change flag to date-and-time") }),
-                    reference: None,
-                    deviate: vec![DeviateStmt::Replace(DeviateReplaceStmt { 
-                        type_: Some(TypeStmt { arg: IdentifierRef::from_str("yang:date-and-time").unwrap(), type_body: None }),
-                        units: None,
-                        default: None,
-                        config: None,
-                        mandatory: None,
-                        min_elements: None,
-                        max_elements: None,
-                    })]
-                }));
+            Ok(yang) => {
+                match yang {
+                    YangStmt::DeviationStmt(stmt) => {
+                        assert_eq!(stmt.arg(), &AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-if:state/oc-if:last-change").unwrap());
+                        assert_eq!(stmt.description(), &Some(DescriptionStmt { arg: String::from("Change the type of the last-change flag to date-and-time") }));
+                        assert_eq!(stmt.reference(), &None);
+                        assert_eq!(stmt.deviate().len(), 1);
+                        let deviate_stmt = stmt.deviate().get(0).unwrap();
+                        match deviate_stmt {
+                            DeviateStmt::Replace(deviate_replace_stmt) => {
+                                assert_eq!(deviate_replace_stmt.type_(), &Some(TypeStmt { arg: IdentifierRef::from_str("yang:date-and-time").unwrap(), type_body: None }));
+                                assert_eq!(deviate_replace_stmt.units(), &None);
+                                assert_eq!(deviate_replace_stmt.default(), &None);
+                                assert_eq!(deviate_replace_stmt.config(), &None);
+                                assert_eq!(deviate_replace_stmt.mandatory(), &None);
+                                assert_eq!(deviate_replace_stmt.min_elements(), &None);
+                                assert_eq!(deviate_replace_stmt.max_elements(), &None);
+                            },
+                            _ => panic!("Unexpected stmt {:?}", deviate_stmt),
+                        }
+                    }
+                    _ => panic!("Unexpected stmt {:?}", yang),
+                }
             }
             Err(err) => panic!("{}", err.to_string()),
         }
@@ -5276,13 +5302,22 @@ mod tests {
   }"#;
         let mut parser = Parser::new(s.to_string());
         match DeviationStmt::parse(&mut parser) {
-            Ok(stmt) => {
-                assert_eq!(stmt, YangStmt::DeviationStmt(DeviationStmt {
-                    arg: AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp").unwrap(),
-                    description: Some(DescriptionStmt { arg: String::from("IPv4 VRRP not supported in 16.6.1.") }),
-                    reference: None,
-                    deviate: vec![DeviateStmt::NotSupported]
-                }));
+            Ok(yang) => {
+                match yang {
+                    YangStmt::DeviationStmt(stmt) => {
+                        assert_eq!(stmt.arg(), &AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp").unwrap());
+                        assert_eq!(stmt.description(), &Some(DescriptionStmt { arg: String::from("IPv4 VRRP not supported in 16.6.1.") }));
+                        assert_eq!(stmt.reference(), &None);
+                        assert_eq!(stmt.deviate().len(), 1);
+                        let deviate_stmt = stmt.deviate().get(0).unwrap();
+                        match deviate_stmt {
+                            DeviateStmt::NotSupported => {}
+                            _ => panic!("Unexpected stmt {:?}", deviate_stmt),
+
+                        }
+                    }
+                    _ => panic!("Unexpected stmt {:?}", yang),
+                }
             }
             Err(err) => panic!("{}", err.to_string()),
         }
