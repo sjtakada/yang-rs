@@ -5015,15 +5015,25 @@ impl UnknownStmt {
         };
 
         let token = parser.get_token()?;
+        let mut yang = Vec::new();
         match token {
             Token::StatementEnd => {
             }
             Token::BlockBegin => {
-                let token = parser.get_token()?;
-                match token {
-                    Token::BlockEnd => {
+                loop {
+                    let token = parser.get_token()?;
+
+                    match token {
+                        Token::BlockEnd => break,
+                        Token::StatementEnd => {},
+                        Token::QuotedString(ref keyword) |
+                        Token::Identifier(ref keyword) => {
+                            let stmt = SubStmtUtil::call_stmt_parser(parser, keyword as &str)?;
+                            yang.push(stmt);
+                        }
+                        Token::EndOfInput => return Err(YangError::UnexpectedEof),
+                        _ => return Err(YangError::UnexpectedToken(token.to_string()))
                     }
-                    _ => return Err(YangError::UnexpectedToken(token.to_string()))
                 }
             }
             _ => return Err(YangError::UnexpectedToken(token.to_string()))
@@ -5032,7 +5042,7 @@ impl UnknownStmt {
         Ok(YangStmt::UnknownStmt(UnknownStmt {
             keyword,
             arg,
-            yang: Vec::new(),
+            yang,
         }))
     }
 }
