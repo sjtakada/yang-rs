@@ -45,7 +45,7 @@ pub struct SubStmtUtil;
 
 impl SubStmtUtil {
     // Parse a single statement.
-    fn call_stmt_parser(parser: &mut Parser, keyword: &str) -> Result<YangStmt, YangError> {
+    pub fn call_stmt_parser(parser: &mut Parser, keyword: &str) -> Result<YangStmt, YangError> {
         let f = STMT_PARSER.get(keyword).unwrap();
         f(parser)
     }
@@ -85,7 +85,10 @@ impl SubStmtUtil {
 
         loop {
             let token = parser.get_token()?;
-println!("*** [DEBUG] parse_substmts_default {:?}", token);
+
+            if parser.config().debug() {
+                println!("*** [DEBUG] parse_substmts_default {:?}", token);
+            }
             match token {
                 Token::Identifier(ref keyword) => {
                     if k2i.contains_key(keyword as &str) {
@@ -105,8 +108,8 @@ println!("*** [DEBUG] parse_substmts_default {:?}", token);
                             break;
                         }
                     } else if !STMT_PARSER.contains_key(keyword as &str) {
-                        // This is "unknown" statement.
-                        let _stmt = UnknownStmt::parse_unknown(parser)?;
+                        // This could be "unknown" statement.
+                        let _stmt = UnknownStmt::parse(parser, keyword)?;
                         // TBD: just parse and ignore it for now.
                     } else {
                         parser.save_token(token);
@@ -126,17 +129,19 @@ println!("*** [DEBUG] parse_substmts_default {:?}", token);
                 Some(i) => {
                     let rep = i2rep.get(i).unwrap();
                     if rep.count < rep.min {
-                        return Err(YangError::TooFewStatement(parser.line(), k.clone()));
+                        return Err(YangError::TooFewStatement(k.clone()));
                     }
                     if rep.max < rep.count {
-                        return Err(YangError::TooManyStatements(parser.line(), k.clone()));
+                        return Err(YangError::TooManyStatements(k.clone()));
                     }
                 }
-                None => return Err(YangError::UnexpectedStatement(parser.line())),
+                None => return Err(YangError::UnexpectedStatement(k.clone())),
             }
         }
 
-println!("*** [DEBUG] end");
+        if parser.config().debug() {
+            println!("*** [DEBUG] end");
+        }
 
         Ok(stmts)
     }

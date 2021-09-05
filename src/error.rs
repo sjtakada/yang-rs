@@ -8,35 +8,38 @@ use quick_error::*;
 quick_error! {
     #[derive(Debug)]
     pub enum YangError {
+        IoError(s: String) {
+            display("io::Error: {}", s)
+        }
         InvalidComment {
             display("Invalid comment")
         }
-        InvalidString {
-            display("Invalid string")
+        InvalidString(s: String) {
+            display("Invalid string '{}'", s)
         }
-        InvalidIdentifier {
-            display("Invalid identifier")
-        }
+//        InvalidIdentifier {
+//            display("Invalid identifier")
+//        }
         UnexpectedEof {
             display("Unexpected end of file")
         }
         UnexpectedToken(s: String) {
             display("Unexpected token {}", s)
         }
-        UnexpectedStatement(line: usize) {
-            display("Unexpected statement at line {}", line)
+        UnexpectedStatement(s: String) {
+            display("Unexpected statement: {}", s)
         }
         MissingStatement(s: &'static str) {
             display("Missing statement {}", s)
         }
-        TooFewStatement(line: usize, s: String) {
-            display("Too few statement {} at line {}", s, line)
+        TooFewStatement(s: String) {
+            display("Too few statement {}", s)
         }
-        TooManyStatements(line: usize, s: String) {
-            display("Too many statements {} at line {}", s, line)
+        TooManyStatements(s: String) {
+            display("Too many statements {}", s)
         }
-        ArgumentParseError(s: &'static str, line: usize) {
-            display("Argument parse error: {} at line {}", s, line)
+        ArgumentParseError(s: &'static str) {
+            display("Argument parse error {}", s)
         }
         PlaceHolder {
             display("placeholder")

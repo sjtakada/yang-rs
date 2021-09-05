@@ -9,6 +9,8 @@ use std::str::FromStr;
 use std::string::ToString;
 use url::Url;
 
+use derive_getters::Getters;
+
 use super::core::*;
 use super::error::*;
 use super::parser::*;
@@ -81,7 +83,7 @@ impl StmtArg for NoArg {
 ///
 /// Yang Identifier.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct Identifier {
     str: String,
 }
@@ -110,7 +112,7 @@ impl StmtArg for Identifier {
 
         match Identifier::from_str(&str) {
             Ok(arg) => Ok(arg),
-            Err(e) => Err(YangError::ArgumentParseError(e.str, parser.line())),
+            Err(e) => Err(YangError::ArgumentParseError(e.str)),
         }
     }
 }
@@ -118,7 +120,7 @@ impl StmtArg for Identifier {
 ///
 /// "identity-ref".
 ///
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Getters)]
 pub struct IdentifierRef {
     prefix: Option<Prefix>,
     identifier: Identifier,
@@ -164,14 +166,14 @@ impl FromStr for IdentifierRef {
 impl StmtArg for IdentifierRef {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
-        IdentifierRef::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))
+        IdentifierRef::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str))
     }
 }
 
 ///
 /// "node-identifier".
 ///
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Getters)]
 pub struct NodeIdentifier {
     prefix: Option<Prefix>,
     identifier: Identifier,
@@ -218,14 +220,14 @@ impl StmtArg for NodeIdentifier {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         NodeIdentifier::from_str(&str)
-            .map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))
+            .map_err(|e| YangError::ArgumentParseError(e.str))
     }
 }
 
 ///
 /// "unknown-stmt" keyword.
 ///
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Getters)]
 pub struct UnknownStmtKeyword {
     prefix:Prefix,
     identifier: Identifier,
@@ -274,7 +276,7 @@ impl StmtArg for Url {
 
         match Url::parse(&s) {
             Ok(url) => Ok(url),
-            Err(_) => Err(YangError::ArgumentParseError("url", parser.line()))
+            Err(_) => Err(YangError::ArgumentParseError("url"))
         }
     }
 }
@@ -282,7 +284,7 @@ impl StmtArg for Url {
 ///
 /// "yang-version-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct YangVersionArg {
     str: String,
 }
@@ -291,10 +293,19 @@ impl StmtArg for YangVersionArg {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
-        if str == "1.1" {
-            Ok(YangVersionArg { str })
-        } else {
-            Err(YangError::ArgumentParseError("yang-version", parser.line()))
+        // According to RFC7950, the version should be "1.1", but we relax it.
+
+        match parser.config().yang_version() {
+            Some(yang_version) => {
+                if str == yang_version {
+                    Ok(YangVersionArg { str })
+                } else {
+                    Err(YangError::ArgumentParseError("yang-version"))
+                }
+            }
+            None => {
+                Ok(YangVersionArg { str })
+            }
         }
     }
 }
@@ -302,7 +313,7 @@ impl StmtArg for YangVersionArg {
 ///
 /// "date-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DateArg {
     str: String,
 }
@@ -327,20 +338,20 @@ impl StmtArg for DateArg {
 
         if str.chars().count() == 10 {
             if let Some(_) = &str[0..4].find(|c: char| !c.is_ascii_digit()) {
-                Err(YangError::ArgumentParseError("date-arg", parser.line()))
+                Err(YangError::ArgumentParseError("date-arg"))
             } else if str.chars().nth(4).unwrap() != '-' {
-                Err(YangError::ArgumentParseError("date-arg", parser.line()))
+                Err(YangError::ArgumentParseError("date-arg"))
             } else if let Some(_) = &str[5..7].find(|c: char| !c.is_ascii_digit()) {
-                Err(YangError::ArgumentParseError("date-arg", parser.line()))
+                Err(YangError::ArgumentParseError("date-arg"))
             } else if str.chars().nth(7).unwrap() != '-' {
-                Err(YangError::ArgumentParseError("date-arg", parser.line()))
+                Err(YangError::ArgumentParseError("date-arg"))
             } else if let Some(_) = &str[8..10].find(|c: char| !c.is_ascii_digit()) {
-                Err(YangError::ArgumentParseError("date-arg", parser.line()))
+                Err(YangError::ArgumentParseError("date-arg"))
             } else {
                 Ok(DateArg { str })
             }
         } else {
-            Err(YangError::ArgumentParseError("date-arg", parser.line()))
+            Err(YangError::ArgumentParseError("date-arg"))
         }
     }
 }
@@ -348,7 +359,7 @@ impl StmtArg for DateArg {
 ///
 /// "yin-element-arg". 
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct YinElementArg {
     arg: bool,
 }
@@ -371,23 +382,16 @@ impl StmtArg for YinElementArg {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
-        YinElementArg::from_str(&str).map_err(|_| YangError::ArgumentParseError("yin-element-arg", parser.line()))
+        YinElementArg::from_str(&str).map_err(|_| YangError::ArgumentParseError("yin-element-arg"))
     }
 }
 
 ///
 /// "fraction-digits-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct FractionDigitsArg {
     digits: u8,
-}
-
-impl FractionDigitsArg {
-    /// Return fraction digits in unsigned integer.
-    fn digits(&self) -> u8 {
-        self.digits
-    }
 }
 
 impl ToString for FractionDigitsArg {
@@ -401,7 +405,7 @@ impl StmtArg for FractionDigitsArg {
         let str = parse_string(parser)?;
         match str.parse::<u8>() {
             Ok(num) if num >= 1 && num <= 18 => Ok(FractionDigitsArg { digits: num }),
-            _ => Err(YangError::ArgumentParseError("fraction-digits-arg", parser.line()))
+            _ => Err(YangError::ArgumentParseError("fraction-digits-arg"))
         }
     }
 }
@@ -417,7 +421,7 @@ pub enum Status {
 ///
 /// "status-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct StatusArg {
     arg: Status,
 }
@@ -432,7 +436,7 @@ impl StmtArg for StatusArg {
         } else if str == "deprecated" {
             Ok(StatusArg { arg: Status::Deprecated })
         } else {
-            Err(YangError::ArgumentParseError("status-arg", parser.line()))
+            Err(YangError::ArgumentParseError("status-arg"))
         }
     }
 }
@@ -440,7 +444,7 @@ impl StmtArg for StatusArg {
 ///
 /// "config-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ConfigArg {
     arg: bool,
 }
@@ -453,7 +457,7 @@ impl StmtArg for ConfigArg {
         } else if str == "false" {
             Ok(ConfigArg { arg: false })
         } else {
-            Err(YangError::ArgumentParseError("config-arg", parser.line()))
+            Err(YangError::ArgumentParseError("config-arg"))
         }
     }
 }
@@ -461,7 +465,7 @@ impl StmtArg for ConfigArg {
 ///
 /// "mandatory-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct MandatoryArg {
     arg: bool,
 }
@@ -474,7 +478,7 @@ impl StmtArg for MandatoryArg {
         } else if str == "false" {
             Ok(MandatoryArg { arg: false })
         } else {
-            Err(YangError::ArgumentParseError("mandatory-arg", parser.line()))
+            Err(YangError::ArgumentParseError("mandatory-arg"))
         }
     }
 }
@@ -488,7 +492,7 @@ pub enum OrderedBy {
 ///
 /// "order-by-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct OrderedByArg {
     arg: OrderedBy,
 }
@@ -501,7 +505,7 @@ impl StmtArg for OrderedByArg {
         } else if str == "system" {
             Ok(OrderedByArg { arg: OrderedBy::System })
         } else {
-            Err(YangError::ArgumentParseError("ordered-by-arg", parser.line()))
+            Err(YangError::ArgumentParseError("ordered-by-arg"))
         }
     }
 }
@@ -509,7 +513,7 @@ impl StmtArg for OrderedByArg {
 ///
 /// "min-value-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct MinValueArg {
     val: u64,
 }
@@ -520,10 +524,10 @@ impl StmtArg for MinValueArg {
         if is_non_negative_integer_value(&str) {
             match str.parse::<u64>() {
                 Ok(num) => Ok(MinValueArg { val: num }),
-                Err(_) => Err(YangError::ArgumentParseError("min-value-arg", parser.line())),
+                Err(_) => Err(YangError::ArgumentParseError("min-value-arg")),
             }
         } else {
-            Err(YangError::ArgumentParseError("min-value-arg", parser.line()))
+            Err(YangError::ArgumentParseError("min-value-arg"))
         }
     }
 }
@@ -546,7 +550,7 @@ impl fmt::Debug for MaxValue {
 ///
 /// "max-value-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct MaxValueArg {
     val: MaxValue,
 }
@@ -560,10 +564,10 @@ impl StmtArg for MaxValueArg {
         } else if is_positive_integer_value(&str) {
             match str.parse::<u64>() {
                 Ok(num) => Ok(MaxValueArg { val: MaxValue::Value(num) }),
-                Err(_) => Err(YangError::ArgumentParseError("max-value-arg", parser.line()))
+                Err(_) => Err(YangError::ArgumentParseError("max-value-arg"))
             }
         } else {
-            Err(YangError::ArgumentParseError("max-value-arg", parser.line()))
+            Err(YangError::ArgumentParseError("max-value-arg"))
         }
     }
 }
@@ -571,7 +575,7 @@ impl StmtArg for MaxValueArg {
 ///
 /// "integer-value".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct IntegerValue {
     val: i64,
 }
@@ -582,10 +586,10 @@ impl StmtArg for IntegerValue {
         if is_integer_value(&str) {
             match str.parse::<i64>() {
                 Ok(num) => Ok(IntegerValue { val: num }),
-                Err(_) => Err(YangError::ArgumentParseError("integer-value", parser.line())),
+                Err(_) => Err(YangError::ArgumentParseError("integer-value")),
             }
         } else {
-            Err(YangError::ArgumentParseError("integer-value", parser.line()))
+            Err(YangError::ArgumentParseError("integer-value"))
         }
     }
 }
@@ -629,7 +633,7 @@ pub type RangePart = (RangeBoundary, Option<RangeBoundary>);
 ///
 /// "range-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RangeArg {
     parts: Vec<RangePart>,
 }
@@ -647,19 +651,19 @@ impl StmtArg for RangeArg {
             let bounds: Vec<_> = p.split("..").collect();
             if bounds.len() == 1 {
                 if bounds[0] == "" {
-                    return Err(YangError::ArgumentParseError("range-arg", parser.line()));
+                    return Err(YangError::ArgumentParseError("range-arg"));
                 }
 
-                lower = RangeBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?;
+                lower = RangeBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str))?;
                 upper = None;
             } else if bounds.len() == 2 {
                 if bounds[0] == "" || bounds[1] == "" {
-                    return Err(YangError::ArgumentParseError("range-arg", parser.line()));
+                    return Err(YangError::ArgumentParseError("range-arg"));
                 }
-                lower = RangeBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?;
-                upper = Some(RangeBoundary::from_str(bounds[1]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?);
+                lower = RangeBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str))?;
+                upper = Some(RangeBoundary::from_str(bounds[1]).map_err(|e| YangError::ArgumentParseError(e.str))?);
             } else {
-                return Err(YangError::ArgumentParseError("range-arg", parser.line()));
+                return Err(YangError::ArgumentParseError("range-arg"));
             }
 
             v.push((lower, upper));
@@ -702,7 +706,7 @@ pub type LengthPart = (LengthBoundary, Option<LengthBoundary>);
 ///
 /// "length-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct LengthArg {
     parts: Vec<LengthPart>,
 }
@@ -720,19 +724,19 @@ impl StmtArg for LengthArg {
             let bounds: Vec<_> = p.split("..").collect();
             if bounds.len() == 1 {
                 if bounds[0] == "" {
-                    return Err(YangError::ArgumentParseError("length-arg", parser.line()));
+                    return Err(YangError::ArgumentParseError("length-arg"));
                 }
 
-                lower = LengthBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?;
+                lower = LengthBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str))?;
                 upper = None;
             } else if bounds.len() == 2 {
                 if bounds[0] == "" || bounds[1] == "" {
-                    return Err(YangError::ArgumentParseError("length-arg", parser.line()));
+                    return Err(YangError::ArgumentParseError("length-arg"));
                 }
-                lower = LengthBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?;
-                upper = Some(LengthBoundary::from_str(bounds[1]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?);
+                lower = LengthBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str))?;
+                upper = Some(LengthBoundary::from_str(bounds[1]).map_err(|e| YangError::ArgumentParseError(e.str))?);
             } else {
-                return Err(YangError::ArgumentParseError("length-arg", parser.line()));
+                return Err(YangError::ArgumentParseError("length-arg"));
             }
 
             v.push((lower, upper));
@@ -745,7 +749,7 @@ impl StmtArg for LengthArg {
 ///
 /// "modifier-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ModifierArg {
 }
 
@@ -755,7 +759,7 @@ impl StmtArg for ModifierArg {
         if str == "invert-match" {
             Ok(ModifierArg { })
         } else {
-            Err(YangError::ArgumentParseError("modifier-arg", parser.line()))
+            Err(YangError::ArgumentParseError("modifier-arg"))
         }
     }
 }
@@ -763,7 +767,7 @@ impl StmtArg for ModifierArg {
 ///
 /// "position-value-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PositionValueArg {
     val: u64,
 }
@@ -774,10 +778,10 @@ impl StmtArg for PositionValueArg {
         if is_non_negative_integer_value(&str) {
             match str.parse::<u64>() {
                 Ok(num) => Ok(PositionValueArg { val: num }),
-                Err(_) => Err(YangError::ArgumentParseError("position-value-arg", parser.line())),
+                Err(_) => Err(YangError::ArgumentParseError("position-value-arg")),
             }
         } else {
-            Err(YangError::ArgumentParseError("position-value-arg", parser.line()))
+            Err(YangError::ArgumentParseError("position-value-arg"))
         }
     }
 }
@@ -798,20 +802,20 @@ impl StmtArg for PathArg {
 
         if str.starts_with('/') {
             Ok(PathArg::AbsolutePath(AbsolutePath::from_str(&str)
-                                     .map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?
+                                     .map_err(|e| YangError::ArgumentParseError(e.str))?
             ))
         } else if str.starts_with("..") {
             Ok(PathArg::RelativePath(RelativePath::from_str(&str)
-                                     .map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?
+                                     .map_err(|e| YangError::ArgumentParseError(e.str))?
             ))
         } else {
-            Err(YangError::ArgumentParseError("path-arg", parser.line()))
+            Err(YangError::ArgumentParseError("path-arg"))
         }
     }
 }
 
 /// "absolute-path".
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct AbsolutePath {
     nodes: Vec<PathNode>,
 }
@@ -866,14 +870,14 @@ impl FromStr for AbsolutePath {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PathNode {
     node_identifier: NodeIdentifier,
     path_predicate: Vec<PathPredicate>,
 }
 
 /// "relative-path".
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RelativePath {
     up: u32,
     descendant_path: DescendantPath,
@@ -902,7 +906,7 @@ impl FromStr for RelativePath {
 }
 
 /// "descendant-path".
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DescendantPath {
     node_identifier: NodeIdentifier,
     path_predicate: Vec<PathPredicate>,
@@ -957,7 +961,7 @@ impl FromStr for DescendantPath {
 
 
 /// "path-predicate".
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PathPredicate {
     path_equality_expr: PathEqualityExpr,
 }
@@ -977,7 +981,7 @@ impl FromStr for PathPredicate {
 }
 
 /// "path-equality-expr".
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PathEqualityExpr {
     node_identifier: NodeIdentifier,
     path_key_expr: PathKeyExpr,
@@ -1008,7 +1012,7 @@ impl FromStr for PathEqualityExpr {
 ///                       *(node-identifier *WSP "/" *WSP)
 ///                       node-identifier
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PathKeyExpr {
     rel_path_keyexpr: String,
 }
@@ -1124,7 +1128,7 @@ impl Tokenizer {
 }
 
 /// "if-feature-expr".
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Getters)]
 pub struct IfFeatureExpr {
     terms: Vec<IfFeatureTerm>,
 }
@@ -1249,12 +1253,12 @@ impl StmtArg for IfFeatureExpr {
         let str = parse_string(parser)?;
         let mut tokenizer = Tokenizer::new(str);
 
-        IfFeatureExpr::parse(&mut tokenizer).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))
+        IfFeatureExpr::parse(&mut tokenizer).map_err(|e| YangError::ArgumentParseError(e.str))
     }
 }
 
 /// "if-feature-term".
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct IfFeatureTerm {
     factors: Vec<IfFeatureFactor>,
 }
@@ -1297,7 +1301,7 @@ impl ToString for IfFeatureFactor {
 ///
 /// "require-instance-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RequireInstanceArg {
     arg: bool,
 }
@@ -1310,7 +1314,7 @@ impl StmtArg for RequireInstanceArg {
         } else if str == "false" {
             Ok(RequireInstanceArg { arg: false })
         } else {
-            Err(YangError::ArgumentParseError("require-instance-arg", parser.line()))
+            Err(YangError::ArgumentParseError("require-instance-arg"))
         }
     }
 }
@@ -1319,7 +1323,7 @@ impl StmtArg for RequireInstanceArg {
 ///
 /// "key-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct KeyArg {
     keys: Vec<NodeIdentifier>,
 }
@@ -1336,7 +1340,7 @@ impl StmtArg for KeyArg {
                 None => s.len(),
             };
 
-            let node_identifier = NodeIdentifier::from_str(&s[..pos]).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?;
+            let node_identifier = NodeIdentifier::from_str(&s[..pos]).map_err(|e| YangError::ArgumentParseError(e.str))?;
             keys.push(node_identifier);
             
             s = &s[pos..].trim();
@@ -1348,7 +1352,7 @@ impl StmtArg for KeyArg {
 }
 
 ///
-/// "schema-nodeid".  TODO - may consolidate.
+/// "schema-nodeid".
 ///
 #[derive(Debug, Clone, PartialEq)]
 pub enum SchemaNodeid {
@@ -1361,20 +1365,20 @@ impl StmtArg for SchemaNodeid {
         let str = parse_string(parser)?;
         if str.starts_with('/') {
             Ok(SchemaNodeid::Absolute(
-                AbsoluteSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?))
+                AbsoluteSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str))?))
         } else {
             Ok(SchemaNodeid::Descendant(
-                DescendantSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?))
+                DescendantSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str))?))
         }
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct AbsoluteSchemaNodeid {
     nodes: Vec<NodeIdentifier>,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DescendantSchemaNodeid {
     nodes: Vec<NodeIdentifier>,
 }
@@ -1423,7 +1427,7 @@ impl StmtArg for AbsoluteSchemaNodeid {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
-        AbsoluteSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))
+        AbsoluteSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str))
     }
 }
 
@@ -1431,7 +1435,7 @@ impl StmtArg for DescendantSchemaNodeid {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
-        DescendantSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))
+        DescendantSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str))
     }
 }
 
@@ -1450,7 +1454,7 @@ impl ToString for DescendantSchemaNodeid {
 ///
 /// "unique-arg".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct UniqueArg {
     nodeids: Vec<DescendantSchemaNodeid>,
 }
@@ -1458,7 +1462,7 @@ pub struct UniqueArg {
 impl StmtArg for UniqueArg {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
-        UniqueArg::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))
+        UniqueArg::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str))
     }
 }
 
@@ -1515,7 +1519,7 @@ mod tests {
 
         match Identifier::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: identifier at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error identifier"),
         }
 
         let s = " 123$ ";
@@ -1523,7 +1527,7 @@ mod tests {
 
         match Identifier::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: identifier at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error identifier"),
         }
     }
 
@@ -1550,7 +1554,7 @@ mod tests {
 
         match IdentifierRef::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: identifier at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error identifier"),
         }
 
         let s = " _123:_456 ";
@@ -1566,7 +1570,7 @@ mod tests {
 
         match IdentifierRef::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: identifier at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error identifier"),
         }
     }
 
@@ -1585,7 +1589,7 @@ mod tests {
 
         match DateArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: date-arg at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error date-arg"),
         }
 
         let s = " 08-01-2021 ";
@@ -1593,7 +1597,7 @@ mod tests {
 
         match DateArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: date-arg at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error date-arg"),
         }
 
         let s = " 2021-08-0x ";
@@ -1601,7 +1605,7 @@ mod tests {
 
         match DateArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: date-arg at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error date-arg"),
         }
     }
 
@@ -1611,7 +1615,7 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match FractionDigitsArg::parse_arg(&mut parser) {
-            Ok(arg) => assert_eq!(arg.digits(), 18),
+            Ok(arg) => assert_eq!(arg.digits(), &18),
             Err(err) => panic!("{:?}", err.to_string()),
         }
 
@@ -1620,7 +1624,7 @@ mod tests {
 
         match FractionDigitsArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: fraction-digits-arg at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error fraction-digits-arg"),
         }
 
         let s = "19";
@@ -1628,7 +1632,7 @@ mod tests {
 
         match FractionDigitsArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: fraction-digits-arg at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error fraction-digits-arg"),
         }
     }
 
@@ -1666,7 +1670,7 @@ mod tests {
 
         match RangeArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: range-arg at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error range-arg"),
         }
 
         let s = r#""1.01 .. 1.99""#;
@@ -1712,7 +1716,7 @@ mod tests {
 
         match LengthArg::parse_arg(&mut parser) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: length-arg at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error length-arg"),
         }
     }
 
@@ -1848,7 +1852,7 @@ mod tests {
 
         match IfFeatureExpr::parse_arg(&mut parser) {
             Ok(expr) => panic!("{:?}", expr),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error: if-feature-expr at line 0"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error if-feature-expr"),
 
         }
     }

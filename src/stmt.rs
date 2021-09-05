@@ -6,6 +6,8 @@
 use std::str::FromStr;
 use url::Url;
 
+use derive_getters::Getters;
+
 use super::core::*;
 use super::error::*;
 use super::parser::*;
@@ -18,9 +20,9 @@ use crate::collect_a_stmt;
 use crate::collect_vec_stmt;
 use crate::collect_opt_stmt;
 
-//
-// Trait for a single YANG statement.
-//
+///
+/// Trait for a single YANG statement.
+///
 pub trait Stmt {
     /// Arg type.
     type Arg;
@@ -111,24 +113,24 @@ pub trait Stmt {
 ///
 /// The "module" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ModuleStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// Module header statements.
+    /// "module-header" statements.
     module_header: ModuleHeaderStmts,
 
-    /// Linkage statements.
+    /// "linkage" statements.
     linkage: LinkageStmts,
 
-    /// Meta statements.
+    /// "meta" statements.
     meta: MetaStmts,
 
-    /// Revision statements.
+    /// "revision" statements.
     revision: RevisionStmts,
 
-    /// Body statements.
+    /// "body" statements.
     body: BodyStmts,
 }
 
@@ -176,24 +178,24 @@ impl Stmt for ModuleStmt {
 ///
 /// The "submodule" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct SubmoduleStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// Submodule header statements.
+    /// "submodule-header" statements.
     submodule_header: SubmoduleHeaderStmts,
 
-    /// Linkage statements.
+    /// "linkage" statements.
     linkage: LinkageStmts,
 
-    /// Meta statements.
+    /// "meta" statements.
     meta: MetaStmts,
 
-    /// Revision statements.
+    /// "revision" statements.
     revision: RevisionStmts,
 
-    /// Body statements.
+    /// "body" statements.
     body: BodyStmts,
 }
 
@@ -241,7 +243,7 @@ impl Stmt for SubmoduleStmt {
 ///
 /// The "yang-version" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct YangVersionStmt {
     /// Yang version arg.
     arg: YangVersionArg,
@@ -270,21 +272,21 @@ impl Stmt for YangVersionStmt {
 ///
 /// The "import" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ImportStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// Prefix statement.
+    /// "prefix" statement.
     prefix: PrefixStmt,
 
-    /// Revision date statement.
+    /// "revision-date" statement.
     revision_date: Option<RevisionDateStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -339,18 +341,18 @@ impl Stmt for ImportStmt {
 ///
 /// The "include" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct IncludeStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// Revision date statement.
+    /// "revision-date" statement.
     revision_date: Option<RevisionDateStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -412,7 +414,7 @@ impl Stmt for IncludeStmt {
 ///
 /// The "namespace" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct NamespaceStmt {
     /// URI.
     arg: Url,
@@ -439,9 +441,9 @@ impl Stmt for NamespaceStmt {
 ///
 /// The "prefix" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PrefixStmt {
-    /// Identifier arg.
+    /// "dentifier-arg".
     arg: Identifier,
 }
 
@@ -466,12 +468,12 @@ impl Stmt for PrefixStmt {
 ///
 /// The "belongs-to" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct BelongsToStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// Prefix statement.
+    /// "prefix" statement.
     prefix: PrefixStmt,
 }
 
@@ -517,7 +519,7 @@ impl Stmt for BelongsToStmt {
 ///
 /// The "organization" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct OrganizationStmt {
     /// String.
     arg: String,
@@ -544,7 +546,7 @@ impl Stmt for OrganizationStmt {
 ///
 /// The "contact" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ContactStmt {
     /// String.
     arg: String,
@@ -571,7 +573,7 @@ impl Stmt for ContactStmt {
 ///
 /// The "description" Statement.
 /// 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DescriptionStmt {
     /// String.
     arg: String,
@@ -598,7 +600,7 @@ impl Stmt for DescriptionStmt {
 ///
 /// The "reference" Statement.
 /// 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ReferenceStmt {
     /// String.
     arg: String,
@@ -625,7 +627,7 @@ impl Stmt for ReferenceStmt {
 ///
 /// The "units" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct UnitsStmt {
     /// String.
     arg: String,
@@ -652,15 +654,15 @@ impl Stmt for UnitsStmt {
 ///
 /// The "revision" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RevisionStmt {
-    /// Revision date.
+    /// "revision-date".
     arg: DateArg,
 
-    /// Description statement..
+    /// "description" statement..
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -718,9 +720,9 @@ impl Stmt for RevisionStmt {
 ///
 /// The "revision-date" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RevisionDateStmt {
-    /// Revision date.
+    /// "revision-date".
     arg: DateArg,
 }
 
@@ -745,21 +747,21 @@ impl Stmt for RevisionDateStmt {
 ///
 /// The "extension" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ExtensionStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// Argument statement.
+    /// "argument" statement.
     argument: Option<ArgumentStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -825,12 +827,12 @@ impl Stmt for ExtensionStmt {
 ///
 /// The "argument" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ArgumentStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// Yin element statement.
+    /// "yin-element" statement.
     yin_element: Option<YinElementStmt>,
 }
 
@@ -884,9 +886,9 @@ impl Stmt for ArgumentStmt {
 ///
 /// The "yin-element" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct YinElementStmt {
-    /// Yin element arg.
+    /// "yin-element-arg".
     arg: YinElementArg,
 }
 
@@ -913,24 +915,24 @@ impl Stmt for YinElementStmt {
 ///
 /// The "identity" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct IdentityStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Base statement.
+    /// "base" statement.
     base: Vec<BaseStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1000,9 +1002,9 @@ impl Stmt for IdentityStmt {
 ///
 /// The "base" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct BaseStmt {
-    /// Identifier-ref arg.
+    /// "dentifier-ref-arg".
     arg: IdentifierRef,
 }
 
@@ -1029,21 +1031,21 @@ impl Stmt for BaseStmt {
 ///
 /// The "feature" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct FeatureStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1109,9 +1111,9 @@ impl Stmt for FeatureStmt {
 ///
 /// The "if-feature" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct IfFeatureStmt {
-    /// If-feature-expr str.
+    /// "if-feature-expr-str".
     arg: IfFeatureExpr,
 }
 
@@ -1136,27 +1138,27 @@ impl Stmt for IfFeatureStmt {
 ///
 /// The "typedef" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct TypedefStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// Type statement.
+    /// "type" statement.
     type_: TypeStmt,
 
-    /// Units statement.
+    /// "units" statement.
     units: Option<UnitsStmt>,
 
-    /// Default statement.
+    /// "default" statement.
     default: Option<DefaultStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1218,12 +1220,12 @@ impl Stmt for TypedefStmt {
 ///
 /// The "type" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct TypeStmt {
-    /// Identifier ref arg.
+    /// "identifier-ref-arg".
     arg: IdentifierRef,
 
-    /// Type-body statements.
+    /// "type-body" statements.
     type_body: Option<TypeBodyStmts>,
 }
 
@@ -1271,21 +1273,21 @@ impl Stmt for TypeStmt {
 ///
 /// The "range" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RangeStmt {
-    /// Range Arg.
+    /// "range-arg".
     arg: RangeArg,
 
-    /// Error Message Statement.
+    /// "error-message" statement.
     error_message: Option<ErrorMessageStmt>,
     
-    /// Error App Tag Statement.
+    /// "error-app-tag" statement.
     error_app_tag: Option<ErrorAppTagStmt>,
 
-    /// Description Statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference Statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1351,9 +1353,9 @@ impl Stmt for RangeStmt {
 ///
 /// The "fraction-digits" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct FractionDigitsStmt {
-    /// Fraction-digits arg.
+    /// "fraction-digits-arg".
     arg: FractionDigitsArg,
 }
 
@@ -1380,21 +1382,21 @@ impl Stmt for FractionDigitsStmt {
 ///
 /// The "length" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct LengthStmt {
-    /// Length arg.
+    /// "length-arg".
     arg: LengthArg,
 
-    /// Error-message statement.
+    /// "error-message" statement.
     error_message: Option<ErrorMessageStmt>,
 
-    /// Error-app-tag statement.
+    /// "error-app-tag" statement.
     error_app_tag: Option<ErrorAppTagStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1460,24 +1462,24 @@ impl Stmt for LengthStmt {
 ///
 /// The "pattern" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PatternStmt {
     /// String.
     arg: String,
 
-    /// Modifier statement.
+    /// "modifier" statement.
     modifier: Option<ModifierStmt>,
 
-    /// Error-message statement.
+    /// "error-message" statement.
     error_message: Option<ErrorMessageStmt>,
 
-    /// Error-app-tag statement.
+    /// "error-app-tag" statement.
     error_app_tag: Option<ErrorAppTagStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1492,7 +1494,6 @@ impl Stmt for PatternStmt {
     fn keyword() -> Keyword {
         "pattern"
     }
-
 
     /// Return true if this statement has sub-statements optionally.
     fn opt_substmts() -> bool {
@@ -1548,9 +1549,9 @@ impl Stmt for PatternStmt {
 ///
 /// The "modifier" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ModifierStmt {
-    /// Modifier arg.
+    /// "modifier-arg".
     arg: ModifierArg,
 }
 
@@ -1577,7 +1578,7 @@ impl Stmt for ModifierStmt {
 ///
 /// The "default" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DefaultStmt {
     /// String.
     arg: String,
@@ -1606,24 +1607,24 @@ impl Stmt for DefaultStmt {
 ///
 /// The "enum" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct EnumStmt {
     /// String.
     arg: String,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Value statement.
+    /// "value" statement.
     value: Option<ValueStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1693,9 +1694,9 @@ impl Stmt for EnumStmt {
 ///
 /// The "path" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PathStmt {
-    /// Path arg.
+    /// "path" arg.
     arg: PathArg,
 }
 
@@ -1722,9 +1723,9 @@ impl Stmt for PathStmt {
 ///
 /// The "require-instance" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RequireInstanceStmt {
-    /// Require-instance arg.
+    /// "require-instance" arg.
     arg: RequireInstanceArg,
 }
 
@@ -1751,24 +1752,24 @@ impl Stmt for RequireInstanceStmt {
 ///
 /// The "bit" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct BitStmt {
-    /// Identifier arg.
+    /// "identifier" arg.
     arg: Identifier,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Position statement.
+    /// "position" statement.
     position: Option<PositionStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -1838,9 +1839,9 @@ impl Stmt for BitStmt {
 ///
 /// The "position" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PositionStmt {
-    /// Position value arg.
+    /// "position-value-arg".
     arg: PositionValueArg,
 }
 
@@ -1867,9 +1868,9 @@ impl Stmt for PositionStmt {
 ///
 /// The "status" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct StatusStmt {
-    /// Status arg.
+    /// "status-arg".
     arg: StatusArg,
 }
 
@@ -1893,13 +1894,12 @@ impl Stmt for StatusStmt {
     }
 }
 
-
 ///
 /// The "config" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ConfigStmt {
-    /// Config arg.
+    /// "config-arg".
     arg: ConfigArg,
 }
 
@@ -1926,9 +1926,9 @@ impl Stmt for ConfigStmt {
 ///
 /// The "mandatory" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct MandatoryStmt {
-    /// Mandatory arg.
+    /// "mandatory-arg".
     arg: MandatoryArg,
 }
 
@@ -1955,7 +1955,7 @@ impl Stmt for MandatoryStmt {
 ///
 /// The "presence" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct PresenceStmt {
     /// String.
     arg: String,
@@ -1984,9 +1984,9 @@ impl Stmt for PresenceStmt {
 ///
 /// The "ordered-by" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct OrderedByStmt {
-    /// Ordered-by arg.
+    /// "ordered-by-arg".
     arg: OrderedByArg,
 }
 
@@ -2013,7 +2013,7 @@ impl Stmt for OrderedByStmt {
 ///
 /// The "must" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct MustStmt {
     /// String.
     arg: String,
@@ -2024,10 +2024,10 @@ pub struct MustStmt {
     /// Error-app-tag statement.
     error_app_tag: Option<ErrorAppTagStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -2093,7 +2093,7 @@ impl Stmt for MustStmt {
 ///
 /// The "error-message" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ErrorMessageStmt {
     /// String.
     arg: String,
@@ -2122,7 +2122,7 @@ impl Stmt for ErrorMessageStmt {
 ///
 /// The "error-app-tag" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ErrorAppTagStmt {
     /// String.
     arg: String,
@@ -2151,9 +2151,9 @@ impl Stmt for ErrorAppTagStmt {
 ///
 /// The "min-elements" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct MinElementsStmt {
-    /// Min-value arg.
+    /// "min-value-arg".
     arg: MinValueArg,
 }
 
@@ -2178,9 +2178,9 @@ impl Stmt for MinElementsStmt {
 ///
 /// The "max-elements" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct MaxElementsStmt {
-    /// Max-value arg.
+    /// "max-value-arg".
     arg: MaxValueArg,
 }
 
@@ -2205,9 +2205,9 @@ impl Stmt for MaxElementsStmt {
 ///
 /// The "value" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ValueStmt {
-    /// Integer-value.
+    /// "integer-value".
     arg: IntegerValue,
 }
 
@@ -2232,31 +2232,73 @@ impl Stmt for ValueStmt {
 ///
 /// The "grouping" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct GroupingStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Typedef / Grouping statement.
+    /// "typedef" / "grouping" statement.
     typedef_or_grouping: TypedefOrGrouping,
 
-    /// Data-def statement.
+    /// "data-def" statement.
     data_def: DataDefStmt,
 
-    /// Action statement.
+    /// "action" statement.
     action: Vec<ActionStmt>,
 
-    /// Notification statement.
+    /// "notification" statement.
     notification: Vec<NotificationStmt>,
+}
+
+impl GroupingStmt {
+    pub fn typedef(&self) -> &Vec<TypedefStmt> {
+        &self.typedef_or_grouping.typedef()
+    }
+
+    pub fn grouping(&self) -> &Vec<GroupingStmt> {
+        &self.typedef_or_grouping.grouping()
+    }
+
+    pub fn container(&self) -> &Vec<ContainerStmt> {
+        &self.data_def.container()
+    }
+
+    pub fn leaf(&self) -> &Vec<LeafStmt> {
+        &self.data_def.leaf()
+    }
+
+    pub fn leaf_list(&self) -> &Vec<LeafListStmt> {
+        &self.data_def.leaf_list()
+    }
+
+    pub fn list(&self) -> &Vec<ListStmt> {
+        &self.data_def.list()
+    }
+
+    pub fn choice(&self) -> &Vec<ChoiceStmt> {
+        &self.data_def.choice()
+    }
+
+    pub fn anydata(&self) -> &Vec<AnydataStmt> {
+        &self.data_def.anydata()
+    }
+
+    pub fn anyxml(&self) -> &Vec<AnyxmlStmt> {
+        &self.data_def.anyxml()
+    }
+
+    pub fn uses(&self) -> &Vec<UsesStmt> {
+        &self.data_def.uses()
+    }
 }
 
 impl Stmt for GroupingStmt {
@@ -2345,46 +2387,88 @@ impl Stmt for GroupingStmt {
 ///
 /// The "container" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ContainerStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// When statement.
+    /// "when" statement.
     when: Option<WhenStmt>,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Presence statement.
+    /// "presence" statement.
     presence: Option<PresenceStmt>,
 
-    /// Config statement.
+    /// "config" statement.
     config: Option<ConfigStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Typedef / Grouping statement.
+    /// "typedef" / "grouping" statement.
     typedef_or_grouping: TypedefOrGrouping,
 
-    /// Data-def statement.
+    /// "data-def" statement.
     data_def: DataDefStmt,
 
-    /// Action statement.
+    /// "action" statement.
     action: Vec<ActionStmt>,
 
-    /// Notification statement.
+    /// "notification" statement.
     notification: Vec<NotificationStmt>,
+}
+
+impl ContainerStmt {
+    pub fn typedef(&self) -> &Vec<TypedefStmt> {
+        &self.typedef_or_grouping.typedef()
+    }
+
+    pub fn grouping(&self) -> &Vec<GroupingStmt> {
+        &self.typedef_or_grouping.grouping()
+    }
+
+    pub fn container(&self) -> &Vec<ContainerStmt> {
+        &self.data_def.container()
+    }
+
+    pub fn leaf(&self) -> &Vec<LeafStmt> {
+        &self.data_def.leaf()
+    }
+
+    pub fn leaf_list(&self) -> &Vec<LeafListStmt> {
+        &self.data_def.leaf_list()
+    }
+
+    pub fn list(&self) -> &Vec<ListStmt> {
+        &self.data_def.list()
+    }
+
+    pub fn choice(&self) -> &Vec<ChoiceStmt> {
+        &self.data_def.choice()
+    }
+
+    pub fn anydata(&self) -> &Vec<AnydataStmt> {
+        &self.data_def.anydata()
+    }
+
+    pub fn anyxml(&self) -> &Vec<AnyxmlStmt> {
+        &self.data_def.anyxml()
+    }
+
+    pub fn uses(&self) -> &Vec<UsesStmt> {
+        &self.data_def.uses()
+    }
 }
 
 impl Stmt for ContainerStmt {
@@ -2494,42 +2578,42 @@ impl Stmt for ContainerStmt {
 ///
 /// The "leaf" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct LeafStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// When statement.
+    /// "when" statement.
     when: Option<WhenStmt>,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Type statement.
+    /// "type" statement.
     type_: TypeStmt,
 
-    /// Units statement.
+    /// "units" statement.
     units: Option<UnitsStmt>,
 
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Default statement.
+    /// "default" statement.
     default: Option<DefaultStmt>,
 
-    /// Config statement.
+    /// "config" statement.
     config: Option<ConfigStmt>,
 
-    /// Mandatory statement.
+    /// "mandatory" statement.
     mandatory: Option<MandatoryStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -2608,48 +2692,48 @@ impl Stmt for LeafStmt {
 ///
 /// The "leaf-list" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct LeafListStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// When statement.
+    /// "when" statement.
     when: Option<WhenStmt>,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Type statement.
+    /// "type" statement.
     type_: TypeStmt,
 
-    /// Units statement.
+    /// "units" statement.
     units: Option<UnitsStmt>,
 
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Default statement.
+    /// "default" statement.
     default: Vec<DefaultStmt>,
 
-    /// Config statement.
+    /// "config" statement.
     config: Option<ConfigStmt>,
 
-    /// Min-elements statement.
+    /// "min-elements" statement.
     min_elements: Option<MinElementsStmt>,
 
-    /// Max-elements statement.
+    /// "max-elements" statement.
     max_elements: Option<MaxElementsStmt>,
 
-    /// Ordered-by statement.
+    /// "ordered-by" statement.
     ordered_by: Option<OrderedByStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -2734,58 +2818,100 @@ impl Stmt for LeafListStmt {
 ///
 /// The "list" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ListStmt {
-    /// Identifier arg.
+    /// "Identifier-arg".
     arg: Identifier,
 
-    /// When statement.
+    /// "when" statement.
     when: Option<WhenStmt>,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Key statement.
+    /// "key" statement.
     key: Option<KeyStmt>,
 
-    /// Unique statement.
+    /// "unique" statement.
     unique: Vec<UniqueStmt>,
 
-    /// Config statement.
+    /// "config" statement.
     config: Option<ConfigStmt>,
 
-    /// Min-elements statement.
+    /// "min-elements" statement.
     min_elements: Option<MinElementsStmt>,
 
-    /// Max-elements statement.
+    /// "max-elements" statement.
     max_elements: Option<MaxElementsStmt>,
 
-    /// Ordered-by statement.
+    /// "ordered-by" statement.
     ordered_by: Option<OrderedByStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Typedef / Grouping statement.
+    /// "typedef" / "grouping" statement.
     typedef_or_grouping: TypedefOrGrouping,
 
-    /// Data-def statement.
+    /// "data-def" statement.
     data_def: DataDefStmt,
 
-    /// Action statement.
+    /// "action" statement.
     action: Vec<ActionStmt>,
 
-    /// Notification statement.
+    /// "notification" statement.
     notification: Vec<NotificationStmt>,
+}
+
+impl ListStmt {
+    pub fn typedef(&self) -> &Vec<TypedefStmt> {
+        &self.typedef_or_grouping.typedef()
+    }
+
+    pub fn grouping(&self) -> &Vec<GroupingStmt> {
+        &self.typedef_or_grouping.grouping()
+    }
+
+    pub fn container(&self) -> &Vec<ContainerStmt> {
+        &self.data_def.container()
+    }
+
+    pub fn leaf(&self) -> &Vec<LeafStmt> {
+        &self.data_def.leaf()
+    }
+
+    pub fn leaf_list(&self) -> &Vec<LeafListStmt> {
+        &self.data_def.leaf_list()
+    }
+
+    pub fn list(&self) -> &Vec<ListStmt> {
+        &self.data_def.list()
+    }
+
+    pub fn choice(&self) -> &Vec<ChoiceStmt> {
+        &self.data_def.choice()
+    }
+
+    pub fn anydata(&self) -> &Vec<AnydataStmt> {
+        &self.data_def.anydata()
+    }
+
+    pub fn anyxml(&self) -> &Vec<AnyxmlStmt> {
+        &self.data_def.anyxml()
+    }
+
+    pub fn uses(&self) -> &Vec<UsesStmt> {
+        &self.data_def.uses()
+    }
 }
 
 impl Stmt for ListStmt {
@@ -2889,9 +3015,9 @@ impl Stmt for ListStmt {
 ///
 /// The "key" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct KeyStmt {
-    /// Key arg.
+    /// "key-arg".
     arg: KeyArg,
 }
 
@@ -2918,9 +3044,9 @@ impl Stmt for KeyStmt {
 ///
 /// The list's "unique" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct UniqueStmt {
-    /// Unique arg.
+    /// "unique-arg".
     arg: UniqueArg,
 }
 
@@ -2947,37 +3073,71 @@ impl Stmt for UniqueStmt {
 ///
 /// The "choice" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ChoiceStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// When statement.
+    /// "when" statement.
     when: Option<WhenStmt>,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Default statement.
+    /// "default" statement.
     default: Option<DefaultStmt>,
 
-    /// Config statement.
+    /// "config" statement.
     config: Option<ConfigStmt>,
 
-    /// Mandatory statement.
+    /// "mandatory" statement.
     mandatory: Option<MandatoryStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Short-case / Case statement.
+    /// "short-case" / "case" statement.
     short_case_or_case: ShortCaseOrCaseStmt,
+}
+
+impl ChoiceStmt {
+    pub fn choice(&self) -> &Vec<ChoiceStmt> {
+        &self.short_case_or_case.choice()
+    }
+
+    pub fn container(&self) -> &Vec<ContainerStmt> {
+        &self.short_case_or_case.container()
+    }
+
+    pub fn leaf(&self) -> &Vec<LeafStmt> {
+        &self.short_case_or_case.leaf()
+    }
+
+    pub fn leaf_list(&self) -> &Vec<LeafListStmt> {
+        &self.short_case_or_case.leaf_list()
+    }
+
+    pub fn list(&self) -> &Vec<ListStmt> {
+        &self.short_case_or_case.list()
+    }
+
+    pub fn anydata(&self) -> &Vec<AnydataStmt> {
+        &self.short_case_or_case.anydata()
+    }
+
+    pub fn anyxml(&self) -> &Vec<AnyxmlStmt> {
+        &self.short_case_or_case.anyxml()
+    }
+
+    pub fn case(&self) -> &Vec<CaseStmt> {
+        &self.short_case_or_case.case()
+    }
 }
 
 impl Stmt for ChoiceStmt {
@@ -3009,7 +3169,7 @@ impl Stmt for ChoiceStmt {
              SubStmtDef::Optional(SubStmtWith::Stmt(StatusStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
              SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
-             SubStmtDef::HasOne(SubStmtWith::Selection(ShortCaseOrCaseStmt::keywords)),
+             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(ShortCaseOrCaseStmt::keywords)),
         ]
     }
 
@@ -3074,28 +3234,62 @@ impl Stmt for ChoiceStmt {
 ///
 /// The "case" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct CaseStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// When statement.
+    /// "when" statement.
     when: Option<WhenStmt>,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Data-def statement.
+    /// "data-def" statement.
     data_def: DataDefStmt,
+}
+
+impl CaseStmt {
+    pub fn container(&self) -> &Vec<ContainerStmt> {
+        &self.data_def.container()
+    }
+
+    pub fn leaf(&self) -> &Vec<LeafStmt> {
+        &self.data_def.leaf()
+    }
+
+    pub fn leaf_list(&self) -> &Vec<LeafListStmt> {
+        &self.data_def.leaf_list()
+    }
+
+    pub fn list(&self) -> &Vec<ListStmt> {
+        &self.data_def.list()
+    }
+
+    pub fn choice(&self) -> &Vec<ChoiceStmt> {
+        &self.data_def.choice()
+    }
+
+    pub fn anydata(&self) -> &Vec<AnydataStmt> {
+        &self.data_def.anydata()
+    }
+
+    pub fn anyxml(&self) -> &Vec<AnyxmlStmt> {
+        &self.data_def.anyxml()
+    }
+
+    pub fn uses(&self) -> &Vec<UsesStmt> {
+        &self.data_def.uses()
+    }
 }
 
 impl Stmt for CaseStmt {
@@ -3178,33 +3372,33 @@ impl Stmt for CaseStmt {
 ///
 /// The "anydata" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct AnydataStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// When statement.
+    /// "when" statement.
     when: Option<WhenStmt>,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Config statement.
+    /// "config" statement.
     config: Option<ConfigStmt>,
 
-    /// Mandatory statement.
+    /// "mandatory" statement.
     mandatory: Option<MandatoryStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -3287,33 +3481,33 @@ impl Stmt for AnydataStmt {
 ///
 /// The "anyxml" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct AnyxmlStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// When statement.
+    /// "when" statement.
     when: Option<WhenStmt>,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Config statement.
+    /// "config" statement.
     config: Option<ConfigStmt>,
 
-    /// Mandatory statement.
+    /// "mandatory" statement.
     mandatory: Option<MandatoryStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -3396,30 +3590,30 @@ impl Stmt for AnyxmlStmt {
 ///
 /// The "uses" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct UsesStmt {
-    /// Identifier-ref arg.
+    /// "identifier-ref-arg".
     arg: IdentifierRef,
 
-    /// When statement.
+    /// "when" statement.
     when: Option<WhenStmt>,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Refine statement.
+    /// "refine" statement.
     refine: Vec<RefineStmt>,
 
-    /// Uses statement.
+    /// "uses" statement.
     uses_augment: Vec<AugmentStmt>,
 }
 
@@ -3498,39 +3692,39 @@ impl Stmt for UsesStmt {
 ///
 /// The "refine" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RefineStmt {
-    /// Refine arg.
+    /// "refine-arg".
     arg: RefineArg,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Presence statement.
+    /// "presence" statement.
     presence: Option<PresenceStmt>,
 
-    /// Default statement.
+    /// "default" statement.
     default: Vec<DefaultStmt>,
 
-    /// Config statement.
+    /// "config" statement.
     config: Option<ConfigStmt>,
 
-    /// Mandatory statement.
+    /// "mandatory" statement.
     mandatory: Option<MandatoryStmt>,
 
-    /// Min-elements statement.
+    /// "min-elements" statement.
     min_elements: Option<MinElementsStmt>,
 
-    /// Max-elements statement.
+    /// "max-elements" statement.
     max_elements: Option<MaxElementsStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -3622,28 +3816,72 @@ impl Stmt for RefineStmt {
 ///
 /// The "augment" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct AugmentStmt {
-    /// Augment arg.
+    /// "augment-arg".
     arg: SchemaNodeid,
 
-    /// When statement.
+    /// "when" statement.
     when: Option<WhenStmt>,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Data-def / case / action / notification statement.
+    /// "data-def" / "case" / "action" / "notification" statement.
     data_def_or_else: DataDefOrElse,
+}
+
+impl AugmentStmt {
+    pub fn container(&self) -> &Vec<ContainerStmt> {
+        &self.data_def_or_else.container()
+    }
+
+    pub fn leaf(&self) -> &Vec<LeafStmt> {
+        &self.data_def_or_else.leaf()
+    }
+
+    pub fn leaf_list(&self) -> &Vec<LeafListStmt> {
+        &self.data_def_or_else.leaf_list()
+    }
+
+    pub fn list(&self) -> &Vec<ListStmt> {
+        &self.data_def_or_else.list()
+    }
+
+    pub fn choice(&self) -> &Vec<ChoiceStmt> {
+        &self.data_def_or_else.choice()
+    }
+
+    pub fn anydata(&self) -> &Vec<AnydataStmt> {
+        &self.data_def_or_else.anydata()
+    }
+
+    pub fn anyxml(&self) -> &Vec<AnyxmlStmt> {
+        &self.data_def_or_else.anyxml()
+    }
+
+    pub fn uses(&self) -> &Vec<UsesStmt> {
+        &self.data_def_or_else.uses()
+    }
+
+    pub fn case(&self) -> &Vec<CaseStmt> {
+        &self.data_def_or_else.case()
+    }
+    pub fn action(&self) -> &Vec<ActionStmt> {
+        &self.data_def_or_else.action()
+    }
+    pub fn notification(&self) -> &Vec<NotificationStmt> {
+        &self.data_def_or_else.notification()
+    }
 }
 
 impl Stmt for AugmentStmt {
@@ -3717,15 +3955,15 @@ impl Stmt for AugmentStmt {
 ///
 /// The "when" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct WhenStmt {
     /// String.
     arg: String,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -3783,31 +4021,41 @@ impl Stmt for WhenStmt {
 ///
 /// The "rpc" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RpcStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Typedef / grouping statement.
+    /// "typedef" / "grouping" statement.
     typedef_or_grouping: TypedefOrGrouping,
 
-    /// Input statement.
+    /// "input" statement.
     input: Option<InputStmt>,
 
-    /// Output statement.
+    /// "output" statement.
     output: Option<OutputStmt>,
+}
+
+impl RpcStmt {
+    pub fn typedef(&self) -> &Vec<TypedefStmt> {
+        &self.typedef_or_grouping.typedef()
+    }
+
+    pub fn grouping(&self) -> &Vec<GroupingStmt> {
+        &self.typedef_or_grouping.grouping()
+    }
 }
 
 impl Stmt for RpcStmt {
@@ -3889,31 +4137,41 @@ impl Stmt for RpcStmt {
 ///
 /// The "action" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ActionStmt {
-    /// Identifier arg.
+    /// "identifier" arg.
     arg: Identifier,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Typedef / Grouping statement.
+    /// "typedef" / "grouping" statement.
     typedef_or_grouping: TypedefOrGrouping,
 
-    /// Input statement.
+    /// "input" statement.
     input: Option<InputStmt>,
 
-    /// Output statement.
+    /// "output" statement.
     output: Option<OutputStmt>,
+}
+
+impl ActionStmt {
+    pub fn typedef(&self) -> &Vec<TypedefStmt> {
+        &self.typedef_or_grouping.typedef()
+    }
+
+    pub fn grouping(&self) -> &Vec<GroupingStmt> {
+        &self.typedef_or_grouping.grouping()
+    }
 }
 
 impl Stmt for ActionStmt {
@@ -3995,16 +4253,58 @@ impl Stmt for ActionStmt {
 ///
 /// The "input" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct InputStmt {
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Typedef / Grouping statement.
+    /// "typedef" / "grouping" statement.
     typedef_or_grouping: TypedefOrGrouping,
 
-    /// Data-def statement.
+    /// "data-def" statement.
     data_def: DataDefStmt,
+}
+
+impl InputStmt {
+    pub fn typedef(&self) -> &Vec<TypedefStmt> {
+        &self.typedef_or_grouping.typedef()
+    }
+
+    pub fn grouping(&self) -> &Vec<GroupingStmt> {
+        &self.typedef_or_grouping.grouping()
+    }
+
+    pub fn container(&self) -> &Vec<ContainerStmt> {
+        &self.data_def.container()
+    }
+
+    pub fn leaf(&self) -> &Vec<LeafStmt> {
+        &self.data_def.leaf()
+    }
+
+    pub fn leaf_list(&self) -> &Vec<LeafListStmt> {
+        &self.data_def.leaf_list()
+    }
+
+    pub fn list(&self) -> &Vec<ListStmt> {
+        &self.data_def.list()
+    }
+
+    pub fn choice(&self) -> &Vec<ChoiceStmt> {
+        &self.data_def.choice()
+    }
+
+    pub fn anydata(&self) -> &Vec<AnydataStmt> {
+        &self.data_def.anydata()
+    }
+
+    pub fn anyxml(&self) -> &Vec<AnyxmlStmt> {
+        &self.data_def.anyxml()
+    }
+
+    pub fn uses(&self) -> &Vec<UsesStmt> {
+        &self.data_def.uses()
+    }
 }
 
 impl Stmt for InputStmt {
@@ -4065,16 +4365,58 @@ impl Stmt for InputStmt {
 ///
 /// The "output" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct OutputStmt {
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Typedef / Grouping statement.
+    /// "typedef" / "grouping" statement.
     typedef_or_grouping: TypedefOrGrouping,
 
-    /// Data-def statement.
+    /// "data-def" statement.
     data_def: DataDefStmt,
+}
+
+impl OutputStmt {
+    pub fn typedef(&self) -> &Vec<TypedefStmt> {
+        &self.typedef_or_grouping.typedef()
+    }
+
+    pub fn grouping(&self) -> &Vec<GroupingStmt> {
+        &self.typedef_or_grouping.grouping()
+    }
+
+    pub fn container(&self) -> &Vec<ContainerStmt> {
+        &self.data_def.container()
+    }
+
+    pub fn leaf(&self) -> &Vec<LeafStmt> {
+        &self.data_def.leaf()
+    }
+
+    pub fn leaf_list(&self) -> &Vec<LeafListStmt> {
+        &self.data_def.leaf_list()
+    }
+
+    pub fn list(&self) -> &Vec<ListStmt> {
+        &self.data_def.list()
+    }
+
+    pub fn choice(&self) -> &Vec<ChoiceStmt> {
+        &self.data_def.choice()
+    }
+
+    pub fn anydata(&self) -> &Vec<AnydataStmt> {
+        &self.data_def.anydata()
+    }
+
+    pub fn anyxml(&self) -> &Vec<AnyxmlStmt> {
+        &self.data_def.anyxml()
+    }
+
+    pub fn uses(&self) -> &Vec<UsesStmt> {
+        &self.data_def.uses()
+    }
 }
 
 impl Stmt for OutputStmt {
@@ -4136,31 +4478,73 @@ impl Stmt for OutputStmt {
 ///
 /// The "notification" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct NotificationStmt {
-    /// Identifier arg.
+    /// "identifier-arg".
     arg: Identifier,
 
-    /// If-feature statement.
+    /// "if-feature" statement.
     if_feature: Vec<IfFeatureStmt>,
 
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Status statement.
+    /// "status" statement.
     status: Option<StatusStmt>,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Typedef / Grouping statement.
+    /// "typedef" / "grouping" statement.
     typedef_or_grouping: TypedefOrGrouping,
 
-    /// Data-def statement.
+    /// "data-def" statement.
     data_def: DataDefStmt,
+}
+
+impl NotificationStmt {
+    pub fn typedef(&self) -> &Vec<TypedefStmt> {
+        &self.typedef_or_grouping.typedef()
+    }
+
+    pub fn grouping(&self) -> &Vec<GroupingStmt> {
+        &self.typedef_or_grouping.grouping()
+    }
+
+    pub fn container(&self) -> &Vec<ContainerStmt> {
+        &self.data_def.container()
+    }
+
+    pub fn leaf(&self) -> &Vec<LeafStmt> {
+        &self.data_def.leaf()
+    }
+
+    pub fn leaf_list(&self) -> &Vec<LeafListStmt> {
+        &self.data_def.leaf_list()
+    }
+
+    pub fn list(&self) -> &Vec<ListStmt> {
+        &self.data_def.list()
+    }
+
+    pub fn choice(&self) -> &Vec<ChoiceStmt> {
+        &self.data_def.choice()
+    }
+
+    pub fn anydata(&self) -> &Vec<AnydataStmt> {
+        &self.data_def.anydata()
+    }
+
+    pub fn anyxml(&self) -> &Vec<AnyxmlStmt> {
+        &self.data_def.anyxml()
+    }
+
+    pub fn uses(&self) -> &Vec<UsesStmt> {
+        &self.data_def.uses()
+    }
 }
 
 impl Stmt for NotificationStmt {
@@ -4249,18 +4633,18 @@ impl Stmt for NotificationStmt {
 ///
 /// The "deviation" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DeviationStmt {
-    /// Deviation arg.
+    /// "deviation-arg".
     arg: DeviationArg,
 
-    /// Description statement.
+    /// "description" statement.
     description: Option<DescriptionStmt>,
 
-    /// Reference statement.
+    /// "reference" statement.
     reference: Option<ReferenceStmt>,
 
-    /// Deviate statement.
+    /// "deviate" statement.
     deviate: Vec<DeviateStmt>,
 }
 
@@ -4371,30 +4755,30 @@ impl Stmt for DeviateStmt {
 ///
 /// The "deviate add" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DeviateAddStmt {
-    /// Units statement.
+    /// "units" statement.
     units: Option<UnitsStmt>,
 
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Unique statement.
+    /// "unique" statement.
     unique: Vec<UniqueStmt>,
 
-    /// Default statement.
+    /// "default" statement.
     default: Vec<DefaultStmt>,
 
-    /// Config statement.
+    /// "config" statement.
     config: Option<ConfigStmt>,
 
-    /// Mandatory statement.
+    /// "mandatory" statement.
     mandatory: Option<MandatoryStmt>,
 
-    /// Min-elements statement.
+    /// "min-elements" statement.
     min_elements: Option<MinElementsStmt>,
 
-    /// Max-elements statement.
+    /// "max-elements" statement.
     max_elements: Option<MaxElementsStmt>,
 }
 
@@ -4457,18 +4841,18 @@ impl DeviateAddStmt {
 ///
 /// The "deviate delete" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DeviateDeleteStmt {
-    /// Units statement.
+    /// "units" statement.
     units: Option<UnitsStmt>,
 
-    /// Must statement.
+    /// "must" statement.
     must: Vec<MustStmt>,
 
-    /// Unique statement.
+    /// "unique" statement.
     unique: Vec<UniqueStmt>,
 
-    /// Default statement.
+    /// "default" statement.
     default: Vec<DefaultStmt>,
 }
 
@@ -4520,27 +4904,27 @@ impl DeviateDeleteStmt {
 ///
 /// The "deviate replace" Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DeviateReplaceStmt {
-    /// Type statement.
+    /// "type" statement.
     type_: Option<TypeStmt>,
 
-    /// Units statement.
+    /// "units" statement.
     units: Option<UnitsStmt>,
 
-    /// Default statement.
+    /// "default" statement.
     default: Option<DefaultStmt>,
 
-    /// Config statement.
+    /// "config" statement.
     config: Option<ConfigStmt>,
 
-    /// Mandatory statement.
+    /// "mandatory" statement.
     mandatory: Option<MandatoryStmt>,
 
-    /// Min-elements statement.
+    /// "min-elements" statement.
     min_elements: Option<MinElementsStmt>,
 
-    /// Max-elements statement.
+    /// "max-elements" statement.
     max_elements: Option<MaxElementsStmt>,
 }
 
@@ -4600,7 +4984,7 @@ impl DeviateReplaceStmt {
 ///
 /// Unknown Statement.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct UnknownStmt {
     /// Keyword
     keyword: UnknownStmtKeyword,
@@ -4608,49 +4992,49 @@ pub struct UnknownStmt {
     /// Optional arg.
     arg: Option<String>,
 
-    // YANG statement.
-    
+    /// YANG statement.
+    yang: Vec<YangStmt>,
 }
 
 impl UnknownStmt {
     /// Parse a statement and return the object wrapped in enum.
-    pub fn parse_unknown(parser: &mut Parser) -> Result<YangStmt, YangError>  where Self: Sized {
-        Self::parse(parser)
-    }
-}
+    pub fn parse(parser: &mut Parser, keyword: &str) -> Result<YangStmt, YangError>  where Self: Sized {
+        let keyword = UnknownStmtKeyword::from_str(keyword).map_err(|e| YangError::ArgumentParseError(e.str))?;
 
-impl Stmt for UnknownStmt {
-    /// Arg type.
-    type Arg = String;
-
-    /// Sub Statements.
-    type SubStmts = ();
-
-    /// Return statement keyword.
-    fn keyword() -> Keyword {
-        "unknown"
-    }
-
-    /// Parse a statement and return the object wrapped in enum.
-    fn parse(parser: &mut Parser) -> Result<YangStmt, YangError>  where Self::Arg: StmtArg, Self: Sized {
-/*
         let token = parser.get_token()?;
-        let keyword = match token {
-            Token::Identifier(s) => {
-                UnknownStmtKeyword::from_str(&s).map_err(|e| YangError::ArgumentParseError(e.str, parser.line()))?
+        let arg = match token {
+            Token::Identifier(s) |
+            Token::QuotedString(s) => {
+                Some(s)
+            }
+            Token::StatementEnd => {
+                parser.save_token(token);
+                None
             }
             _ => return Err(YangError::UnexpectedToken(token.to_string()))
         };
-*/
-        let keyword = UnknownStmtKeyword::from_str("hoge:hgoe").unwrap();
 
         let token = parser.get_token()?;
-        let mut arg = None;
+        let mut yang = Vec::new();
         match token {
-            Token::Identifier(s) => {
-                arg = Some(s);
-            }
             Token::StatementEnd => {
+            }
+            Token::BlockBegin => {
+                loop {
+                    let token = parser.get_token()?;
+
+                    match token {
+                        Token::BlockEnd => break,
+                        Token::StatementEnd => {},
+                        Token::QuotedString(ref keyword) |
+                        Token::Identifier(ref keyword) => {
+                            let stmt = SubStmtUtil::call_stmt_parser(parser, keyword as &str)?;
+                            yang.push(stmt);
+                        }
+                        Token::EndOfInput => return Err(YangError::UnexpectedEof),
+                        _ => return Err(YangError::UnexpectedToken(token.to_string()))
+                    }
+                }
             }
             _ => return Err(YangError::UnexpectedToken(token.to_string()))
         }
@@ -4658,6 +5042,7 @@ impl Stmt for UnknownStmt {
         Ok(YangStmt::UnknownStmt(UnknownStmt {
             keyword,
             arg,
+            yang,
         }))
     }
 }
@@ -4669,6 +5054,7 @@ mod tests {
 
     #[test]
     pub fn test_import_stmt() {
+        // Assuming keyword is already parsed, and arg and body are given to stmt parser.
         let s = r#"openconfig-inet-types {
                        prefix oc-inet;
                        revision-date 2017-07-06;
@@ -4676,15 +5062,17 @@ mod tests {
 
         let mut parser = Parser::new(s.to_string());
         match ImportStmt::parse(&mut parser) {
-            Ok(stmt) => {
-                assert_eq!(stmt,
-                           YangStmt::ImportStmt(ImportStmt {
-                               arg: Identifier::from_str("openconfig-inet-types").unwrap(),
-                               prefix: PrefixStmt { arg: Identifier::from_str("oc-inet").unwrap() },
-                               revision_date: Some(RevisionDateStmt { arg: DateArg::from_str("2017-07-06").unwrap() } ),
-                               description: None,
-                               reference: None })
-                );
+            Ok(yang) => {
+                match yang {
+                    YangStmt::ImportStmt(stmt) => {
+                        assert_eq!(stmt.arg(), &Identifier::from_str("openconfig-inet-types").unwrap());
+                        assert_eq!(stmt.prefix(), &PrefixStmt { arg: Identifier::from_str("oc-inet").unwrap() });
+                        assert_eq!(stmt.revision_date(), &Some(RevisionDateStmt { arg: DateArg::from_str("2017-07-06").unwrap() } ));
+                        assert_eq!(stmt.description(), &None);
+                        assert_eq!(stmt.reference(), &None);
+                    }
+                    _ => panic!("Unexpected stmt {:?}", yang),
+                }
             }
             Err(err) => panic!("{}", err.to_string()),
         }
@@ -4692,6 +5080,7 @@ mod tests {
 
     #[test]
     pub fn test_include_stmt() {
+        // Assuming keyword is already parsed, and arg and body are given to stmt parser.
         let s = r#"openconfig-inet-types {
                        prefix oc-inet;
                        revision-date 2017-07-06;
@@ -4699,7 +5088,7 @@ mod tests {
 
         let mut parser = Parser::new(s.to_string());
         match IncludeStmt::parse(&mut parser) {
-            Ok(stmt) => panic!("{:?}", stmt),
+            Ok(yang) => panic!("{:?}", yang),
             Err(err) => assert_eq!(err.to_string(), "Unexpected token Identifier '\"prefix\"'"),
         }
 
@@ -4709,16 +5098,16 @@ mod tests {
 
         let mut parser = Parser::new(s.to_string());
         match IncludeStmt::parse(&mut parser) {
-            Ok(stmt) => {
-                println!("{:?}", stmt);
-
-                assert_eq!(stmt,
-                           YangStmt::IncludeStmt(IncludeStmt {
-                               arg: Identifier::from_str("openconfig-inet-types").unwrap(),
-                               revision_date: Some(RevisionDateStmt { arg: DateArg::from_str("2017-07-06").unwrap() } ),
-                               description: None,
-                               reference: None })
-                );
+            Ok(yang) => {
+                match yang {
+                    YangStmt::IncludeStmt(stmt) => {
+                        assert_eq!(stmt.arg(), &Identifier::from_str("openconfig-inet-types").unwrap());
+                        assert_eq!(stmt.revision_date(), &Some(RevisionDateStmt { arg: DateArg::from_str("2017-07-06").unwrap() } ));
+                        assert_eq!(stmt.description(), &None);
+                        assert_eq!(stmt.reference(), &None);
+                    }
+                    _ => panic!("Unexpected stmt {:?}", yang),
+                }
             }
             Err(err) => panic!("{}", err.to_string()),
         }
@@ -4726,6 +5115,7 @@ mod tests {
 
     #[test]
     pub fn test_extension_stmt() {
+        // Assuming keyword is already parsed, and arg and body are given to stmt parser.
         let s = r#"openconfig-version {
     argument "semver" {
       yin-element false;
@@ -4737,17 +5127,33 @@ mod tests {
 
         let mut parser = Parser::new(s.to_string());
         match ExtensionStmt::parse(&mut parser) {
-            Ok(stmt) => {
-                assert_eq!(stmt,
-                           YangStmt::ExtensionStmt(ExtensionStmt {
-                               arg: Identifier::from_str("openconfig-version").unwrap(),
-                               argument: Some(ArgumentStmt { arg: Identifier::from_str("semver").unwrap(),
-                                                             yin_element: Some(YinElementStmt { arg: YinElementArg::from_str("false").unwrap() })}),
-                               status: None,
-                               description: Some(DescriptionStmt { arg: String::from("The OpenConfig version number for the module. This is\n...") }),
-                               reference: None 
-                           })
-                );
+            Ok(yang) => {
+                match yang {
+                    YangStmt::ExtensionStmt(stmt) => {
+                        assert_eq!(stmt.arg(), &Identifier::from_str("openconfig-version").unwrap());
+                        match stmt.argument() {
+                            Some(argument_stmt) => {
+                                assert_eq!(argument_stmt.arg(), &Identifier::from_str("semver").unwrap());
+                                match argument_stmt.yin_element() {
+                                    Some(yin_element_stmt) => {
+                                        assert_eq!(yin_element_stmt.arg(), &YinElementArg::from_str("false").unwrap());
+                                    }
+                                    None => panic!("No yin-element-stmt"),
+                                }
+                            }
+                            None => panic!("No argument-stmt"),
+                        }
+                        assert_eq!(stmt.status(), &None);
+                        match stmt.description() {
+                            Some(description_stmt) => {
+                                assert_eq!(description_stmt.arg(), "The OpenConfig version number for the module. This is\n...");
+                            }
+                            None => panic!("No description-stmt"),
+                        }
+                        assert_eq!(stmt.reference(), &None);
+                    }
+                    _ => panic!("Unexpected stmt {:?}", yang),
+                }
             }
             Err(err) => panic!("{}", err.to_string()),
         }
@@ -4755,6 +5161,7 @@ mod tests {
     
     #[test]
     pub fn test_identity_stmt() {
+        // Assuming keyword is already parsed, and arg and body are given to stmt parser.
         let s = r#"SFP {
     base TRANSCEIVER_FORM_FACTOR_TYPE;
     description
@@ -4763,28 +5170,64 @@ mod tests {
     }"#;
         let mut parser = Parser::new(s.to_string());
         match IdentityStmt::parse(&mut parser) {
-            Ok(stmt) => {
-                assert_eq!(stmt,
-                           YangStmt::IdentityStmt(IdentityStmt {
-                               arg: Identifier::from_str("SFP").unwrap(),
-                               if_feature: vec![],
-                               base: vec![BaseStmt { arg: IdentifierRef::from_str("TRANSCEIVER_FORM_FACTOR_TYPE").unwrap() }],
-                               status: None,
-                               description: Some(DescriptionStmt { arg: String::from("Small form-factor pluggable transceiver supporting up to\n10 Gb/s signal") }),
-                               reference: None })
-                           );
+            Ok(yang) => {
+                match yang {
+                    YangStmt::IdentityStmt(stmt) => {
+                        assert_eq!(stmt.arg(), &Identifier::from_str("SFP").unwrap());
+                        assert_eq!(stmt.if_feature(), &vec![]);
+                        assert_eq!(stmt.base(), &vec![BaseStmt { arg: IdentifierRef::from_str("TRANSCEIVER_FORM_FACTOR_TYPE").unwrap()}]);
+                        assert_eq!(stmt.status(), &None);
+                        assert_eq!(stmt.description(), &Some(DescriptionStmt { arg: String::from("Small form-factor pluggable transceiver supporting up to\n10 Gb/s signal") }));
+                        assert_eq!(stmt.reference(), &None);
+                    }
+                    _ => panic!("Unexpected stmt {:?}", yang),
+                }
+            }
+            Err(err) => panic!("{}", err.to_string()),
+        }
+    }
+
+//    #[test]
+//    pub fn test_feature_stmt() {
+//        // TBD
+//    }
+
+    #[test]
+    pub fn test_typedef_stmt() {
+        let s = r#"zero-based-counter32 {
+    type yang:counter32;
+    default "0";
+    description
+     "The zero-based-counter32 type represents a counter32
+      that has the defined 'initial' value zero....";
+    reference
+      "RFC 4502: Remote Network Monitoring Management Information
+                 Base Version 2";
+    }"#;
+
+        let mut parser = Parser::new(s.to_string());
+        match TypedefStmt::parse(&mut parser) {
+            Ok(yang) => {
+                match yang {
+                    YangStmt::TypedefStmt(stmt) => {
+                        assert_eq!(stmt.arg(), &Identifier::from_str("zero-based-counter32").unwrap());
+                        assert_eq!(stmt.type_(), &TypeStmt { arg: IdentifierRef::from_str("yang:counter32").unwrap(), type_body: None });
+                        assert_eq!(stmt.units(), &None);
+                        assert_eq!(stmt.default(), &Some(DefaultStmt { arg: String::from("0") }));
+                        assert_eq!(stmt.description(), &Some(DescriptionStmt { arg: String::from("The zero-based-counter32 type represents a counter32\nthat has the defined 'initial' value zero....") }));
+                        assert_eq!(stmt.reference(), &Some(ReferenceStmt { arg: String::from("RFC 4502: Remote Network Monitoring Management Information\n          Base Version 2") }));
+                    }
+                    _ => panic!("Unexpected stmt {:?}", yang),
+                }
             }
             Err(err) => panic!("{}", err.to_string()),
         }
     }
 
     #[test]
-    pub fn test_feature_stmt() {
-        // TBD
-    }
-
-    #[test]
     pub fn test_deviation_stmt() {
+        // Assuming keyword is already parsed, and arg and body are given to stmt parser.
+
         // Deviation add.
         let s = r#""/oc-if:interfaces/oc-if:interface/oc-if:hold-time" +
             "/oc-if:config/oc-if:up" {
@@ -4792,21 +5235,29 @@ mod tests {
   }"#;
         let mut parser = Parser::new(s.to_string());
         match DeviationStmt::parse(&mut parser) {
-            Ok(stmt) => {
-                assert_eq!(stmt, YangStmt::DeviationStmt(DeviationStmt {
-                    arg: AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-if:hold-time/oc-if:config/oc-if:up").unwrap(),
-                    description: None,
-                    reference: None,
-                    deviate: vec![DeviateStmt::Add(DeviateAddStmt { units: None,
-                                                                    must: vec![],
-                                                                    unique: vec![],
-                                                                    default: vec![],
-                                                                    config: None,
-                                                                    mandatory: None,
-                                                                    min_elements: None,
-                                                                    max_elements: None,
-                    })]
-                }));
+            Ok(yang) => {
+                match yang {
+                    YangStmt::DeviationStmt(stmt) => {
+                        assert_eq!(stmt.arg(), &AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-if:hold-time/oc-if:config/oc-if:up").unwrap());
+                        assert_eq!(stmt.description(), &None);
+                        assert_eq!(stmt.reference(), &None);
+                        assert_eq!(stmt.deviate().len(), 1);
+                        let deviate_stmt = stmt.deviate().get(0).unwrap();
+                        match deviate_stmt {
+                            DeviateStmt::Add(deviate_add_stmt) => {
+                                assert_eq!(deviate_add_stmt.units(), &None);
+                                assert_eq!(deviate_add_stmt.must().len(), 0);
+                                assert_eq!(deviate_add_stmt.unique().len(), 0);
+                                assert_eq!(deviate_add_stmt.config(), &None);
+                                assert_eq!(deviate_add_stmt.mandatory(), &None);
+                                assert_eq!(deviate_add_stmt.min_elements(), &None);
+                                assert_eq!(deviate_add_stmt.max_elements(), &None);
+                            },
+                            _ => panic!("Unexpected stmt {:?}", deviate_stmt),
+                        }
+                    }
+                    _ => panic!("Unexpected stmt {:?}", yang),
+                }
             }
             Err(err) => panic!("{}", err.to_string()),
         }
@@ -4822,16 +5273,26 @@ mod tests {
   }"#;
         let mut parser = Parser::new(s.to_string());
         match DeviationStmt::parse(&mut parser) {
-            Ok(stmt) => {
-                assert_eq!(stmt, YangStmt::DeviationStmt(DeviationStmt {
-                    arg: AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-if:hold-time/oc-if:config/oc-if:up").unwrap(),
-                    description: Some(DescriptionStmt { arg: String::from("Hold-time 0 is not configurable on XE, use no dampening.") }),
-                    reference: None,
-                    deviate: vec![DeviateStmt::Delete(DeviateDeleteStmt { units: None,
-                                                                          must: vec![],
-                                                                          unique: vec![],
-                                                                          default: vec![DefaultStmt { arg: String::from("0") }] })]
-                }));
+            Ok(yang) => {
+                match yang {
+                    YangStmt::DeviationStmt(stmt) => {
+                        assert_eq!(stmt.arg(), &AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-if:hold-time/oc-if:config/oc-if:up").unwrap());
+                        assert_eq!(stmt.description(), &Some(DescriptionStmt { arg: String::from("Hold-time 0 is not configurable on XE, use no dampening.") }));
+                        assert_eq!(stmt.reference(), &None);
+                        assert_eq!(stmt.deviate().len(), 1);
+                        let deviate_stmt = stmt.deviate().get(0).unwrap();
+                        match deviate_stmt {
+                            DeviateStmt::Delete(deviate_delete_stmt) => {
+                                assert_eq!(deviate_delete_stmt.units(), &None);
+                                assert_eq!(deviate_delete_stmt.must().len(), 0);
+                                assert_eq!(deviate_delete_stmt.unique().len(), 0);
+                                assert_eq!(deviate_delete_stmt.default(), &vec![DefaultStmt { arg: String::from("0") }]);
+                            },
+                            _ => panic!("Unexpected stmt {:?}", deviate_stmt),
+                        }
+                    }
+                    _ => panic!("Unexpected stmt {:?}", yang),
+                }
             }
             Err(err) => panic!("{}", err.to_string()),
         }
@@ -4847,21 +5308,29 @@ mod tests {
   }"#;
         let mut parser = Parser::new(s.to_string());
         match DeviationStmt::parse(&mut parser) {
-            Ok(stmt) => {
-                assert_eq!(stmt, YangStmt::DeviationStmt(DeviationStmt {
-                    arg: AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-if:state/oc-if:last-change").unwrap(),
-                    description: Some(DescriptionStmt { arg: String::from("Change the type of the last-change flag to date-and-time") }),
-                    reference: None,
-                    deviate: vec![DeviateStmt::Replace(DeviateReplaceStmt { 
-                        type_: Some(TypeStmt { arg: IdentifierRef::from_str("yang:date-and-time").unwrap(), type_body: None }),
-                        units: None,
-                        default: None,
-                        config: None,
-                        mandatory: None,
-                        min_elements: None,
-                        max_elements: None,
-                    })]
-                }));
+            Ok(yang) => {
+                match yang {
+                    YangStmt::DeviationStmt(stmt) => {
+                        assert_eq!(stmt.arg(), &AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-if:state/oc-if:last-change").unwrap());
+                        assert_eq!(stmt.description(), &Some(DescriptionStmt { arg: String::from("Change the type of the last-change flag to date-and-time") }));
+                        assert_eq!(stmt.reference(), &None);
+                        assert_eq!(stmt.deviate().len(), 1);
+                        let deviate_stmt = stmt.deviate().get(0).unwrap();
+                        match deviate_stmt {
+                            DeviateStmt::Replace(deviate_replace_stmt) => {
+                                assert_eq!(deviate_replace_stmt.type_(), &Some(TypeStmt { arg: IdentifierRef::from_str("yang:date-and-time").unwrap(), type_body: None }));
+                                assert_eq!(deviate_replace_stmt.units(), &None);
+                                assert_eq!(deviate_replace_stmt.default(), &None);
+                                assert_eq!(deviate_replace_stmt.config(), &None);
+                                assert_eq!(deviate_replace_stmt.mandatory(), &None);
+                                assert_eq!(deviate_replace_stmt.min_elements(), &None);
+                                assert_eq!(deviate_replace_stmt.max_elements(), &None);
+                            },
+                            _ => panic!("Unexpected stmt {:?}", deviate_stmt),
+                        }
+                    }
+                    _ => panic!("Unexpected stmt {:?}", yang),
+                }
             }
             Err(err) => panic!("{}", err.to_string()),
         }
@@ -4875,37 +5344,24 @@ mod tests {
   }"#;
         let mut parser = Parser::new(s.to_string());
         match DeviationStmt::parse(&mut parser) {
-            Ok(stmt) => {
-                assert_eq!(stmt, YangStmt::DeviationStmt(DeviationStmt {
-                    arg: AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp").unwrap(),
-                    description: Some(DescriptionStmt { arg: String::from("IPv4 VRRP not supported in 16.6.1.") }),
-                    reference: None,
-                    deviate: vec![DeviateStmt::NotSupported]
-                }));
+            Ok(yang) => {
+                match yang {
+                    YangStmt::DeviationStmt(stmt) => {
+                        assert_eq!(stmt.arg(), &AbsoluteSchemaNodeid::from_str("/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp").unwrap());
+                        assert_eq!(stmt.description(), &Some(DescriptionStmt { arg: String::from("IPv4 VRRP not supported in 16.6.1.") }));
+                        assert_eq!(stmt.reference(), &None);
+                        assert_eq!(stmt.deviate().len(), 1);
+                        let deviate_stmt = stmt.deviate().get(0).unwrap();
+                        match deviate_stmt {
+                            DeviateStmt::NotSupported => {}
+                            _ => panic!("Unexpected stmt {:?}", deviate_stmt),
+
+                        }
+                    }
+                    _ => panic!("Unexpected stmt {:?}", yang),
+                }
             }
             Err(err) => panic!("{}", err.to_string()),
         }
-    }
-
-    #[test]
-    pub fn test_typedef_stmt() {
-// TBD
-        let s = r#"area-id {
-	type union {
-
-            type ipv4-address {
-
-            }
-
-            type uint32 {
-		range "0..4294967295";
-            }
-	}
-    }"#;
-
-        let mut parser = Parser::new(s.to_string());
-
-        let res = TypedefStmt::parse(&mut parser);
-        println!("{:?}", res);
     }
 }

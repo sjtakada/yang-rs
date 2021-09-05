@@ -3,14 +3,9 @@
 //  Copyright (C) 2021 Toshiaki Takada
 //
 
-//use std::mem::size_of;
-
-use std::cell::Cell;
-use std::fs::File;
-use std::io::prelude::*;
 use std::io::Error;
 use std::io::ErrorKind;
-use std::path::Path;
+use std::cell::Cell;
 
 use super::core::*;
 use super::error::*;
@@ -19,38 +14,6 @@ use super::stmt::*;
 use super::substmt::*;
 
 use crate::collect_a_stmt;
-
-/// Open and parse a YANG file.
-pub fn parse_file(filename: &str, config: Config) -> std::io::Result<()> {
-    let mut f = File::open(filename)?;
-    let mut s = String::new();
-    let p = Path::new(filename)
-        .file_stem()
-        .ok_or(Error::new(ErrorKind::Other, "Invalid filename"))?;
-    let n1 = p
-        .to_str()
-        .ok_or(Error::new(ErrorKind::Other, "Invalid filename"))?;
-    let _n2 = str::replace(n1, ".", "_");
-
-    f.read_to_string(&mut s)?;
-    let mut parser = Parser::new_with_config(config, s);
-
-    match parser.parse_yang() {
-        Ok(yang) => {
-            println!("{:?}", yang)
-        }
-        Err(err) => {
-            println!(
-                "Error: {:?} at line {}, pos {}",
-                err,
-                parser.line(),
-                parser.pos()
-            );
-        }
-    }
-
-    Ok(())
-}
 
 /// 6.1.3. Quoting
 ///
@@ -199,7 +162,7 @@ impl Parser {
     }
 
     /// Constructor with config.
-    pub fn new_with_config(config: Config, s: String) -> Parser {
+    pub fn new_with_config(s: String, config: Config) -> Parser {
         Parser {
             config,
             input: s,
@@ -208,6 +171,11 @@ impl Parser {
             column: Cell::new(0),
             saved: Cell::new(None),
         }
+    }
+
+    /// Get config reference.
+    pub fn config(&self) -> &Config {
+        &self.config
     }
 
     /// Get input string at current position.
@@ -299,19 +267,19 @@ impl Parser {
                         concat_str = false;
                         string_parsed = true;
                     } else {
-                        return Err(YangError::InvalidString);
+                        return Err(YangError::InvalidString(s));
                     }
                 }
                 Token::PlusSign => {
                     if concat_str {
-                        return Err(YangError::InvalidString);
+                        return Err(YangError::InvalidString(st));
                     } else {
                         concat_str = true;
                     }
                 }
                 _ => {
                     if concat_str {
-                        return Err(YangError::InvalidString);
+                        return Err(YangError::InvalidString(st));
                     }
 
                     if string_parsed {
@@ -395,16 +363,16 @@ impl Parser {
             loop {
                 let c = match chars.next() {
                     Some(c) => c,
-                    None => return Err(YangError::InvalidString),
+                    None => return Err(YangError::InvalidString("String not terminated".to_string())),
                 };
 
                 if c == '\\' {
                     let d = match chars.next() {
                         Some(d) => d,
-                        None => return Err(YangError::InvalidString),
+                        None => return Err(YangError::InvalidString("String not terminated".to_string())),
                     };
                     if d != 'n' && d != 't' && d != '"' && d != '\\' {
-                        return Err(YangError::InvalidString);
+                        return Err(YangError::InvalidString(format!("backslash followed by invalid char '{}'", d)));
                     } 
                     pos += 2;
                 } else if c == '"' {
@@ -431,7 +399,7 @@ impl Parser {
             let l = &input[1..];
             pos = match l.find("'") {
                 Some(pos) => pos,
-                None => return Err(YangError::InvalidString),
+                None => return Err(YangError::InvalidString("String not terminated".to_string())),
             };
 
             let line = l[..pos].matches("\n").count();
@@ -476,11 +444,9 @@ impl Parser {
         ]
     }
 
-    /// Entry point of YANG parser. It will return a module or submodule statement.
+    /// Entry point of YANG parser.  An input and a config has to be set.
+    /// It will return a module or submodule statement.
     pub fn parse_yang(&mut self) -> Result<YangStmt, YangError> {
-
-//        println!("*** size_of {}", size_of::<ModuleStmt>());
-
         let mut stmts = SubStmtUtil::parse_substmts(self, Self::substmts_def())?;
 
         if stmts.contains_key("module") {
@@ -492,6 +458,15 @@ impl Parser {
         } else {
             Err(YangError::UnexpectedEof)
         }
+    }
+
+    /// Parse string as an input, and return YangStmt. Encapsulate YangError into io::Error.
+    pub fn parse_yang_from_string(s: String, config: Config) -> Result<YangStmt, std::io::Error> {
+    let mut parser = Parser::new_with_config(s, config);
+        parser.parse_yang()
+            .map_err(|err| Error::new(ErrorKind::Other,
+                                      format!("YangError: {:?} at line {}, pos {}",
+                                              err, parser.line(), parser.pos())))
     }
 }
 

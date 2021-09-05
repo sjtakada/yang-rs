@@ -16,6 +16,7 @@ pub mod compound;
 
 #[macro_use]
 extern crate lazy_static;
+extern crate derive_getters;
 
 #[macro_export]
 macro_rules! collect_a_stmt {
@@ -80,7 +81,7 @@ macro_rules! parse_a_stmt {
     ($st:ident, $parser:ident) => {
         match <$st>::parse($parser)? {
             YangStmt::$st(stmt) => Ok(stmt),
-            _ => Err(YangError::UnexpectedStatement($parser.line())),
+            _ => Err(YangError::MissingStatement(String::from(<$st>::keyword()))),
         }
     };
 }

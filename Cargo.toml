@@ -16,4 +16,5 @@ categories = ["network-programming", "parser-implementations"]
 getopts = "0.2.21"
 lazy_static = "1.4.0"
 quick-error = "2.0.1"
+derive-getters = "0.2.0"
 url = "2.2.2"

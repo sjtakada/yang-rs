@@ -3,6 +3,8 @@
 //  Copyright (C) 2021 Toshiaki Takada
 //
 
+use derive_getters::Getters;
+
 use super::core::*;
 use super::error::*;
 use super::parser::*;
@@ -13,9 +15,9 @@ use crate::collect_a_stmt;
 use crate::collect_vec_stmt;
 use crate::collect_opt_stmt;
 
-//
-// Trait for compound YANG statements.
-//
+///
+/// Trait for compound YANG statements.
+///
 pub trait Compound {
     /// Return list fo statement keyword.
     fn keywords() -> Vec<Keyword> {
@@ -27,12 +29,17 @@ pub trait Compound {
 }
 
 ///
-/// Module Header Statements.
+/// "module-header" statements.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ModuleHeaderStmts {
+    /// "yang-version" statement.
     yang_version: Option<YangVersionStmt>,
+
+    /// "namespace" statement.
     namespace: NamespaceStmt,
+
+    /// "prefix" statement.
     prefix: PrefixStmt,
 }
 
@@ -47,6 +54,7 @@ impl Compound for ModuleHeaderStmts {
 }
 
 impl ModuleHeaderStmts {
+    /// Parse sub statements.
     pub fn parse(parser: &mut Parser) -> Result<ModuleHeaderStmts, YangError> {
         let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
@@ -58,50 +66,72 @@ impl ModuleHeaderStmts {
     }
 }
 
-
 ///
-/// Submodule Header Statements.
+/// "submodule-header" statements.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct SubmoduleHeaderStmts {
-    yang_version: YangVersionStmt,
+    /// "yang-version" statement.
+    yang_version: Option<YangVersionStmt>,
+
+    /// "belongs-to" statement.
     belongs_to: BelongsToStmt,
 }
 
 impl Compound for SubmoduleHeaderStmts {
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::HasOne(SubStmtWith::Stmt(YangVersionStmt::keyword)),
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(YangVersionStmt::keyword)),
              SubStmtDef::HasOne(SubStmtWith::Stmt(BelongsToStmt::keyword)),
         ]
     }
 }
 
 impl SubmoduleHeaderStmts {
+    /// Parse sub statements.
     pub fn parse(parser: &mut Parser) -> Result<SubmoduleHeaderStmts, YangError> {
         let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         Ok(SubmoduleHeaderStmts {
-            yang_version: collect_a_stmt!(stmts, YangVersionStmt)?,
+            yang_version: collect_opt_stmt!(stmts, YangVersionStmt)?,
             belongs_to: collect_a_stmt!(stmts, BelongsToStmt)?,
         })
     }
 }
 
 ///
-/// Body Statements.
+/// "body" Statements.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct BodyStmts {
+    /// "extension" statment.
     extension: Vec<ExtensionStmt>,
+
+    /// "feature" statement.
     feature: Vec<FeatureStmt>,
+
+    /// "identity" statement.
     identity: Vec<IdentityStmt>,
+
+    /// "typedef" statement.
     typedef: Vec<TypedefStmt>,
+
+    /// "grouping" statement.
     grouping: Vec<GroupingStmt>,
+
+    /// "data-def" statement.
     data_def: DataDefStmt,
+
+    /// "augment" statement.
     augment: Vec<AugmentStmt>,
+
+    /// "rpc" statement.
     rpc: Vec<RpcStmt>,
+
+    /// "notification" statement.
     notification: Vec<NotificationStmt>,
+
+    /// "deviation" statement.
     deviation: Vec<DeviationStmt>,
 }
 
@@ -150,13 +180,20 @@ impl BodyStmts {
 }
 
 ///
-/// Meta Statements.
+/// "meta" statements.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct MetaStmts {
+    /// "organization" statement.
     organization: Option<OrganizationStmt>,
+
+    /// "contact" statement.
     contact: Option<ContactStmt>,
+
+    /// "description" statement.
     description: Option<DescriptionStmt>,
+
+    /// "refrence statement.
     reference: Option<ReferenceStmt>,
 }
 
@@ -185,11 +222,14 @@ impl MetaStmts {
 }
 
 ///
-/// Linkage Statements.
+/// "linkage" statements.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct LinkageStmts {
+    /// "import" statement.
     import: Vec<ImportStmt>,
+
+    /// "include" statement.
     include: Vec<IncludeStmt>,
 }
 
@@ -214,10 +254,11 @@ impl LinkageStmts {
 }
 
 ///
-/// Revision Statements.
+/// "revision" statements.
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RevisionStmts {
+    /// "revision" statement.
     revision: Vec<RevisionStmt>
 }
 
@@ -242,8 +283,9 @@ impl RevisionStmts {
 ///
 /// "numerical-restrictions".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct NumericalRestrictions {
+    /// "reange" statement.
     range: Option<RangeStmt>,
 }
 
@@ -268,9 +310,12 @@ impl NumericalRestrictions {
 ///
 /// "decimal64-specification".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct Decimal64Specification {
+    /// "fraction-digits" statement.
     fraction_digits: FractionDigitsStmt,
+
+    /// "range" statement.
     range: Option<RangeStmt>,
 }
 
@@ -297,66 +342,78 @@ impl Decimal64Specification {
 ///
 /// "string-restrictions".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct StringRestrictions {
+    /// "length" statement.
     length: Option<LengthStmt>,
+
+    /// "pattern" statement.
     pattern: Vec<PatternStmt>,
 }
 
 ///
 /// "enum-specification".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct EnumSpecification {
+    /// "enum" statement.
     enum_: Vec<EnumStmt>,
 }
 
 ///
 /// "leafref-specification".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct LeafrefSpecification {
+    /// "path" statement.
     path: PathStmt,
+
+    /// "require-instance" statement.
     require_instance: Option<RequireInstanceStmt>,
 }
 
 ///
 /// "identityref-specification".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct IdentityrefSpecification {
+    /// "base" statement.
     base: Vec<BaseStmt>,
 }
 
 ///
 /// "instance-identifier-specification".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct InstanceIdentifierSpecification {
+    /// "require-instance" statement.
     require_instance: Option<RequireInstanceStmt>,
 }
 
 ///
 /// "bits-specification".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct BitsSpecification {
+    /// "bit" statement.
     bit: Vec<BitStmt>,
 }
 
 ///
 /// "union-specification".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct UnionSpecification {
+    /// "type" statement.
     type_: Vec<TypeStmt>,
 }
 
 ///
 /// "binary-specification".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct BinarySpecification {
+    /// "length" statement.
     length: Option<LengthStmt>,
 }
 
@@ -479,21 +536,24 @@ pub trait Selection {
 
     /// Constructor with empty substatements.
     fn new() -> Self where Self: Sized {
-        panic!();
+        panic!("{:?}", Self::keywords());
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
     fn new_with_substmts(_substmts: Self::SubStmts) -> Self where Self: Sized {
-        panic!();
+        panic!("{:?}", Self::keywords());
     }
 }
 
 ///
-/// "typedef-stmt" / "grouping-stmt"
+/// "typedef" stmt / "grouping" stmt
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct TypedefOrGrouping {
+    /// "typedef" statement.
     typedef: Vec<TypedefStmt>,
+
+    /// "grouping" statement.
     grouping: Vec<GroupingStmt>,
 }
 
@@ -526,15 +586,30 @@ impl Selection for TypedefOrGrouping {
 ///
 /// "data-def-stmt".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DataDefStmt {
+    /// "container" statement.
     container: Vec<ContainerStmt>,
+
+    /// "leaf" statement.
     leaf: Vec<LeafStmt>,
+
+    /// "leaf-list" statement.
     leaf_list: Vec<LeafListStmt>,
+
+    /// "list" statement.
     list: Vec<ListStmt>,
+
+    /// "choice" statement.
     choice: Vec<ChoiceStmt>,
+
+    /// "anydata" statement.
     anydata: Vec<AnydataStmt>,
+
+    /// "anyxml" statement.
     anyxml: Vec<AnyxmlStmt>,
+
+    /// "uses" statement.
     uses: Vec<UsesStmt>,
 }
 
@@ -581,18 +656,39 @@ impl Selection for DataDefStmt {
 ///
 /// "data-def-stmt" / "case-stmt" / "action-stmt" / "notification-stmt".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct DataDefOrElse {
+    /// "container" statement.
     container: Vec<ContainerStmt>,
+
+    /// "leaf" statement.
     leaf: Vec<LeafStmt>,
+
+    /// "leaf-list" statement.
     leaf_list: Vec<LeafListStmt>,
+
+    /// "list" statement.
     list: Vec<ListStmt>,
+
+    /// "choice" statement.
     choice: Vec<ChoiceStmt>,
+
+    /// "anydata" statement.
     anydata: Vec<AnydataStmt>,
+
+    /// "anyxml" statement.
     anyxml: Vec<AnyxmlStmt>,
+
+    /// "uses" statement.
     uses: Vec<UsesStmt>,
+
+    /// "case" statement.
     case: Vec<CaseStmt>,
+
+    /// "action" statement.
     action: Vec<ActionStmt>,
+
+    /// "notification" statement.
     notification: Vec<NotificationStmt>,
 }
 
@@ -647,15 +743,30 @@ impl Selection for DataDefOrElse {
 ///
 /// "short-case-stmt" / "case-stmt".
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Getters)]
 pub struct ShortCaseOrCaseStmt {
+    /// "choice" statement.
     choice: Vec<ChoiceStmt>,
+
+    /// "container" statement.
     container: Vec<ContainerStmt>,
+
+    /// "leaf" statement.
     leaf: Vec<LeafStmt>,
+
+    /// "leaf-list" statement.
     leaf_list: Vec<LeafListStmt>,
+
+    /// "list" statement.
     list: Vec<ListStmt>,
+
+    /// "anydata" statement.
     anydata: Vec<AnydataStmt>,
+
+    /// "anyxml" statement.
     anyxml: Vec<AnyxmlStmt>,
+
+    /// "case" statement.
     case: Vec<CaseStmt>,
 }
 
