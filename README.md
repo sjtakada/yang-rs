@@ -8,7 +8,7 @@ Parse and dump a YANG file.
 cargo run YANG-FILE
 ```
 
-Parse YANG string and get parsed Rust object.
+Code example to parse YANG string and get parsed Rust object.
 ```
 use yang_rs::parser::Parser;
 use yang_rs::config::Config;
