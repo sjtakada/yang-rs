@@ -45,14 +45,13 @@ pub type Prefix = Identifier;
 //              %xE0000-EFFFD /  ; exclude noncharacters %xEFFFE-EFFFF
 //              %xF0000-FFFFD /  ; exclude noncharacters %xFFFFE-FFFFF
 //              %x100000-10FFFD  ; exclude noncharacters %x10FFFE-10FFFF
-// 
+//
 // YANG string, quoted or unquoted.
 fn parse_string(parser: &mut Parser) -> Result<String, YangError> {
     let token = parser.get_token()?;
     match token {
         // Statement argument.
-        Token::Identifier(s) |
-        Token::QuotedString(s) => Ok(s),
+        Token::Identifier(s) | Token::QuotedString(s) => Ok(s),
         // End of Input.
         Token::EndOfInput => Err(YangError::UnexpectedEof),
         // Unexpected Token.
@@ -65,7 +64,9 @@ fn parse_string(parser: &mut Parser) -> Result<String, YangError> {
 ///
 pub trait StmtArg {
     /// Parse token and return StmtArg if it is valid.
-    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> where Self: Sized;
+    fn parse_arg(parser: &mut Parser) -> Result<Self, YangError>
+    where
+        Self: Sized;
 }
 
 ///
@@ -153,11 +154,17 @@ impl FromStr for IdentifierRef {
                 let prefix = Identifier::from_str(&str[..p])?;
                 let identifier = Identifier::from_str(&str[p + 1..])?;
 
-                Ok(IdentifierRef { prefix: Some(prefix), identifier})
+                Ok(IdentifierRef {
+                    prefix: Some(prefix),
+                    identifier,
+                })
             }
             None => {
                 let identifier = Identifier::from_str(&str)?;
-                Ok(IdentifierRef { prefix: None, identifier })
+                Ok(IdentifierRef {
+                    prefix: None,
+                    identifier,
+                })
             }
         }
     }
@@ -197,11 +204,17 @@ impl FromStr for NodeIdentifier {
                 let prefix = Identifier::from_str(&s[..p])?;
                 let identifier = Identifier::from_str(&s[p + 1..])?;
 
-                Ok(NodeIdentifier { prefix: Some(prefix), identifier})
+                Ok(NodeIdentifier {
+                    prefix: Some(prefix),
+                    identifier,
+                })
             }
             None => {
                 let identifier = Identifier::from_str(&s)?;
-                Ok(NodeIdentifier { prefix: None, identifier })
+                Ok(NodeIdentifier {
+                    prefix: None,
+                    identifier,
+                })
             }
         }
     }
@@ -219,8 +232,7 @@ impl ToString for NodeIdentifier {
 impl StmtArg for NodeIdentifier {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
-        NodeIdentifier::from_str(&str)
-            .map_err(|e| YangError::ArgumentParseError(e.str))
+        NodeIdentifier::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str))
     }
 }
 
@@ -229,7 +241,7 @@ impl StmtArg for NodeIdentifier {
 ///
 #[derive(Clone, PartialEq, Getters)]
 pub struct UnknownStmtKeyword {
-    prefix:Prefix,
+    prefix: Prefix,
     identifier: Identifier,
 }
 
@@ -254,13 +266,12 @@ impl FromStr for UnknownStmtKeyword {
                 let prefix = Identifier::from_str(&str[..p])?;
                 let identifier = Identifier::from_str(&str[p + 1..])?;
 
-                Ok(UnknownStmtKeyword { prefix, identifier})
+                Ok(UnknownStmtKeyword { prefix, identifier })
             }
             None => Err(ArgError::new("unknown-stmt keyword")),
         }
     }
 }
-
 
 // Yang String.
 impl StmtArg for String {
@@ -276,7 +287,7 @@ impl StmtArg for Url {
 
         match Url::parse(&s) {
             Ok(url) => Ok(url),
-            Err(_) => Err(YangError::ArgumentParseError("url"))
+            Err(_) => Err(YangError::ArgumentParseError("url")),
         }
     }
 }
@@ -303,9 +314,7 @@ impl StmtArg for YangVersionArg {
                     Err(YangError::ArgumentParseError("yang-version"))
                 }
             }
-            None => {
-                Ok(YangVersionArg { str })
-            }
+            None => Ok(YangVersionArg { str }),
         }
     }
 }
@@ -357,7 +366,7 @@ impl StmtArg for DateArg {
 }
 
 ///
-/// "yin-element-arg". 
+/// "yin-element-arg".
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct YinElementArg {
@@ -405,11 +414,10 @@ impl StmtArg for FractionDigitsArg {
         let str = parse_string(parser)?;
         match str.parse::<u8>() {
             Ok(num) if num >= 1 && num <= 18 => Ok(FractionDigitsArg { digits: num }),
-            _ => Err(YangError::ArgumentParseError("fraction-digits-arg"))
+            _ => Err(YangError::ArgumentParseError("fraction-digits-arg")),
         }
     }
 }
-
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Status {
@@ -430,11 +438,17 @@ impl StmtArg for StatusArg {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         if str == "current" {
-            Ok(StatusArg { arg: Status::Current })
+            Ok(StatusArg {
+                arg: Status::Current,
+            })
         } else if str == "obsolete" {
-            Ok(StatusArg { arg: Status::Obsolete })
+            Ok(StatusArg {
+                arg: Status::Obsolete,
+            })
         } else if str == "deprecated" {
-            Ok(StatusArg { arg: Status::Deprecated })
+            Ok(StatusArg {
+                arg: Status::Deprecated,
+            })
         } else {
             Err(YangError::ArgumentParseError("status-arg"))
         }
@@ -501,9 +515,13 @@ impl StmtArg for OrderedByArg {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         if str == "user" {
-            Ok(OrderedByArg { arg: OrderedBy::User })
+            Ok(OrderedByArg {
+                arg: OrderedBy::User,
+            })
         } else if str == "system" {
-            Ok(OrderedByArg { arg: OrderedBy::System })
+            Ok(OrderedByArg {
+                arg: OrderedBy::System,
+            })
         } else {
             Err(YangError::ArgumentParseError("ordered-by-arg"))
         }
@@ -560,11 +578,15 @@ impl StmtArg for MaxValueArg {
         let str = parse_string(parser)?;
 
         if str == "unbounded" {
-            Ok(MaxValueArg { val: MaxValue::Unbounded })
+            Ok(MaxValueArg {
+                val: MaxValue::Unbounded,
+            })
         } else if is_positive_integer_value(&str) {
             match str.parse::<u64>() {
-                Ok(num) => Ok(MaxValueArg { val: MaxValue::Value(num) }),
-                Err(_) => Err(YangError::ArgumentParseError("max-value-arg"))
+                Ok(num) => Ok(MaxValueArg {
+                    val: MaxValue::Value(num),
+                }),
+                Err(_) => Err(YangError::ArgumentParseError("max-value-arg")),
             }
         } else {
             Err(YangError::ArgumentParseError("max-value-arg"))
@@ -654,14 +676,19 @@ impl StmtArg for RangeArg {
                     return Err(YangError::ArgumentParseError("range-arg"));
                 }
 
-                lower = RangeBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str))?;
+                lower = RangeBoundary::from_str(bounds[0])
+                    .map_err(|e| YangError::ArgumentParseError(e.str))?;
                 upper = None;
             } else if bounds.len() == 2 {
                 if bounds[0] == "" || bounds[1] == "" {
                     return Err(YangError::ArgumentParseError("range-arg"));
                 }
-                lower = RangeBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str))?;
-                upper = Some(RangeBoundary::from_str(bounds[1]).map_err(|e| YangError::ArgumentParseError(e.str))?);
+                lower = RangeBoundary::from_str(bounds[0])
+                    .map_err(|e| YangError::ArgumentParseError(e.str))?;
+                upper = Some(
+                    RangeBoundary::from_str(bounds[1])
+                        .map_err(|e| YangError::ArgumentParseError(e.str))?,
+                );
             } else {
                 return Err(YangError::ArgumentParseError("range-arg"));
             }
@@ -727,14 +754,19 @@ impl StmtArg for LengthArg {
                     return Err(YangError::ArgumentParseError("length-arg"));
                 }
 
-                lower = LengthBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str))?;
+                lower = LengthBoundary::from_str(bounds[0])
+                    .map_err(|e| YangError::ArgumentParseError(e.str))?;
                 upper = None;
             } else if bounds.len() == 2 {
                 if bounds[0] == "" || bounds[1] == "" {
                     return Err(YangError::ArgumentParseError("length-arg"));
                 }
-                lower = LengthBoundary::from_str(bounds[0]).map_err(|e| YangError::ArgumentParseError(e.str))?;
-                upper = Some(LengthBoundary::from_str(bounds[1]).map_err(|e| YangError::ArgumentParseError(e.str))?);
+                lower = LengthBoundary::from_str(bounds[0])
+                    .map_err(|e| YangError::ArgumentParseError(e.str))?;
+                upper = Some(
+                    LengthBoundary::from_str(bounds[1])
+                        .map_err(|e| YangError::ArgumentParseError(e.str))?,
+                );
             } else {
                 return Err(YangError::ArgumentParseError("length-arg"));
             }
@@ -750,14 +782,13 @@ impl StmtArg for LengthArg {
 /// "modifier-arg".
 ///
 #[derive(Debug, Clone, PartialEq, Getters)]
-pub struct ModifierArg {
-}
+pub struct ModifierArg {}
 
 impl StmtArg for ModifierArg {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
         if str == "invert-match" {
-            Ok(ModifierArg { })
+            Ok(ModifierArg {})
         } else {
             Err(YangError::ArgumentParseError("modifier-arg"))
         }
@@ -786,7 +817,6 @@ impl StmtArg for PositionValueArg {
     }
 }
 
-
 ///
 /// "path-arg".
 ///
@@ -801,12 +831,12 @@ impl StmtArg for PathArg {
         let str = parse_string(parser)?;
 
         if str.starts_with('/') {
-            Ok(PathArg::AbsolutePath(AbsolutePath::from_str(&str)
-                                     .map_err(|e| YangError::ArgumentParseError(e.str))?
+            Ok(PathArg::AbsolutePath(
+                AbsolutePath::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str))?,
             ))
         } else if str.starts_with("..") {
-            Ok(PathArg::RelativePath(RelativePath::from_str(&str)
-                                     .map_err(|e| YangError::ArgumentParseError(e.str))?
+            Ok(PathArg::RelativePath(
+                RelativePath::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str))?,
             ))
         } else {
             Err(YangError::ArgumentParseError("path-arg"))
@@ -829,7 +859,7 @@ impl FromStr for AbsolutePath {
 
         while s.len() > 0 {
             if !s.starts_with('/') {
-                return Err(ArgError::new("absolute-path"))
+                return Err(ArgError::new("absolute-path"));
             }
             s = &s[1..];
 
@@ -846,24 +876,30 @@ impl FromStr for AbsolutePath {
                         while {
                             let pos = match s.find(']') {
                                 Some(p) => Ok(p + 1),
-                                None => Err(ArgError::new("absolute-path"))
+                                None => Err(ArgError::new("absolute-path")),
                             }?;
 
                             path_predicate.push(PathPredicate::from_str(&s[..pos])?);
                             s = &s[pos..];
 
                             s.len() > 0 && s.starts_with('[')
-                        } { };
+                        } {}
                     }
                 }
                 None => {
                     node_identifier = NodeIdentifier::from_str(&s)?;
-                    nodes.push(PathNode { node_identifier, path_predicate });
+                    nodes.push(PathNode {
+                        node_identifier,
+                        path_predicate,
+                    });
                     break;
                 }
             }
 
-            nodes.push(PathNode { node_identifier, path_predicate });
+            nodes.push(PathNode {
+                node_identifier,
+                path_predicate,
+            });
         }
 
         Ok(AbsolutePath { nodes })
@@ -891,17 +927,20 @@ impl FromStr for RelativePath {
         let mut up = 0;
 
         if !s.starts_with("../") {
-            return Err(ArgError::new("relative-path"))
+            return Err(ArgError::new("relative-path"));
         }
 
         while {
             up += 1;
             s = &s[3..];
             s.len() > 0 && s.starts_with("../")
-        } { };
+        } {}
 
         let descendant_path = DescendantPath::from_str(s)?;
-        Ok(RelativePath{ up, descendant_path })
+        Ok(RelativePath {
+            up,
+            descendant_path,
+        })
     }
 }
 
@@ -923,7 +962,7 @@ impl FromStr for DescendantPath {
         let mut absolute_path = None;
 
         if s.len() == 0 {
-            return Err(ArgError::new("descendant-path"))
+            return Err(ArgError::new("descendant-path"));
         }
 
         match s.find(|c: char| c == '[' || c == '/') {
@@ -943,7 +982,7 @@ impl FromStr for DescendantPath {
                         s = &s[pos..];
 
                         s.len() > 0 && s.starts_with('[')
-                    } { };
+                    } {}
                 }
 
                 if s.len() > 0 {
@@ -955,10 +994,13 @@ impl FromStr for DescendantPath {
             }
         }
 
-        Ok(DescendantPath { node_identifier, path_predicate, absolute_path })
+        Ok(DescendantPath {
+            node_identifier,
+            path_predicate,
+            absolute_path,
+        })
     }
 }
-
 
 /// "path-predicate".
 #[derive(Debug, Clone, PartialEq, Getters)]
@@ -992,13 +1034,11 @@ impl FromStr for PathEqualityExpr {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.find('=') {
-            Some(p) => {
-                Ok(PathEqualityExpr {
-                    node_identifier: NodeIdentifier::from_str(&s[0..p].trim())?,
-                    path_key_expr: PathKeyExpr::from_str(&s[p + 1..].trim())?,
-                })
-            }
-            None => Err(ArgError::new("path-equality-expr"))
+            Some(p) => Ok(PathEqualityExpr {
+                node_identifier: NodeIdentifier::from_str(&s[0..p].trim())?,
+                path_key_expr: PathKeyExpr::from_str(&s[p + 1..].trim())?,
+            }),
+            None => Err(ArgError::new("path-equality-expr")),
         }
     }
 }
@@ -1025,10 +1065,10 @@ impl FromStr for PathKeyExpr {
         let paths: Vec<_> = str.split("/").map(|s| s.trim()).collect();
         // Minimum of "current() / .. / node-identifier".
         if paths.len() < 3 {
-            return Err(ArgError::new("path-key-expr"))
+            return Err(ArgError::new("path-key-expr"));
         // Invalid current function invocation.
         } else if !is_current_function_invocation(&paths[0]) {
-            return Err(ArgError::new("path-key-expr"))
+            return Err(ArgError::new("path-key-expr"));
         // Validate rel-path-keyexpr.
         } else {
             let mut i = 1;
@@ -1041,21 +1081,23 @@ impl FromStr for PathKeyExpr {
                     i += 1;
                 }
                 if i >= paths.len() {
-                    return Err(ArgError::new("path-key-expr"))
+                    return Err(ArgError::new("path-key-expr"));
                 }
 
                 if !is_node_identifier(paths[i]) {
-                    return Err(ArgError::new("path-key-expr"))
+                    return Err(ArgError::new("path-key-expr"));
                 }
 
                 while i < paths.len() {
                     if !is_node_identifier(paths[i]) {
-                        return Err(ArgError::new("path-key-expr"))
+                        return Err(ArgError::new("path-key-expr"));
                     }
                     i += 1;
                 }
 
-                Ok(PathKeyExpr { rel_path_keyexpr: str.to_string() })
+                Ok(PathKeyExpr {
+                    rel_path_keyexpr: str.to_string(),
+                })
             }
         }
     }
@@ -1063,7 +1105,7 @@ impl FromStr for PathKeyExpr {
 
 ///
 /// Tokenizer for "if-feature".
-/// 
+///
 pub enum IfFeatureToken {
     Init,
     ParenBegin,
@@ -1082,10 +1124,7 @@ pub struct Tokenizer {
 
 impl Tokenizer {
     pub fn new(s: String) -> Tokenizer {
-        Tokenizer {
-            str: s,
-            pos: 0,
-        }
+        Tokenizer { str: s, pos: 0 }
     }
 
     pub fn line(&mut self) -> &str {
@@ -1115,7 +1154,9 @@ impl Tokenizer {
             self.pos += 2;
             IfFeatureToken::Or
         } else {
-            let p = match self.line().find(|c: char| !c.is_alphanumeric() && c != '-' && c != '_' && c != '.' && c != ':') {
+            let p = match self.line().find(|c: char| {
+                !c.is_alphanumeric() && c != '-' && c != '_' && c != '.' && c != ':'
+            }) {
                 Some(p) => p,
                 None => self.str.len() - self.pos,
             };
@@ -1160,9 +1201,9 @@ impl IfFeatureExpr {
                 IfFeatureToken::Init => {}
                 IfFeatureToken::ParenBegin => {
                     match prev {
-                        IfFeatureToken::ParenBegin |
-                        IfFeatureToken::ParenEnd |
-                        IfFeatureToken::IdentifierRef(_) => {
+                        IfFeatureToken::ParenBegin
+                        | IfFeatureToken::ParenEnd
+                        | IfFeatureToken::IdentifierRef(_) => {
                             return Err(ArgError::new("if-feature-expr"))
                         }
                         _ => {}
@@ -1175,12 +1216,10 @@ impl IfFeatureExpr {
                 }
                 IfFeatureToken::ParenEnd => {
                     match prev {
-                        IfFeatureToken::ParenBegin |
-                        IfFeatureToken::Not |
-                        IfFeatureToken::And |
-                        IfFeatureToken::Or => {
-                            return Err(ArgError::new("if-feature-expr"))
-                        }
+                        IfFeatureToken::ParenBegin
+                        | IfFeatureToken::Not
+                        | IfFeatureToken::And
+                        | IfFeatureToken::Or => return Err(ArgError::new("if-feature-expr")),
                         _ => {}
                     }
 
@@ -1188,36 +1227,32 @@ impl IfFeatureExpr {
                 }
                 IfFeatureToken::Or => {
                     match prev {
-                        IfFeatureToken::Init |
-                        IfFeatureToken::ParenBegin |
-                        IfFeatureToken::Not |
-                        IfFeatureToken::And |
-                        IfFeatureToken::Or => {
-                            return Err(ArgError::new("if-feature-expr"))
-                        }
+                        IfFeatureToken::Init
+                        | IfFeatureToken::ParenBegin
+                        | IfFeatureToken::Not
+                        | IfFeatureToken::And
+                        | IfFeatureToken::Or => return Err(ArgError::new("if-feature-expr")),
                         _ => {}
                     }
 
-                    terms.push(IfFeatureTerm { factors: factors.drain(..).collect() });
+                    terms.push(IfFeatureTerm {
+                        factors: factors.drain(..).collect(),
+                    });
                     factors = Vec::new();
                 }
-                IfFeatureToken::And => {
-                    match prev {
-                        IfFeatureToken::Init |
-                        IfFeatureToken::ParenBegin |
-                        IfFeatureToken::Not |
-                        IfFeatureToken::And |
-                        IfFeatureToken::Or => {
-                            return Err(ArgError::new("if-feature-expr"))
-                        }
-                        _ => {}
-                    }
-                }
+                IfFeatureToken::And => match prev {
+                    IfFeatureToken::Init
+                    | IfFeatureToken::ParenBegin
+                    | IfFeatureToken::Not
+                    | IfFeatureToken::And
+                    | IfFeatureToken::Or => return Err(ArgError::new("if-feature-expr")),
+                    _ => {}
+                },
                 IfFeatureToken::Not => {
                     match prev {
-                        IfFeatureToken::ParenEnd |
-                        IfFeatureToken::Not |
-                        IfFeatureToken::IdentifierRef(_) => {
+                        IfFeatureToken::ParenEnd
+                        | IfFeatureToken::Not
+                        | IfFeatureToken::IdentifierRef(_) => {
                             return Err(ArgError::new("if-feature-expr"))
                         }
                         _ => {}
@@ -1227,8 +1262,7 @@ impl IfFeatureExpr {
                 }
                 IfFeatureToken::IdentifierRef(ref str) => {
                     match prev {
-                        IfFeatureToken::ParenEnd |
-                        IfFeatureToken::IdentifierRef(_) => {
+                        IfFeatureToken::ParenEnd | IfFeatureToken::IdentifierRef(_) => {
                             return Err(ArgError::new("if-feature-expr"))
                         }
                         _ => {}
@@ -1243,7 +1277,9 @@ impl IfFeatureExpr {
             prev = token;
         }
 
-        terms.push(IfFeatureTerm { factors: factors.drain(..).collect() });
+        terms.push(IfFeatureTerm {
+            factors: factors.drain(..).collect(),
+        });
         Ok(IfFeatureExpr { terms })
     }
 }
@@ -1319,7 +1355,6 @@ impl StmtArg for RequireInstanceArg {
     }
 }
 
-
 ///
 /// "key-arg".
 ///
@@ -1340,12 +1375,13 @@ impl StmtArg for KeyArg {
                 None => s.len(),
             };
 
-            let node_identifier = NodeIdentifier::from_str(&s[..pos]).map_err(|e| YangError::ArgumentParseError(e.str))?;
+            let node_identifier = NodeIdentifier::from_str(&s[..pos])
+                .map_err(|e| YangError::ArgumentParseError(e.str))?;
             keys.push(node_identifier);
-            
+
             s = &s[pos..].trim();
             s.len() > 0
-        } { }
+        } {}
 
         Ok(KeyArg { keys })
     }
@@ -1365,10 +1401,14 @@ impl StmtArg for SchemaNodeid {
         let str = parse_string(parser)?;
         if str.starts_with('/') {
             Ok(SchemaNodeid::Absolute(
-                AbsoluteSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str))?))
+                AbsoluteSchemaNodeid::from_str(&str)
+                    .map_err(|e| YangError::ArgumentParseError(e.str))?,
+            ))
         } else {
             Ok(SchemaNodeid::Descendant(
-                DescendantSchemaNodeid::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str))?))
+                DescendantSchemaNodeid::from_str(&str)
+                    .map_err(|e| YangError::ArgumentParseError(e.str))?,
+            ))
         }
     }
 }
@@ -1441,13 +1481,24 @@ impl StmtArg for DescendantSchemaNodeid {
 
 impl ToString for AbsoluteSchemaNodeid {
     fn to_string(&self) -> String {
-        format!("/{}", self.nodes.iter().map(|n| n.to_string()).collect::<Vec<String>>().join("/"))
+        format!(
+            "/{}",
+            self.nodes
+                .iter()
+                .map(|n| n.to_string())
+                .collect::<Vec<String>>()
+                .join("/")
+        )
     }
 }
 
 impl ToString for DescendantSchemaNodeid {
     fn to_string(&self) -> String {
-        self.nodes.iter().map(|n| n.to_string()).collect::<Vec<String>>().join("/")
+        self.nodes
+            .iter()
+            .map(|n| n.to_string())
+            .collect::<Vec<String>>()
+            .join("/")
     }
 }
 
@@ -1502,7 +1553,12 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match Identifier::parse_arg(&mut parser) {
-            Ok(arg) => assert_eq!(arg, Identifier { str: String::from("hello-world") }),
+            Ok(arg) => assert_eq!(
+                arg,
+                Identifier {
+                    str: String::from("hello-world")
+                }
+            ),
             Err(err) => panic!("{:?}", err.to_string()),
         }
 
@@ -1510,7 +1566,12 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match Identifier::parse_arg(&mut parser) {
-            Ok(arg) => assert_eq!(arg, Identifier { str: String::from("_123.IdEnT.456-789_") }),
+            Ok(arg) => assert_eq!(
+                arg,
+                Identifier {
+                    str: String::from("_123.IdEnT.456-789_")
+                }
+            ),
             Err(err) => panic!("{:?}", err.to_string()),
         }
 
@@ -1642,7 +1703,12 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match RangeArg::parse_arg(&mut parser) {
-            Ok(arg) => assert_eq!(arg, RangeArg { parts: vec![(RangeBoundary::Integer(1), Some(RangeBoundary::Integer(10)))]}),
+            Ok(arg) => assert_eq!(
+                arg,
+                RangeArg {
+                    parts: vec![(RangeBoundary::Integer(1), Some(RangeBoundary::Integer(10)))]
+                }
+            ),
             Err(err) => panic!("{:?}", err.to_string()),
         }
 
@@ -1650,9 +1716,15 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match RangeArg::parse_arg(&mut parser) {
-            Ok(arg) => assert_eq!(arg, RangeArg { parts: vec![(RangeBoundary::Integer(1), Some(RangeBoundary::Integer(10))),
-                                                               (RangeBoundary::Integer(21), Some(RangeBoundary::Integer(30))),
-            ]}),
+            Ok(arg) => assert_eq!(
+                arg,
+                RangeArg {
+                    parts: vec![
+                        (RangeBoundary::Integer(1), Some(RangeBoundary::Integer(10))),
+                        (RangeBoundary::Integer(21), Some(RangeBoundary::Integer(30))),
+                    ]
+                }
+            ),
             Err(err) => panic!("{:?}", err.to_string()),
         }
 
@@ -1660,8 +1732,12 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match RangeArg::parse_arg(&mut parser) {
-            Ok(arg) => assert_eq!(arg, RangeArg { parts: vec![(RangeBoundary::Min, Some(RangeBoundary::Max)),
-            ]}),
+            Ok(arg) => assert_eq!(
+                arg,
+                RangeArg {
+                    parts: vec![(RangeBoundary::Min, Some(RangeBoundary::Max)),]
+                }
+            ),
             Err(err) => panic!("{:?}", err.to_string()),
         }
 
@@ -1677,7 +1753,15 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match RangeArg::parse_arg(&mut parser) {
-            Ok(arg) => assert_eq!(arg, RangeArg { parts: vec![(RangeBoundary::Decimal(1.01), Some(RangeBoundary::Decimal(1.99)))]}),
+            Ok(arg) => assert_eq!(
+                arg,
+                RangeArg {
+                    parts: vec![(
+                        RangeBoundary::Decimal(1.01),
+                        Some(RangeBoundary::Decimal(1.99))
+                    )]
+                }
+            ),
             Err(err) => panic!("{:?}", err.to_string()),
         }
     }
@@ -1688,7 +1772,15 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match LengthArg::parse_arg(&mut parser) {
-            Ok(arg) => assert_eq!(arg, LengthArg { parts: vec![(LengthBoundary::Integer(1), Some(LengthBoundary::Integer(10)))]}),
+            Ok(arg) => assert_eq!(
+                arg,
+                LengthArg {
+                    parts: vec![(
+                        LengthBoundary::Integer(1),
+                        Some(LengthBoundary::Integer(10))
+                    )]
+                }
+            ),
             Err(err) => panic!("{:?}", err.to_string()),
         }
 
@@ -1696,9 +1788,21 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match LengthArg::parse_arg(&mut parser) {
-            Ok(arg) => assert_eq!(arg, LengthArg { parts: vec![(LengthBoundary::Integer(1), Some(LengthBoundary::Integer(10))),
-                                                               (LengthBoundary::Integer(21), Some(LengthBoundary::Integer(30))),
-            ]}),
+            Ok(arg) => assert_eq!(
+                arg,
+                LengthArg {
+                    parts: vec![
+                        (
+                            LengthBoundary::Integer(1),
+                            Some(LengthBoundary::Integer(10))
+                        ),
+                        (
+                            LengthBoundary::Integer(21),
+                            Some(LengthBoundary::Integer(30))
+                        ),
+                    ]
+                }
+            ),
             Err(err) => panic!("{:?}", err.to_string()),
         }
 
@@ -1706,8 +1810,12 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match LengthArg::parse_arg(&mut parser) {
-            Ok(arg) => assert_eq!(arg, LengthArg { parts: vec![(LengthBoundary::Min, Some(LengthBoundary::Max)),
-            ]}),
+            Ok(arg) => assert_eq!(
+                arg,
+                LengthArg {
+                    parts: vec![(LengthBoundary::Min, Some(LengthBoundary::Max)),]
+                }
+            ),
             Err(err) => panic!("{:?}", err.to_string()),
         }
 
@@ -1724,25 +1832,46 @@ mod tests {
     pub fn test_path_key_expr() {
         let s = "current()/../node";
         match PathKeyExpr::from_str(s) {
-            Ok(arg) => assert_eq!(arg, PathKeyExpr { rel_path_keyexpr: "current()/../node".to_string() }),
+            Ok(arg) => assert_eq!(
+                arg,
+                PathKeyExpr {
+                    rel_path_keyexpr: "current()/../node".to_string()
+                }
+            ),
             Err(err) => panic!("{:?}", err.to_string()),
         }
 
         let s = "current()/../../../node";
         match PathKeyExpr::from_str(s) {
-            Ok(arg) => assert_eq!(arg, PathKeyExpr { rel_path_keyexpr: "current()/../../../node".to_string() }),
+            Ok(arg) => assert_eq!(
+                arg,
+                PathKeyExpr {
+                    rel_path_keyexpr: "current()/../../../node".to_string()
+                }
+            ),
             Err(err) => panic!("{:?}", err.to_string()),
         }
 
         let s = "current()/../../../node/node/node";
         match PathKeyExpr::from_str(s) {
-            Ok(arg) => assert_eq!(arg, PathKeyExpr { rel_path_keyexpr: "current()/../../../node/node/node".to_string() }),
+            Ok(arg) => assert_eq!(
+                arg,
+                PathKeyExpr {
+                    rel_path_keyexpr: "current()/../../../node/node/node".to_string()
+                }
+            ),
             Err(err) => panic!("{:?}", err.to_string()),
         }
 
         let s = "current ( ) / .. / .. / .. / node / node / node ";
         match PathKeyExpr::from_str(s) {
-            Ok(arg) => assert_eq!(arg, PathKeyExpr { rel_path_keyexpr: "current ( ) / .. / .. / .. / node / node / node ".to_string() }),
+            Ok(arg) => assert_eq!(
+                arg,
+                PathKeyExpr {
+                    rel_path_keyexpr: "current ( ) / .. / .. / .. / node / node / node "
+                        .to_string()
+                }
+            ),
             Err(err) => panic!("{:?}", err.to_string()),
         }
 
@@ -1763,26 +1892,65 @@ mod tests {
     pub fn test_absolute_path() {
         let s = "/node1/node2[id=current()/../rel1/rel2]";
         let path = AbsolutePath {
-            nodes: vec![PathNode { node_identifier: NodeIdentifier::from_str("node1").unwrap(), path_predicate: vec![] },
-                        PathNode { node_identifier: NodeIdentifier::from_str("node2").unwrap(), path_predicate:
-                                   vec![PathPredicate { path_equality_expr: PathEqualityExpr { node_identifier: NodeIdentifier::from_str("id").unwrap(),
-                                                                                               path_key_expr: PathKeyExpr { rel_path_keyexpr: "current()/../rel1/rel2".to_string() } } }] }] };
+            nodes: vec![
+                PathNode {
+                    node_identifier: NodeIdentifier::from_str("node1").unwrap(),
+                    path_predicate: vec![],
+                },
+                PathNode {
+                    node_identifier: NodeIdentifier::from_str("node2").unwrap(),
+                    path_predicate: vec![PathPredicate {
+                        path_equality_expr: PathEqualityExpr {
+                            node_identifier: NodeIdentifier::from_str("id").unwrap(),
+                            path_key_expr: PathKeyExpr {
+                                rel_path_keyexpr: "current()/../rel1/rel2".to_string(),
+                            },
+                        },
+                    }],
+                },
+            ],
+        };
 
         match AbsolutePath::from_str(s) {
             Ok(p) => assert_eq!(p, path),
             Err(err) => panic!("{:?}", err.to_string()),
         }
 
-        let s = "/node1/node2[id1=current()/../rel1/rel2][prefix:id2=current()/../../rel3/rel4]/node3";
+        let s =
+            "/node1/node2[id1=current()/../rel1/rel2][prefix:id2=current()/../../rel3/rel4]/node3";
         let path = AbsolutePath {
-            nodes: vec![PathNode { node_identifier: NodeIdentifier::from_str("node1").unwrap(), path_predicate: vec![] },
-                        PathNode { node_identifier: NodeIdentifier::from_str("node2").unwrap(), path_predicate:
-                                   vec![PathPredicate { path_equality_expr: PathEqualityExpr { node_identifier: NodeIdentifier::from_str("id1").unwrap(),
-                                                                                               path_key_expr: PathKeyExpr { rel_path_keyexpr: "current()/../rel1/rel2".to_string() } } },
-                                        PathPredicate { path_equality_expr: PathEqualityExpr { node_identifier: NodeIdentifier::from_str("prefix:id2").unwrap(),
-                                                                                               path_key_expr: PathKeyExpr { rel_path_keyexpr: "current()/../../rel3/rel4".to_string() } } }] },
-                        PathNode { node_identifier: NodeIdentifier::from_str("node3").unwrap(), path_predicate: vec![] },
-            ] };
+            nodes: vec![
+                PathNode {
+                    node_identifier: NodeIdentifier::from_str("node1").unwrap(),
+                    path_predicate: vec![],
+                },
+                PathNode {
+                    node_identifier: NodeIdentifier::from_str("node2").unwrap(),
+                    path_predicate: vec![
+                        PathPredicate {
+                            path_equality_expr: PathEqualityExpr {
+                                node_identifier: NodeIdentifier::from_str("id1").unwrap(),
+                                path_key_expr: PathKeyExpr {
+                                    rel_path_keyexpr: "current()/../rel1/rel2".to_string(),
+                                },
+                            },
+                        },
+                        PathPredicate {
+                            path_equality_expr: PathEqualityExpr {
+                                node_identifier: NodeIdentifier::from_str("prefix:id2").unwrap(),
+                                path_key_expr: PathKeyExpr {
+                                    rel_path_keyexpr: "current()/../../rel3/rel4".to_string(),
+                                },
+                            },
+                        },
+                    ],
+                },
+                PathNode {
+                    node_identifier: NodeIdentifier::from_str("node3").unwrap(),
+                    path_predicate: vec![],
+                },
+            ],
+        };
 
         match AbsolutePath::from_str(s) {
             Ok(p) => assert_eq!(p, path),
@@ -1795,10 +1963,24 @@ mod tests {
         let s = "node0/node1/node2[id=current()/../rel1/rel2]";
 
         let absolute_path = AbsolutePath {
-            nodes: vec![PathNode { node_identifier: NodeIdentifier::from_str("node1").unwrap(), path_predicate: vec![] },
-                        PathNode { node_identifier: NodeIdentifier::from_str("node2").unwrap(), path_predicate:
-                                   vec![PathPredicate { path_equality_expr: PathEqualityExpr { node_identifier: NodeIdentifier::from_str("id").unwrap(),
-                                                                                               path_key_expr: PathKeyExpr { rel_path_keyexpr: "current()/../rel1/rel2".to_string() } } }] }] };
+            nodes: vec![
+                PathNode {
+                    node_identifier: NodeIdentifier::from_str("node1").unwrap(),
+                    path_predicate: vec![],
+                },
+                PathNode {
+                    node_identifier: NodeIdentifier::from_str("node2").unwrap(),
+                    path_predicate: vec![PathPredicate {
+                        path_equality_expr: PathEqualityExpr {
+                            node_identifier: NodeIdentifier::from_str("id").unwrap(),
+                            path_key_expr: PathKeyExpr {
+                                rel_path_keyexpr: "current()/../rel1/rel2".to_string(),
+                            },
+                        },
+                    }],
+                },
+            ],
+        };
         let descendant_path = DescendantPath {
             node_identifier: NodeIdentifier::from_str("node0").unwrap(),
             path_predicate: vec![],
@@ -1816,8 +1998,17 @@ mod tests {
         let s = "../../node0/node1/node2";
 
         let absolute_path = AbsolutePath {
-            nodes: vec![PathNode { node_identifier: NodeIdentifier::from_str("node1").unwrap(), path_predicate: vec![] },
-                        PathNode { node_identifier: NodeIdentifier::from_str("node2").unwrap(), path_predicate: vec![] }]};
+            nodes: vec![
+                PathNode {
+                    node_identifier: NodeIdentifier::from_str("node1").unwrap(),
+                    path_predicate: vec![],
+                },
+                PathNode {
+                    node_identifier: NodeIdentifier::from_str("node2").unwrap(),
+                    path_predicate: vec![],
+                },
+            ],
+        };
 
         let descendant_path = DescendantPath {
             node_identifier: NodeIdentifier::from_str("node0").unwrap(),
@@ -1842,8 +2033,10 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match IfFeatureExpr::parse_arg(&mut parser) {
-            Ok(expr) =>
-                assert_eq!(format!("{:?}", expr), "p1:id1 and p1:id2 or (p2:id3 and p2:id4) or not p3:id5"),
+            Ok(expr) => assert_eq!(
+                format!("{:?}", expr),
+                "p1:id1 and p1:id2 or (p2:id3 and p2:id4) or not p3:id5"
+            ),
             Err(_) => panic!(),
         }
 
@@ -1853,7 +2046,6 @@ mod tests {
         match IfFeatureExpr::parse_arg(&mut parser) {
             Ok(expr) => panic!("{:?}", expr),
             Err(err) => assert_eq!(err.to_string(), "Argument parse error if-feature-expr"),
-
         }
     }
 
@@ -1863,13 +2055,18 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         match KeyArg::parse_arg(&mut parser) {
-            Ok(arg) => assert_eq!(arg, KeyArg {
-                keys: vec![NodeIdentifier::from_str("p1:id1").unwrap(),
-                           NodeIdentifier::from_str("p1:id2").unwrap(),
-                           NodeIdentifier::from_str("p2:id3").unwrap(),
-                           NodeIdentifier::from_str("id4").unwrap(),
-                           NodeIdentifier::from_str("id5").unwrap(),
-            ] }),
+            Ok(arg) => assert_eq!(
+                arg,
+                KeyArg {
+                    keys: vec![
+                        NodeIdentifier::from_str("p1:id1").unwrap(),
+                        NodeIdentifier::from_str("p1:id2").unwrap(),
+                        NodeIdentifier::from_str("p2:id3").unwrap(),
+                        NodeIdentifier::from_str("id4").unwrap(),
+                        NodeIdentifier::from_str("id5").unwrap(),
+                    ]
+                }
+            ),
             Err(err) => panic!("{}", err.to_string()),
         }
     }

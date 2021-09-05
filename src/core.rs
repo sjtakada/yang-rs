@@ -3,8 +3,8 @@
 //   Copyright (C) 2021 Toshiaki Takada
 //
 
-use std::fmt;
 use std::collections::HashMap;
+use std::fmt;
 
 use super::error::*;
 use super::parser::*;
@@ -47,7 +47,10 @@ lazy_static! {
         m.insert("default", DefaultStmt::parse as StmtParserFn);
         m.insert("enum", EnumStmt::parse as StmtParserFn);
         m.insert("path", PathStmt::parse as StmtParserFn);
-        m.insert("require-instance", RequireInstanceStmt::parse as StmtParserFn);
+        m.insert(
+            "require-instance",
+            RequireInstanceStmt::parse as StmtParserFn,
+        );
         m.insert("bit", BitStmt::parse as StmtParserFn);
         m.insert("position", PositionStmt::parse as StmtParserFn);
         m.insert("status", StatusStmt::parse as StmtParserFn);
@@ -172,7 +175,7 @@ pub enum YangStmt {
 
 impl fmt::Debug for YangStmt {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-	match &*self {
+        match &*self {
             YangStmt::ModuleStmt(stmt) => write!(f, "{:?}", stmt),
             YangStmt::SubmoduleStmt(stmt) => write!(f, "{:?}", stmt),
             YangStmt::YangVersionStmt(stmt) => write!(f, "{:?}", stmt),
@@ -187,7 +190,7 @@ impl fmt::Debug for YangStmt {
             YangStmt::ReferenceStmt(stmt) => write!(f, "{:?}", stmt),
             YangStmt::UnitsStmt(stmt) => write!(f, "{:?}", stmt),
             YangStmt::RevisionStmt(stmt) => write!(f, "{:?}", stmt),
-            YangStmt::RevisionDateStmt(stmt) => write!(f,"{:?}", stmt),
+            YangStmt::RevisionDateStmt(stmt) => write!(f, "{:?}", stmt),
             YangStmt::ExtensionStmt(stmt) => write!(f, "{:?}", stmt),
             YangStmt::ArgumentStmt(stmt) => write!(f, "{:?}", stmt),
             YangStmt::YinElementStmt(stmt) => write!(f, "{:?}", stmt),
@@ -253,7 +256,7 @@ pub fn is_node_identifier(s: &str) -> bool {
     if parts.len() == 1 {
         is_identifier(parts[0])
     } else if parts.len() == 2 {
-        is_identifier(parts[0]) && is_identifier(parts[1]) 
+        is_identifier(parts[0]) && is_identifier(parts[1])
     } else {
         false
     }
@@ -285,7 +288,9 @@ pub fn is_identifier(s: &str) -> bool {
     if !s.starts_with(|c: char| c.is_alphabetic() || c == '_') {
         false
     } else if s.len() > 1 {
-        if let Some(_) = &s[1..].find(|c: char| !c.is_alphabetic() && !c.is_ascii_digit() && c != '_' && c != '-' && c != '.') {
+        if let Some(_) = &s[1..].find(|c: char| {
+            !c.is_alphabetic() && !c.is_ascii_digit() && c != '_' && c != '-' && c != '.'
+        }) {
             false
         } else {
             true

@@ -9,8 +9,8 @@ use std::io::prelude::*;
 
 use getopts::Options;
 
-use yang_rs::parser::Parser;
 use yang_rs::config::Config;
+use yang_rs::parser::Parser;
 
 const YANG_RS_VERSION: &str = "0.1.0";
 
@@ -40,12 +40,17 @@ pub fn parse_file(filename: &str, config: Config) -> std::io::Result<()> {
 
 /// Main.
 fn main() {
-    // Command line arguments.                                                                                                  
+    // Command line arguments.
     let args: Vec<String> = env::args().collect();
     let program = args[0].clone();
 
     let mut opts = Options::new();
-    opts.optopt("y", "yang-version", "Set explicit yang version", "YANG-VERSION");
+    opts.optopt(
+        "y",
+        "yang-version",
+        "Set explicit yang version",
+        "YANG-VERSION",
+    );
     opts.optflag("h", "help", "Display this help and exit");
     opts.optflag("v", "version", "Print program version");
     opts.optflag("d", "debug", "Run parser in debug mode");

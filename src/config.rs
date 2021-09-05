@@ -39,12 +39,11 @@ impl Config {
     pub fn yang_version(&self) -> Option<&str> {
         match &self.yang_version {
             Some(s) => Some(s),
-            None => None
+            None => None,
         }
     }
 
     pub fn sub_stmts_count_check(&self) -> bool {
         self.sub_stmts_count_check
     }
-
 }

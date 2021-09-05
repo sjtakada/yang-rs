@@ -5,14 +5,14 @@
 //   Copyright (C) 2021 Toshiaki Takada
 //
 
+pub mod arg;
+pub mod compound;
+pub mod config;
 pub mod core;
 pub mod error;
-pub mod config;
 pub mod parser;
-pub mod arg;
 pub mod stmt;
 pub mod substmt;
-pub mod compound;
 
 #[macro_use]
 extern crate lazy_static;
@@ -20,23 +20,23 @@ extern crate derive_getters;
 
 #[macro_export]
 macro_rules! collect_a_stmt {
-    ($stmts:expr, $st:ident) => (
+    ($stmts:expr, $st:ident) => {
         match $stmts.get_mut(<$st>::keyword()) {
             Some(v) => match v.pop() {
                 Some(en) => match en {
                     YangStmt::$st(stmt) => Ok(stmt),
                     _ => Err(YangError::MissingStatement(<$st>::keyword())),
-                }
+                },
                 None => Err(YangError::MissingStatement(<$st>::keyword())),
             },
             None => Err(YangError::MissingStatement(<$st>::keyword())),
         }
-    );
+    };
 }
 
 #[macro_export]
 macro_rules! collect_vec_stmt {
-    ($stmts:expr, $st:ident) => (
+    ($stmts:expr, $st:ident) => {
         match $stmts.get_mut(<$st>::keyword()) {
             Some(v) => {
                 let mut error = false;
@@ -57,23 +57,23 @@ macro_rules! collect_vec_stmt {
             }
             None => Ok(Vec::new()),
         }
-    );
+    };
 }
 
 #[macro_export]
 macro_rules! collect_opt_stmt {
-    ($stmts:expr, $st:ident) => (
+    ($stmts:expr, $st:ident) => {
         match $stmts.get_mut(<$st>::keyword()) {
             Some(v) => match v.pop() {
                 Some(en) => match en {
                     YangStmt::$st(stmt) => Ok(Some(stmt)),
                     _ => Err(YangError::MissingStatement(<$st>::keyword())),
-                }
+                },
                 None => Ok(None),
             },
             None => Ok(None),
         }
-    );
+    };
 }
 
 #[macro_export]

@@ -12,8 +12,8 @@ use super::stmt::*;
 use super::substmt::*;
 
 use crate::collect_a_stmt;
-use crate::collect_vec_stmt;
 use crate::collect_opt_stmt;
+use crate::collect_vec_stmt;
 
 ///
 /// Trait for compound YANG statements.
@@ -46,9 +46,10 @@ pub struct ModuleHeaderStmts {
 impl Compound for ModuleHeaderStmts {
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::Optional(SubStmtWith::Stmt(YangVersionStmt::keyword)),
-             SubStmtDef::HasOne(SubStmtWith::Stmt(NamespaceStmt::keyword)),
-             SubStmtDef::HasOne(SubStmtWith::Stmt(PrefixStmt::keyword)),
+        vec![
+            SubStmtDef::Optional(SubStmtWith::Stmt(YangVersionStmt::keyword)),
+            SubStmtDef::HasOne(SubStmtWith::Stmt(NamespaceStmt::keyword)),
+            SubStmtDef::HasOne(SubStmtWith::Stmt(PrefixStmt::keyword)),
         ]
     }
 }
@@ -81,8 +82,9 @@ pub struct SubmoduleHeaderStmts {
 impl Compound for SubmoduleHeaderStmts {
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::Optional(SubStmtWith::Stmt(YangVersionStmt::keyword)),
-             SubStmtDef::HasOne(SubStmtWith::Stmt(BelongsToStmt::keyword)),
+        vec![
+            SubStmtDef::Optional(SubStmtWith::Stmt(YangVersionStmt::keyword)),
+            SubStmtDef::HasOne(SubStmtWith::Stmt(BelongsToStmt::keyword)),
         ]
     }
 }
@@ -138,16 +140,17 @@ pub struct BodyStmts {
 impl Compound for BodyStmts {
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(ExtensionStmt::keyword)),
-             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(FeatureStmt::keyword)),
-             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IdentityStmt::keyword)),
-             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(TypedefStmt::keyword)),
-             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(GroupingStmt::keyword)),
-             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(DataDefStmt::keywords)),
-             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(AugmentStmt::keyword)),
-             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(RpcStmt::keyword)),
-             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(NotificationStmt::keyword)),
-             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(DeviationStmt::keyword)),
+        vec![
+            SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(ExtensionStmt::keyword)),
+            SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(FeatureStmt::keyword)),
+            SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IdentityStmt::keyword)),
+            SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(TypedefStmt::keyword)),
+            SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(GroupingStmt::keyword)),
+            SubStmtDef::ZeroOrMore(SubStmtWith::Selection(DataDefStmt::keywords)),
+            SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(AugmentStmt::keyword)),
+            SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(RpcStmt::keyword)),
+            SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(NotificationStmt::keyword)),
+            SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(DeviationStmt::keyword)),
         ]
     }
 }
@@ -170,7 +173,8 @@ impl BodyStmts {
                 collect_vec_stmt!(stmts, ChoiceStmt)?,
                 collect_vec_stmt!(stmts, AnydataStmt)?,
                 collect_vec_stmt!(stmts, AnyxmlStmt)?,
-                collect_vec_stmt!(stmts, UsesStmt)?,)),
+                collect_vec_stmt!(stmts, UsesStmt)?,
+            )),
             augment: collect_vec_stmt!(stmts, AugmentStmt)?,
             rpc: collect_vec_stmt!(stmts, RpcStmt)?,
             notification: collect_vec_stmt!(stmts, NotificationStmt)?,
@@ -200,10 +204,11 @@ pub struct MetaStmts {
 impl Compound for MetaStmts {
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::Optional(SubStmtWith::Stmt(OrganizationStmt::keyword)),
-             SubStmtDef::Optional(SubStmtWith::Stmt(ContactStmt::keyword)),
-             SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
-             SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
+        vec![
+            SubStmtDef::Optional(SubStmtWith::Stmt(OrganizationStmt::keyword)),
+            SubStmtDef::Optional(SubStmtWith::Stmt(ContactStmt::keyword)),
+            SubStmtDef::Optional(SubStmtWith::Stmt(DescriptionStmt::keyword)),
+            SubStmtDef::Optional(SubStmtWith::Stmt(ReferenceStmt::keyword)),
         ]
     }
 }
@@ -236,8 +241,9 @@ pub struct LinkageStmts {
 impl Compound for LinkageStmts {
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(ImportStmt::keyword)),
-             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IncludeStmt::keyword)),
+        vec![
+            SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(ImportStmt::keyword)),
+            SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(IncludeStmt::keyword)),
         ]
     }
 }
@@ -259,14 +265,15 @@ impl LinkageStmts {
 #[derive(Debug, Clone, PartialEq, Getters)]
 pub struct RevisionStmts {
     /// "revision" statement.
-    revision: Vec<RevisionStmt>
+    revision: Vec<RevisionStmt>,
 }
 
 impl Compound for RevisionStmts {
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(RevisionStmt::keyword)),
-        ]
+        vec![SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(
+            RevisionStmt::keyword,
+        ))]
     }
 }
 
@@ -292,8 +299,7 @@ pub struct NumericalRestrictions {
 impl Compound for NumericalRestrictions {
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::Optional(SubStmtWith::Stmt(RangeStmt::keyword)),
-        ]
+        vec![SubStmtDef::Optional(SubStmtWith::Stmt(RangeStmt::keyword))]
     }
 }
 
@@ -322,8 +328,9 @@ pub struct Decimal64Specification {
 impl Compound for Decimal64Specification {
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::HasOne(SubStmtWith::Stmt(FractionDigitsStmt::keyword)),
-             SubStmtDef::Optional(SubStmtWith::Stmt(RangeStmt::keyword)),
+        vec![
+            SubStmtDef::HasOne(SubStmtWith::Stmt(FractionDigitsStmt::keyword)),
+            SubStmtDef::Optional(SubStmtWith::Stmt(RangeStmt::keyword)),
         ]
     }
 }
@@ -437,16 +444,17 @@ pub enum TypeBodyStmts {
 impl TypeBodyStmts {
     /// Return substatements definition.
     pub fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::Optional(SubStmtWith::Stmt(FractionDigitsStmt::keyword)),
-             SubStmtDef::Optional(SubStmtWith::Stmt(RangeStmt::keyword)),
-             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(PatternStmt::keyword)),
-             SubStmtDef::Optional(SubStmtWith::Stmt(LengthStmt::keyword)),
-             SubStmtDef::Optional(SubStmtWith::Stmt(PathStmt::keyword)),
-             SubStmtDef::Optional(SubStmtWith::Stmt(RequireInstanceStmt::keyword)),
-             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(EnumStmt::keyword)),
-             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(BaseStmt::keyword)),
-             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(BitStmt::keyword)),
-             SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(TypeStmt::keyword)),
+        vec![
+            SubStmtDef::Optional(SubStmtWith::Stmt(FractionDigitsStmt::keyword)),
+            SubStmtDef::Optional(SubStmtWith::Stmt(RangeStmt::keyword)),
+            SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(PatternStmt::keyword)),
+            SubStmtDef::Optional(SubStmtWith::Stmt(LengthStmt::keyword)),
+            SubStmtDef::Optional(SubStmtWith::Stmt(PathStmt::keyword)),
+            SubStmtDef::Optional(SubStmtWith::Stmt(RequireInstanceStmt::keyword)),
+            SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(EnumStmt::keyword)),
+            SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(BaseStmt::keyword)),
+            SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(BitStmt::keyword)),
+            SubStmtDef::ZeroOrMore(SubStmtWith::Stmt(TypeStmt::keyword)),
         ]
         // TBD: This check is very loose at this moment.
     }
@@ -464,59 +472,59 @@ impl TypeBodyStmts {
     pub fn parse(parser: &mut Parser) -> Result<TypeBodyStmts, YangError> {
         let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
-        let type_body =
-            if let Ok(fraction_digits) = collect_a_stmt!(stmts, FractionDigitsStmt) {
-                let range = if let Ok(range) = collect_a_stmt!(stmts, RangeStmt) {
-                    Some(range)
-                } else {
-                    None
-                };
+        let type_body = if let Ok(fraction_digits) = collect_a_stmt!(stmts, FractionDigitsStmt) {
+            let range = if let Ok(range) = collect_a_stmt!(stmts, RangeStmt) {
+                Some(range)
+            } else {
+                None
+            };
 
-                TypeBodyStmts::Decimal64Specification(
-                    Decimal64Specification { fraction_digits, range })
-            } else if let Ok(range) = collect_a_stmt!(stmts, RangeStmt) {
-                TypeBodyStmts::NumericalRestrictions(
-                    NumericalRestrictions { range: Some(range) })
-            } else if let Ok(pattern) = collect_vec_stmt!(stmts, PatternStmt) {
-                // TBD: need check pattern.len()
-                let length = if let Ok(length) = collect_a_stmt!(stmts, LengthStmt) {
-                    Some(length)
-                } else {
-                    None
-                };
+            TypeBodyStmts::Decimal64Specification(Decimal64Specification {
+                fraction_digits,
+                range,
+            })
+        } else if let Ok(range) = collect_a_stmt!(stmts, RangeStmt) {
+            TypeBodyStmts::NumericalRestrictions(NumericalRestrictions { range: Some(range) })
+        } else if let Ok(pattern) = collect_vec_stmt!(stmts, PatternStmt) {
+            // TBD: need check pattern.len()
+            let length = if let Ok(length) = collect_a_stmt!(stmts, LengthStmt) {
+                Some(length)
+            } else {
+                None
+            };
 
-                TypeBodyStmts::StringRestrictions(
-                    StringRestrictions { pattern, length })
-            } else if let Ok(length) = collect_a_stmt!(stmts, LengthStmt) {
-                TypeBodyStmts::BinarySpecification(
-                    BinarySpecification { length: Some(length) })
-            } else if let Ok(path) = collect_a_stmt!(stmts, PathStmt) {
-                let require_instance = if let Ok(require_instance) = collect_a_stmt!(stmts, RequireInstanceStmt) {
+            TypeBodyStmts::StringRestrictions(StringRestrictions { pattern, length })
+        } else if let Ok(length) = collect_a_stmt!(stmts, LengthStmt) {
+            TypeBodyStmts::BinarySpecification(BinarySpecification {
+                length: Some(length),
+            })
+        } else if let Ok(path) = collect_a_stmt!(stmts, PathStmt) {
+            let require_instance =
+                if let Ok(require_instance) = collect_a_stmt!(stmts, RequireInstanceStmt) {
                     Some(require_instance)
                 } else {
                     None
                 };
 
-                TypeBodyStmts::LeafrefSpecification(
-                    LeafrefSpecification { path, require_instance })
-            } else if let Ok(require_instance) = collect_a_stmt!(stmts, RequireInstanceStmt) {
-                TypeBodyStmts::InstanceIdentifierSpecification(
-                    InstanceIdentifierSpecification { require_instance: Some(require_instance) })
-            } else if let Ok(enum_) = collect_vec_stmt!(stmts, EnumStmt) {
-                TypeBodyStmts::EnumSpecification(
-                    EnumSpecification { enum_ })
-            } else if let Ok(base) = collect_vec_stmt!(stmts, BaseStmt) {
-                TypeBodyStmts::IdentityrefSpecification(
-                    IdentityrefSpecification { base })
-            } else if let Ok(bit) = collect_vec_stmt!(stmts, BitStmt) {
-                TypeBodyStmts::BitsSpecification(
-                    BitsSpecification { bit })
-            } else if let Ok(type_) = collect_vec_stmt!(stmts, TypeStmt) {
-                TypeBodyStmts::UnionSpecification(
-                    UnionSpecification { type_ })
-            } else {
-                return Err(YangError::MissingStatement(""))
-            };
+            TypeBodyStmts::LeafrefSpecification(LeafrefSpecification {
+                path,
+                require_instance,
+            })
+        } else if let Ok(require_instance) = collect_a_stmt!(stmts, RequireInstanceStmt) {
+            TypeBodyStmts::InstanceIdentifierSpecification(InstanceIdentifierSpecification {
+                require_instance: Some(require_instance),
+            })
+        } else if let Ok(enum_) = collect_vec_stmt!(stmts, EnumStmt) {
+            TypeBodyStmts::EnumSpecification(EnumSpecification { enum_ })
+        } else if let Ok(base) = collect_vec_stmt!(stmts, BaseStmt) {
+            TypeBodyStmts::IdentityrefSpecification(IdentityrefSpecification { base })
+        } else if let Ok(bit) = collect_vec_stmt!(stmts, BitStmt) {
+            TypeBodyStmts::BitsSpecification(BitsSpecification { bit })
+        } else if let Ok(type_) = collect_vec_stmt!(stmts, TypeStmt) {
+            TypeBodyStmts::UnionSpecification(UnionSpecification { type_ })
+        } else {
+            return Err(YangError::MissingStatement(""));
+        };
 
         Ok(type_body)
     }
@@ -535,12 +543,18 @@ pub trait Selection {
     }
 
     /// Constructor with empty substatements.
-    fn new() -> Self where Self: Sized {
+    fn new() -> Self
+    where
+        Self: Sized,
+    {
         panic!("{:?}", Self::keywords());
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(_substmts: Self::SubStmts) -> Self where Self: Sized {
+    fn new_with_substmts(_substmts: Self::SubStmts) -> Self
+    where
+        Self: Sized,
+    {
         panic!("{:?}", Self::keywords());
     }
 }
@@ -567,7 +581,10 @@ impl Selection for TypedefOrGrouping {
     }
 
     /// Constructor with empty substatements.
-    fn new() -> Self where Self: Sized {
+    fn new() -> Self
+    where
+        Self: Sized,
+    {
         Self {
             typedef: Vec::new(),
             grouping: Vec::new(),
@@ -575,7 +592,10 @@ impl Selection for TypedefOrGrouping {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(substmts: Self::SubStmts) -> Self where Self: Sized {
+    fn new_with_substmts(substmts: Self::SubStmts) -> Self
+    where
+        Self: Sized,
+    {
         Self {
             typedef: substmts.0,
             grouping: substmts.1,
@@ -615,17 +635,36 @@ pub struct DataDefStmt {
 
 impl Selection for DataDefStmt {
     /// Sub Statements.
-    type SubStmts = (Vec<ContainerStmt>, Vec<LeafStmt>, Vec<LeafListStmt>, Vec<ListStmt>,
-                     Vec<ChoiceStmt>, Vec<AnydataStmt>, Vec<AnyxmlStmt>, Vec<UsesStmt>);
+    type SubStmts = (
+        Vec<ContainerStmt>,
+        Vec<LeafStmt>,
+        Vec<LeafListStmt>,
+        Vec<ListStmt>,
+        Vec<ChoiceStmt>,
+        Vec<AnydataStmt>,
+        Vec<AnyxmlStmt>,
+        Vec<UsesStmt>,
+    );
 
     /// Return list fo statement keyword.
     fn keywords() -> Vec<Keyword> {
-        vec![ContainerStmt::keyword(), LeafStmt::keyword(), LeafListStmt::keyword(), ListStmt::keyword(),
-             ChoiceStmt::keyword(), AnydataStmt::keyword(), AnyxmlStmt::keyword(), UsesStmt::keyword()]
+        vec![
+            ContainerStmt::keyword(),
+            LeafStmt::keyword(),
+            LeafListStmt::keyword(),
+            ListStmt::keyword(),
+            ChoiceStmt::keyword(),
+            AnydataStmt::keyword(),
+            AnyxmlStmt::keyword(),
+            UsesStmt::keyword(),
+        ]
     }
 
     /// Constructor with empty substatements.
-    fn new() -> Self where Self: Sized {
+    fn new() -> Self
+    where
+        Self: Sized,
+    {
         Self {
             container: Vec::new(),
             leaf: Vec::new(),
@@ -639,7 +678,10 @@ impl Selection for DataDefStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(substmts: Self::SubStmts) -> Self where Self: Sized {
+    fn new_with_substmts(substmts: Self::SubStmts) -> Self
+    where
+        Self: Sized,
+    {
         Self {
             container: substmts.0,
             leaf: substmts.1,
@@ -694,19 +736,42 @@ pub struct DataDefOrElse {
 
 impl Selection for DataDefOrElse {
     /// Sub Statements.
-    type SubStmts = (Vec<ContainerStmt>, Vec<LeafStmt>, Vec<LeafListStmt>, Vec<ListStmt>,
-                     Vec<ChoiceStmt>, Vec<AnydataStmt>, Vec<AnyxmlStmt>, Vec<UsesStmt>,
-                     Vec<CaseStmt>, Vec<ActionStmt>, Vec<NotificationStmt>);
+    type SubStmts = (
+        Vec<ContainerStmt>,
+        Vec<LeafStmt>,
+        Vec<LeafListStmt>,
+        Vec<ListStmt>,
+        Vec<ChoiceStmt>,
+        Vec<AnydataStmt>,
+        Vec<AnyxmlStmt>,
+        Vec<UsesStmt>,
+        Vec<CaseStmt>,
+        Vec<ActionStmt>,
+        Vec<NotificationStmt>,
+    );
 
     /// Return list fo statement keyword.
     fn keywords() -> Vec<Keyword> {
-        vec![ContainerStmt::keyword(), LeafStmt::keyword(), LeafListStmt::keyword(), ListStmt::keyword(),
-             ChoiceStmt::keyword(), AnydataStmt::keyword(), AnyxmlStmt::keyword(), UsesStmt::keyword(),
-             CaseStmt::keyword(), ActionStmt::keyword(), NotificationStmt::keyword()]
+        vec![
+            ContainerStmt::keyword(),
+            LeafStmt::keyword(),
+            LeafListStmt::keyword(),
+            ListStmt::keyword(),
+            ChoiceStmt::keyword(),
+            AnydataStmt::keyword(),
+            AnyxmlStmt::keyword(),
+            UsesStmt::keyword(),
+            CaseStmt::keyword(),
+            ActionStmt::keyword(),
+            NotificationStmt::keyword(),
+        ]
     }
 
     /// Constructor with empty substatements.
-    fn new() -> Self where Self: Sized {
+    fn new() -> Self
+    where
+        Self: Sized,
+    {
         Self {
             container: Vec::new(),
             leaf: Vec::new(),
@@ -723,7 +788,10 @@ impl Selection for DataDefOrElse {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(substmts: Self::SubStmts) -> Self where Self: Sized {
+    fn new_with_substmts(substmts: Self::SubStmts) -> Self
+    where
+        Self: Sized,
+    {
         Self {
             container: substmts.0,
             leaf: substmts.1,
@@ -772,17 +840,36 @@ pub struct ShortCaseOrCaseStmt {
 
 impl Selection for ShortCaseOrCaseStmt {
     /// Sub Statements.
-    type SubStmts = (Vec<ChoiceStmt>, Vec<ContainerStmt>, Vec<LeafStmt>, Vec<LeafListStmt>,
-                     Vec<ListStmt>, Vec<AnydataStmt>, Vec<AnyxmlStmt>, Vec<CaseStmt>);
+    type SubStmts = (
+        Vec<ChoiceStmt>,
+        Vec<ContainerStmt>,
+        Vec<LeafStmt>,
+        Vec<LeafListStmt>,
+        Vec<ListStmt>,
+        Vec<AnydataStmt>,
+        Vec<AnyxmlStmt>,
+        Vec<CaseStmt>,
+    );
 
     /// Return list fo statement keyword.
     fn keywords() -> Vec<Keyword> {
-        vec![ChoiceStmt::keyword(), ContainerStmt::keyword(), LeafStmt::keyword(), LeafListStmt::keyword(),
-             ListStmt::keyword(), AnydataStmt::keyword(), AnyxmlStmt::keyword(), CaseStmt::keyword()]
+        vec![
+            ChoiceStmt::keyword(),
+            ContainerStmt::keyword(),
+            LeafStmt::keyword(),
+            LeafListStmt::keyword(),
+            ListStmt::keyword(),
+            AnydataStmt::keyword(),
+            AnyxmlStmt::keyword(),
+            CaseStmt::keyword(),
+        ]
     }
 
     /// Constructor with empty substatements.
-    fn new() -> Self where Self: Sized {
+    fn new() -> Self
+    where
+        Self: Sized,
+    {
         Self {
             choice: Vec::new(),
             container: Vec::new(),
@@ -796,7 +883,10 @@ impl Selection for ShortCaseOrCaseStmt {
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
-    fn new_with_substmts(substmts: Self::SubStmts) -> Self where Self: Sized {
+    fn new_with_substmts(substmts: Self::SubStmts) -> Self
+    where
+        Self: Sized,
+    {
         Self {
             choice: substmts.0,
             container: substmts.1,
@@ -809,4 +899,3 @@ impl Selection for ShortCaseOrCaseStmt {
         }
     }
 }
-

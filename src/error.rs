@@ -51,7 +51,7 @@ use std::fmt;
 
 #[derive(Debug)]
 pub struct ArgError {
-    pub str: &'static str
+    pub str: &'static str,
 }
 
 impl fmt::Display for ArgError {
@@ -62,8 +62,6 @@ impl fmt::Display for ArgError {
 
 impl ArgError {
     pub fn new(str: &'static str) -> ArgError {
-        ArgError {
-            str
-        }
+        ArgError { str }
     }
 }

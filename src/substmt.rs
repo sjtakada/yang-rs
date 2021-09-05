@@ -6,8 +6,8 @@
 use std::collections::HashMap;
 
 use super::core::*;
-use super::parser::*;
 use super::error::*;
+use super::parser::*;
 use super::stmt::UnknownStmt;
 
 pub type StmtKeywordFn = fn() -> Keyword;
@@ -50,7 +50,10 @@ impl SubStmtUtil {
         f(parser)
     }
 
-    pub fn parse_substmts(parser: &mut Parser, def: Vec<SubStmtDef>) -> Result<StmtCollection, YangError> {
+    pub fn parse_substmts(
+        parser: &mut Parser,
+        def: Vec<SubStmtDef>,
+    ) -> Result<StmtCollection, YangError> {
         // TBD: want to cache this definition somewhere.
         // Keyword to index.
         let mut k2i = HashMap::new();
@@ -60,10 +63,38 @@ impl SubStmtUtil {
         let mut i = 0;
         for s in def {
             let (rep, ssw) = match s {
-                SubStmtDef::HasOne(ssw) => (RepeatCount { count: 0, min: 1, max: 1 }, ssw),
-                SubStmtDef::Optional(ssw) => (RepeatCount { count: 0, min: 0, max: 1 }, ssw),
-                SubStmtDef::ZeroOrMore(ssw) => (RepeatCount { count: 0, min: 0, max: usize::MAX}, ssw),
-                SubStmtDef::OneOrMore(ssw) => (RepeatCount { count: 0, min: 1, max: usize::MAX}, ssw),
+                SubStmtDef::HasOne(ssw) => (
+                    RepeatCount {
+                        count: 0,
+                        min: 1,
+                        max: 1,
+                    },
+                    ssw,
+                ),
+                SubStmtDef::Optional(ssw) => (
+                    RepeatCount {
+                        count: 0,
+                        min: 0,
+                        max: 1,
+                    },
+                    ssw,
+                ),
+                SubStmtDef::ZeroOrMore(ssw) => (
+                    RepeatCount {
+                        count: 0,
+                        min: 0,
+                        max: usize::MAX,
+                    },
+                    ssw,
+                ),
+                SubStmtDef::OneOrMore(ssw) => (
+                    RepeatCount {
+                        count: 0,
+                        min: 1,
+                        max: usize::MAX,
+                    },
+                    ssw,
+                ),
             };
             i2rep.insert(i, rep);
 
@@ -94,7 +125,7 @@ impl SubStmtUtil {
                     if k2i.contains_key(keyword as &str) {
                         if let Some(rep) = i2rep.get_mut(k2i.get(keyword as &str).unwrap()) {
                             let stmt = Self::call_stmt_parser(parser, &keyword)?;
-                            let v =  match stmts.get_mut(keyword as &str) {
+                            let v = match stmts.get_mut(keyword as &str) {
                                 Some(v) => v,
                                 None => {
                                     stmts.insert(keyword.to_string(), Vec::new());
@@ -146,4 +177,3 @@ impl SubStmtUtil {
         Ok(stmts)
     }
 }
-

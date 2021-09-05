@@ -3,13 +3,13 @@
 //  Copyright (C) 2021 Toshiaki Takada
 //
 
+use std::cell::Cell;
 use std::io::Error;
 use std::io::ErrorKind;
-use std::cell::Cell;
 
+use super::config::Config;
 use super::core::*;
 use super::error::*;
-use super::config::Config;
 use super::stmt::*;
 use super::substmt::*;
 
@@ -243,7 +243,7 @@ impl Parser {
         let mut string_parsed = false;
 
         if let Some(token) = self.load_token() {
-            return Ok(token)
+            return Ok(token);
         }
 
         loop {
@@ -259,8 +259,7 @@ impl Parser {
 
             let (token, _pos) = self.get_single_token()?;
             match token {
-                Token::Whitespace(_) |
-                Token::Comment(_) => {}
+                Token::Whitespace(_) | Token::Comment(_) => {}
                 Token::QuotedString(s) => {
                     if st.len() == 0 || concat_str {
                         st.push_str(&s);
@@ -363,17 +362,28 @@ impl Parser {
             loop {
                 let c = match chars.next() {
                     Some(c) => c,
-                    None => return Err(YangError::InvalidString("String not terminated".to_string())),
+                    None => {
+                        return Err(YangError::InvalidString(
+                            "String not terminated".to_string(),
+                        ))
+                    }
                 };
 
                 if c == '\\' {
                     let d = match chars.next() {
                         Some(d) => d,
-                        None => return Err(YangError::InvalidString("String not terminated".to_string())),
+                        None => {
+                            return Err(YangError::InvalidString(
+                                "String not terminated".to_string(),
+                            ))
+                        }
                     };
                     if d != 'n' && d != 't' && d != '"' && d != '\\' {
-                        return Err(YangError::InvalidString(format!("backslash followed by invalid char '{}'", d)));
-                    } 
+                        return Err(YangError::InvalidString(format!(
+                            "backslash followed by invalid char '{}'",
+                            d
+                        )));
+                    }
                     pos += 2;
                 } else if c == '"' {
                     l = &l[..pos];
@@ -399,7 +409,11 @@ impl Parser {
             let l = &input[1..];
             pos = match l.find("'") {
                 Some(pos) => pos,
-                None => return Err(YangError::InvalidString("String not terminated".to_string())),
+                None => {
+                    return Err(YangError::InvalidString(
+                        "String not terminated".to_string(),
+                    ))
+                }
             };
 
             let line = l[..pos].matches("\n").count();
@@ -439,8 +453,9 @@ impl Parser {
 
     /// Return substatements definition.
     fn substmts_def() -> Vec<SubStmtDef> {
-        vec![SubStmtDef::Optional(SubStmtWith::Stmt(ModuleStmt::keyword)),
-             SubStmtDef::Optional(SubStmtWith::Stmt(SubmoduleStmt::keyword)),
+        vec![
+            SubStmtDef::Optional(SubStmtWith::Stmt(ModuleStmt::keyword)),
+            SubStmtDef::Optional(SubStmtWith::Stmt(SubmoduleStmt::keyword)),
         ]
     }
 
@@ -462,11 +477,18 @@ impl Parser {
 
     /// Parse string as an input, and return YangStmt. Encapsulate YangError into io::Error.
     pub fn parse_yang_from_string(s: String, config: Config) -> Result<YangStmt, std::io::Error> {
-    let mut parser = Parser::new_with_config(s, config);
-        parser.parse_yang()
-            .map_err(|err| Error::new(ErrorKind::Other,
-                                      format!("YangError: {:?} at line {}, pos {}",
-                                              err, parser.line(), parser.pos())))
+        let mut parser = Parser::new_with_config(s, config);
+        parser.parse_yang().map_err(|err| {
+            Error::new(
+                ErrorKind::Other,
+                format!(
+                    "YangError: {:?} at line {}, pos {}",
+                    err,
+                    parser.line(),
+                    parser.pos()
+                ),
+            )
+        })
     }
 }
 
@@ -481,10 +503,10 @@ mod tests {
 
         let token = parser.get_token().unwrap();
         assert_eq!(token, Token::Identifier("module".to_string()));
-        
+
         let token = parser.get_token().unwrap();
         assert_eq!(token, Token::BlockBegin);
-        
+
         let token = parser.get_token().unwrap();
         assert_eq!(token, Token::BlockEnd);
     }
@@ -521,7 +543,7 @@ mod tests {
     pub fn test_get_token_comment_3() {
         let s = "/* comment // */ module";
         let mut parser = Parser::new(s.to_string());
-        
+
         let token = parser.get_token().unwrap();
         assert_eq!(token, Token::Identifier("module".to_string()));
 
@@ -542,9 +564,12 @@ mod tests {
     pub fn test_get_token_string_1() {
         let s = r#" "string" "#;
         let mut parser = Parser::new(s.to_string());
-        
+
         let token = parser.get_token().unwrap();
-        assert_eq!(token, Token::QuotedString(String::from("string".to_string())));
+        assert_eq!(
+            token,
+            Token::QuotedString(String::from("string".to_string()))
+        );
 
         let token = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
@@ -554,9 +579,12 @@ mod tests {
     pub fn test_get_token_string_2() {
         let s = r#" '"string"' "#;
         let mut parser = Parser::new(s.to_string());
-        
+
         let token = parser.get_token().unwrap();
-        assert_eq!(token, Token::QuotedString(String::from(r#""string""#.to_string())));
+        assert_eq!(
+            token,
+            Token::QuotedString(String::from(r#""string""#.to_string()))
+        );
 
         let token = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
@@ -568,7 +596,10 @@ mod tests {
         let mut parser = Parser::new(s.to_string());
 
         let token = parser.get_token().unwrap();
-        assert_eq!(token, Token::QuotedString(String::from(r#"HelloWorld"#.to_string())));
+        assert_eq!(
+            token,
+            Token::QuotedString(String::from(r#"HelloWorld"#.to_string()))
+        );
 
         let token = parser.get_token().unwrap();
         assert_eq!(token, Token::BlockBegin);
@@ -586,9 +617,12 @@ mod tests {
  string2 ' "#;
 
         let mut parser = Parser::new(s.to_string());
-        
+
         let token = parser.get_token().unwrap();
-        assert_eq!(token, Token::QuotedString(String::from("string1\n string2 ".to_string())));
+        assert_eq!(
+            token,
+            Token::QuotedString(String::from("string1\n string2 ".to_string()))
+        );
 
         let token = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
@@ -600,9 +634,12 @@ mod tests {
      string2" "#;
 
         let mut parser = Parser::new(s.to_string());
-        
+
         let token = parser.get_token().unwrap();
-        assert_eq!(token, Token::QuotedString(String::from("string1\nstring2".to_string())));
+        assert_eq!(
+            token,
+            Token::QuotedString(String::from("string1\nstring2".to_string()))
+        );
 
         let token = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
@@ -617,9 +654,14 @@ mod tests {
  string3	" + "string4" "#;
 
         let mut parser = Parser::new(s.to_string());
-        
+
         let token = parser.get_token().unwrap();
-        assert_eq!(token, Token::QuotedString(String::from("string1\n\n string2\n\nstring3	string4".to_string())));
+        assert_eq!(
+            token,
+            Token::QuotedString(String::from(
+                "string1\n\n string2\n\nstring3	string4".to_string()
+            ))
+        );
 
         let token = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
