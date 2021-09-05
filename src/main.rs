@@ -6,9 +6,6 @@
 use std::env;
 use std::fs::File;
 use std::io::prelude::*;
-use std::io::Error;
-use std::io::ErrorKind;
-use std::path::Path;
 
 use getopts::Options;
 
@@ -33,13 +30,6 @@ fn print_version(program: &str) {
 pub fn parse_file(filename: &str, config: Config) -> std::io::Result<()> {
     let mut f = File::open(filename)?;
     let mut s = String::new();
-    let p = Path::new(filename)
-        .file_stem()
-        .ok_or(Error::new(ErrorKind::Other, "Invalid filename"))?;
-    let n1 = p
-        .to_str()
-        .ok_or(Error::new(ErrorKind::Other, "Invalid filename"))?;
-    let _n2 = str::replace(n1, ".", "_");
 
     f.read_to_string(&mut s)?;
 

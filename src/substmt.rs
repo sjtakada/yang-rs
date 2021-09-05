@@ -108,7 +108,7 @@ impl SubStmtUtil {
                             break;
                         }
                     } else if !STMT_PARSER.contains_key(keyword as &str) {
-                        // This is "unknown" statement.
+                        // This could be "unknown" statement.
                         let _stmt = UnknownStmt::parse(parser, keyword)?;
                         // TBD: just parse and ignore it for now.
                     } else {
