@@ -1,10 +1,10 @@
 [package]
 name = "yang-rs"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Toshiaki Takada <toshi@reze.rs>"]
 edition = "2018"
 description = "YANG Parser Library"
-repository = "https://github.com/sjtakada/yanb-rs"
+repository = "https://github.com/sjtakada/yang-rs"
 readme = "README.md"
 keywords = ["YANG", "NETCONF", "parser"]
 license	= "Apache-2.0"
