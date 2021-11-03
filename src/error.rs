@@ -41,6 +41,9 @@ quick_error! {
         ArgumentParseError(s: &'static str) {
             display("Argument parse error {}", s)
         }
+        UnknownKeywordError(s: String) {
+            display("Trying to parse unknown keyword '{}'", s)
+        }
         PlaceHolder {
             display("placeholder")
         }

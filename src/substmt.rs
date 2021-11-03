@@ -46,7 +46,7 @@ pub struct SubStmtUtil;
 impl SubStmtUtil {
     // Parse a single statement.
     pub fn call_stmt_parser(parser: &mut Parser, keyword: &str) -> Result<YangStmt, YangError> {
-        let f = STMT_PARSER.get(keyword).unwrap();
+        let f = STMT_PARSER.get(keyword).ok_or(YangError::UnknownKeywordError(String::from(keyword)))?;
         f(parser)
     }
 
