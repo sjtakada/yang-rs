@@ -119,7 +119,7 @@ impl ToString for Token {
             Token::PlusSign => String::from("PlusSign"),
             Token::BlockBegin => String::from("BlockBegin"),
             Token::BlockEnd => String::from("BlockEnd"),
-            Token::QuotedString(_) => String::from("QuotedString"),
+            Token::QuotedString(s) => format!("QuotedString '{}'", s),
             Token::Identifier(s) => format!("Identifier '{:?}'", s),
             Token::StatementEnd => String::from("StatementEnd"),
             Token::EndOfInput => String::from("EndOfInput"),
