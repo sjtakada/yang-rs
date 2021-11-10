@@ -1204,7 +1204,7 @@ impl IfFeatureExpr {
                         IfFeatureToken::ParenBegin
                         | IfFeatureToken::ParenEnd
                         | IfFeatureToken::IdentifierRef(_) => {
-                            return Err(ArgError::new("if-feature-expr"))
+                            return Err(ArgError::new("if-feature-expr: invalid begin paren"))
                         }
                         _ => {}
                     }
@@ -1219,7 +1219,9 @@ impl IfFeatureExpr {
                         IfFeatureToken::ParenBegin
                         | IfFeatureToken::Not
                         | IfFeatureToken::And
-                        | IfFeatureToken::Or => return Err(ArgError::new("if-feature-expr")),
+                        | IfFeatureToken::Or => {
+                            return Err(ArgError::new("if-feature-expr: invalid end paren"))
+                        }
                         _ => {}
                     }
 
@@ -1231,7 +1233,9 @@ impl IfFeatureExpr {
                         | IfFeatureToken::ParenBegin
                         | IfFeatureToken::Not
                         | IfFeatureToken::And
-                        | IfFeatureToken::Or => return Err(ArgError::new("if-feature-expr")),
+                        | IfFeatureToken::Or => {
+                            return Err(ArgError::new("if-feature-expr: invalid or"))
+                        }
                         _ => {}
                     }
 
@@ -1245,7 +1249,9 @@ impl IfFeatureExpr {
                     | IfFeatureToken::ParenBegin
                     | IfFeatureToken::Not
                     | IfFeatureToken::And
-                    | IfFeatureToken::Or => return Err(ArgError::new("if-feature-expr")),
+                    | IfFeatureToken::Or => {
+                        return Err(ArgError::new("if-feature-expr: invalid and"))
+                    }
                     _ => {}
                 },
                 IfFeatureToken::Not => {
@@ -1253,7 +1259,7 @@ impl IfFeatureExpr {
                         IfFeatureToken::ParenEnd
                         | IfFeatureToken::Not
                         | IfFeatureToken::IdentifierRef(_) => {
-                            return Err(ArgError::new("if-feature-expr"))
+                            return Err(ArgError::new("if-feature-expr: invalid not"))
                         }
                         _ => {}
                     }
@@ -1263,7 +1269,7 @@ impl IfFeatureExpr {
                 IfFeatureToken::IdentifierRef(ref str) => {
                     match prev {
                         IfFeatureToken::ParenEnd | IfFeatureToken::IdentifierRef(_) => {
-                            return Err(ArgError::new("if-feature-expr"))
+                            return Err(ArgError::new("if-feature-expr: invalid idref"))
                         }
                         _ => {}
                     }
@@ -2045,7 +2051,10 @@ mod tests {
 
         match IfFeatureExpr::parse_arg(&mut parser) {
             Ok(expr) => panic!("{:?}", expr),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error if-feature-expr"),
+            Err(err) => assert_eq!(
+                err.to_string(),
+                "Argument parse error if-feature-expr: invalid idref"
+            ),
         }
     }
 
