@@ -1131,6 +1131,17 @@ impl Tokenizer {
         &self.str[self.pos..]
     }
 
+    /// Helper to check if the current line starts with a keyword
+    /// while checking the keyword is followed by a word boundary (whitespace, line end)
+    /// to distinguish between keywords ('or')
+    /// and identifiers starting the same ('origin')
+    fn line_starts_with_keyword(&mut self, key: &str) -> bool {
+        let line = self.line();
+        line.starts_with(key)
+            && (line.len() == key.len()
+                || line.find(|c: char| c.is_whitespace()) == Some(key.len()))
+    }
+
     pub fn get_token(&mut self) -> IfFeatureToken {
         if let Some(p) = self.line().find(|c: char| !c.is_whitespace()) {
             self.pos += p;
@@ -1144,13 +1155,13 @@ impl Tokenizer {
         } else if self.line().starts_with(')') {
             self.pos += 1;
             IfFeatureToken::ParenEnd
-        } else if self.line().starts_with("not") {
+        } else if self.line_starts_with_keyword("not") {
             self.pos += 3;
             IfFeatureToken::Not
-        } else if self.line().starts_with("and") {
+        } else if self.line_starts_with_keyword("and") {
             self.pos += 3;
             IfFeatureToken::And
-        } else if self.line().starts_with("or") {
+        } else if self.line_starts_with_keyword("or") {
             self.pos += 2;
             IfFeatureToken::Or
         } else {
