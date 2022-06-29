@@ -4827,7 +4827,14 @@ impl Stmt for InputStmt {
     }
 
     /// Return true if this statement has substatements.
+    #[cfg(not(feature = "cisco-nso-extensions"))]
     fn has_substmts() -> bool {
+        true
+    }
+
+    /// Return true if this statement has sub-statements optionally.
+    #[cfg(feature = "cisco-nso-extensions")]
+    fn opt_substmts() -> bool {
         true
     }
 
@@ -4838,6 +4845,19 @@ impl Stmt for InputStmt {
             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(TypedefOrGrouping::keywords)),
             SubStmtDef::OneOrMore(SubStmtWith::Selection(DataDefStmt::keywords)),
         ]
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    #[cfg(feature = "cisco-nso-extensions")]
+    fn new_with_arg(_arg: Self::Arg) -> YangStmt
+    where
+        Self: Sized,
+    {
+        YangStmt::InputStmt(InputStmt {
+            must: Vec::new(),
+            typedef_or_grouping: TypedefOrGrouping::new(),
+            data_def: DataDefStmt::new(),
+        })
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.
@@ -4946,7 +4966,14 @@ impl Stmt for OutputStmt {
     }
 
     /// Return true if this statement has substatements.
+    #[cfg(not(feature = "cisco-nso-extensions"))]
     fn has_substmts() -> bool {
+        true
+    }
+
+    /// Return true if this statement has sub-statements optionally.
+    #[cfg(feature = "cisco-nso-extensions")]
+    fn opt_substmts() -> bool {
         true
     }
 
@@ -4957,6 +4984,19 @@ impl Stmt for OutputStmt {
             SubStmtDef::ZeroOrMore(SubStmtWith::Selection(TypedefOrGrouping::keywords)),
             SubStmtDef::OneOrMore(SubStmtWith::Selection(DataDefStmt::keywords)),
         ]
+    }
+
+    /// Constructor with a single arg. Panic if it is not defined.
+    #[cfg(feature = "cisco-nso-extensions")]
+    fn new_with_arg(_arg: Self::Arg) -> YangStmt
+    where
+        Self: Sized,
+    {
+        YangStmt::OutputStmt(OutputStmt {
+            must: Vec::new(),
+            typedef_or_grouping: TypedefOrGrouping::new(),
+            data_def: DataDefStmt::new(),
+        })
     }
 
     /// Constructor with tuple of substatements. Panic if it is not defined.

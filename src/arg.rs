@@ -824,22 +824,36 @@ impl StmtArg for PositionValueArg {
 pub enum PathArg {
     AbsolutePath(AbsolutePath),
     RelativePath(RelativePath),
+    #[cfg(feature = "cisco-nso-extensions")]
+    DerefPath(DerefPath),
 }
 
 impl StmtArg for PathArg {
     fn parse_arg(parser: &mut Parser) -> Result<Self, YangError> {
         let str = parse_string(parser)?;
 
-        if str.starts_with('/') {
-            Ok(PathArg::AbsolutePath(
-                AbsolutePath::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str))?,
-            ))
-        } else if str.starts_with("..") {
-            Ok(PathArg::RelativePath(
-                RelativePath::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str))?,
-            ))
+        Self::from_str(&str).map_err(|e| YangError::ArgumentParseError(e.str))
+    }
+}
+
+impl FromStr for PathArg {
+    type Err = ArgError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.starts_with('/') {
+            Ok(PathArg::AbsolutePath(AbsolutePath::from_str(&s)?))
+        } else if s.starts_with("..") {
+            Ok(PathArg::RelativePath(RelativePath::from_str(&s)?))
+        } else if s.starts_with("deref") {
+            #[cfg(feature = "cisco-nso-extensions")]
+            return Ok(PathArg::DerefPath(DerefPath::from_str(s)?));
+            #[cfg(not(feature = "cisco-nso-extensions"))]
+            return Err(ArgError {
+                str: "path-arg with deref is not RFC7950 compatible, see cisco-nso-extensions feature",
+            });
         } else {
-            Err(YangError::ArgumentParseError("path-arg"))
+            Err(ArgError {
+                str: "path-arg start",
+            })
         }
     }
 }
@@ -940,6 +954,58 @@ impl FromStr for RelativePath {
         Ok(RelativePath {
             up,
             descendant_path,
+        })
+    }
+}
+
+///  "deref-path"
+#[cfg(feature = "cisco-nso-extensions")]
+#[derive(Debug, Clone, PartialEq, Getters)]
+pub struct DerefPath {
+    deref_path: Box<PathArg>, // Needs to be boxed to prevent recursion
+    relative_path: RelativePath,
+}
+
+#[cfg(feature = "cisco-nso-extensions")]
+impl FromStr for DerefPath {
+    type Err = ArgError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if !s.starts_with("deref(") {
+            return Err(ArgError::new("deref-path prefix"));
+        }
+        let mut paren_count = 0;
+        let mut deref_arg_end = 0;
+        for (i, c) in s.chars().enumerate().skip("deref".len()) {
+            match c {
+                '(' => paren_count += 1,
+                ')' => {
+                    paren_count -= 1;
+                    if paren_count == 0 {
+                        deref_arg_end = i;
+                        break;
+                    }
+                }
+                _ => {}
+            };
+        }
+
+        if deref_arg_end == 0 {
+            println!("Paren mismatch in '{}': {}", s, paren_count);
+            return Err(ArgError::new("deref-path parens"));
+        }
+
+        let path_remainder_start = deref_arg_end + 2; // skip )/
+        if &s[deref_arg_end..path_remainder_start] != ")/" {
+            return Err(ArgError::new("deref-path follow"));
+        }
+
+        let deref_path = PathArg::from_str(&s[6..deref_arg_end])?;
+        let relative_path = RelativePath::from_str(&s[path_remainder_start..])?;
+
+        Ok(DerefPath {
+            deref_path: Box::new(deref_path),
+            relative_path,
         })
     }
 }
