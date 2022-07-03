@@ -2051,6 +2051,14 @@ mod tests {
             Err(_) => panic!(),
         }
 
+        let s = r#""p1:id1 and p1:id2 origin (p2:id3 and p2:id4)""#;
+        let mut parser = Parser::new(s.to_string());
+
+        match IfFeatureExpr::parse_arg(&mut parser) {
+            Ok(expr) => panic!("{:?}", expr),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error if-feature-expr"),
+        }
+
         let s = r#""p1:id1 p1:id2""#;
         let mut parser = Parser::new(s.to_string());
 
