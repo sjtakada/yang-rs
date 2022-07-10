@@ -2062,7 +2062,10 @@ mod tests {
 
         match IfFeatureExpr::parse_arg(&mut parser) {
             Ok(expr) => panic!("{:?}", expr),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error if-feature-expr: invalid identifier-ref"),
+            Err(err) => assert_eq!(
+                err.to_string(),
+                "Argument parse error if-feature-expr: invalid identifier-ref"
+            ),
         }
 
         let s = r#""p1:id1 p1:id2""#;
