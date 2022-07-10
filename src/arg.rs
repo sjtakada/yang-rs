@@ -1245,7 +1245,7 @@ impl IfFeatureExpr {
                         | IfFeatureToken::Not
                         | IfFeatureToken::And
                         | IfFeatureToken::Or => {
-                            return Err(ArgError::new("if-feature-expr: invalid or"))
+                            return Err(ArgError::new("if-feature-expr: invalid 'or'"))
                         }
                         _ => {}
                     }
@@ -1261,7 +1261,7 @@ impl IfFeatureExpr {
                     | IfFeatureToken::Not
                     | IfFeatureToken::And
                     | IfFeatureToken::Or => {
-                        return Err(ArgError::new("if-feature-expr: invalid and"))
+                        return Err(ArgError::new("if-feature-expr: invalid 'and'"))
                     }
                     _ => {}
                 },
@@ -1270,7 +1270,7 @@ impl IfFeatureExpr {
                         IfFeatureToken::ParenEnd
                         | IfFeatureToken::Not
                         | IfFeatureToken::IdentifierRef(_) => {
-                            return Err(ArgError::new("if-feature-expr: invalid not"))
+                            return Err(ArgError::new("if-feature-expr: invalid 'not'"))
                         }
                         _ => {}
                     }
@@ -1280,7 +1280,7 @@ impl IfFeatureExpr {
                 IfFeatureToken::IdentifierRef(ref str) => {
                     match prev {
                         IfFeatureToken::ParenEnd | IfFeatureToken::IdentifierRef(_) => {
-                            return Err(ArgError::new("if-feature-expr: invalid idref"))
+                            return Err(ArgError::new("if-feature-expr: invalid identifier-ref"))
                         }
                         _ => {}
                     }
@@ -2062,7 +2062,7 @@ mod tests {
 
         match IfFeatureExpr::parse_arg(&mut parser) {
             Ok(expr) => panic!("{:?}", expr),
-            Err(err) => assert_eq!(err.to_string(), "Argument parse error if-feature-expr"),
+            Err(err) => assert_eq!(err.to_string(), "Argument parse error if-feature-expr: invalid identifier-ref"),
         }
 
         let s = r#""p1:id1 p1:id2""#;
@@ -2072,7 +2072,7 @@ mod tests {
             Ok(expr) => panic!("{:?}", expr),
             Err(err) => assert_eq!(
                 err.to_string(),
-                "Argument parse error if-feature-expr: invalid idref"
+                "Argument parse error if-feature-expr: invalid identifier-ref"
             ),
         }
     }
