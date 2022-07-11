@@ -432,7 +432,13 @@ impl Parser {
             while l.len() > 0 {
                 let c = l.chars().next().unwrap();
 
-                if c.is_whitespace() || c == '"' || c == '\'' || c == '}' || c == '{' || c == ';' {
+                if c.is_whitespace() || c == ';' || c == '}' || c == '{' {
+                    break;
+                }
+
+                // Cisco allows quote characters in unquoted strings :/
+                #[cfg(not(feature = "cisco-nso-extensions"))]
+                if c == '"' || c == '\'' {
                     break;
                 }
 
