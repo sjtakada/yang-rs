@@ -12,6 +12,7 @@ use super::stmt::*;
 use super::substmt::*;
 
 use crate::collect_a_stmt;
+use crate::collect_nonempty_vec_stmt;
 use crate::collect_opt_stmt;
 use crate::collect_vec_stmt;
 
@@ -469,7 +470,7 @@ impl TypeBodyStmts {
     // identityref-specification		1*base-stmt
     // bits-specification			1*bit-stmt
     // union-specification			1*type-stmt
-    pub fn parse(parser: &mut Parser) -> Result<TypeBodyStmts, YangError> {
+    pub fn parse(parser: &mut Parser) -> Result<Option<TypeBodyStmts>, YangError> {
         let mut stmts = SubStmtUtil::parse_substmts(parser, Self::substmts_def())?;
 
         let type_body = if let Ok(fraction_digits) = collect_a_stmt!(stmts, FractionDigitsStmt) {
@@ -485,7 +486,7 @@ impl TypeBodyStmts {
             })
         } else if let Ok(range) = collect_a_stmt!(stmts, RangeStmt) {
             TypeBodyStmts::NumericalRestrictions(NumericalRestrictions { range: Some(range) })
-        } else if let Ok(pattern) = collect_vec_stmt!(stmts, PatternStmt) {
+        } else if let Ok(pattern) = collect_nonempty_vec_stmt!(stmts, PatternStmt) {
             // TBD: need check pattern.len()
             let length = if let Ok(length) = collect_a_stmt!(stmts, LengthStmt) {
                 Some(length)
@@ -514,19 +515,19 @@ impl TypeBodyStmts {
             TypeBodyStmts::InstanceIdentifierSpecification(InstanceIdentifierSpecification {
                 require_instance: Some(require_instance),
             })
-        } else if let Ok(enum_) = collect_vec_stmt!(stmts, EnumStmt) {
+        } else if let Ok(enum_) = collect_nonempty_vec_stmt!(stmts, EnumStmt) {
             TypeBodyStmts::EnumSpecification(EnumSpecification { enum_ })
-        } else if let Ok(base) = collect_vec_stmt!(stmts, BaseStmt) {
+        } else if let Ok(base) = collect_nonempty_vec_stmt!(stmts, BaseStmt) {
             TypeBodyStmts::IdentityrefSpecification(IdentityrefSpecification { base })
-        } else if let Ok(bit) = collect_vec_stmt!(stmts, BitStmt) {
+        } else if let Ok(bit) = collect_nonempty_vec_stmt!(stmts, BitStmt) {
             TypeBodyStmts::BitsSpecification(BitsSpecification { bit })
-        } else if let Ok(type_) = collect_vec_stmt!(stmts, TypeStmt) {
+        } else if let Ok(type_) = collect_nonempty_vec_stmt!(stmts, TypeStmt) {
             TypeBodyStmts::UnionSpecification(UnionSpecification { type_ })
         } else {
-            return Err(YangError::MissingStatement(""));
+            return Ok(None);
         };
 
-        Ok(type_body)
+        Ok(Some(type_body))
     }
 }
 
