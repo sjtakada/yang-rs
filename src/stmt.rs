@@ -5565,11 +5565,16 @@ impl UnknownStmt {
         let token = parser.get_token()?;
         let arg = match token {
             Token::Identifier(s) | Token::QuotedString(s) => Some(s),
-            Token::StatementEnd => {
+            Token::StatementEnd | Token::BlockBegin => {
                 parser.save_token(token);
                 None
             }
-            _ => return Err(YangError::UnexpectedToken(token.to_string())),
+            _ => {
+                return Err(YangError::UnexpectedToken(format!(
+                    "{} after UnknownStmt",
+                    token.to_string()
+                )))
+            }
         };
 
         let token = parser.get_token()?;
@@ -5977,6 +5982,30 @@ mod tests {
                         DeviateStmt::NotSupported => {}
                         _ => panic!("Unexpected stmt {:?}", deviate_stmt),
                     }
+                }
+                _ => panic!("Unexpected stmt {:?}", yang),
+            },
+            Err(err) => panic!("{}", err.to_string()),
+        }
+    }
+
+    #[test]
+    pub fn test_unknown_stmt_noarg_body() {
+        // Assuming keyword is already parsed, and arg and body are given to stmt parser.
+        let s = r#" { description "test"; }"#;
+
+        let mut parser = Parser::new(s.to_string());
+        match UnknownStmt::parse(&mut parser, "nonstandard:stmt") {
+            Ok(yang) => match yang {
+                YangStmt::UnknownStmt(stmt) => {
+                    assert_eq!(stmt.arg(), &None);
+                    assert_eq!(stmt.yang().len(), 1);
+                    match &stmt.yang()[0] {
+                        YangStmt::DescriptionStmt(desc) => {
+                            assert_eq!(desc.arg(), "test");
+                        }
+                        _ => panic!("Parsing unknown-stmt body failed"),
+                    };
                 }
                 _ => panic!("Unexpected stmt {:?}", yang),
             },
