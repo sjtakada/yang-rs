@@ -29,3 +29,10 @@ match yang {
 }
 
 ```
+
+## Feature 'cisco-nso-extensions'
+
+Enables parsing a few nonstandard constructs Cisco allows and uses with Network Service Orchestrator (NSO):
+
+- Empty `input` / `output` statements
+- `deref` in `leafref` `path` substatements ([see RFC errata 5617](https://www.rfc-editor.org/errata/eid5617))

@@ -18,3 +18,7 @@ lazy_static = "1.4.0"
 quick-error = "2.0.1"
 derive-getters = "0.2.0"
 url = "2.2.2"
+
+[features]
+# Enables parsing some non-standard YANG constructs used in Cisco NSO
+cisco-nso-extensions = []
