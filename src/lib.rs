@@ -61,6 +61,35 @@ macro_rules! collect_vec_stmt {
 }
 
 #[macro_export]
+macro_rules! collect_nonempty_vec_stmt {
+    ($stmts:expr, $st:ident) => {
+        match $stmts.get_mut(<$st>::keyword()) {
+            Some(v) => {
+                if v.is_empty() {
+                    return Err(YangError::PlaceHolder);
+                }
+                let mut error = false;
+                let mut w = Vec::new();
+                for en in v.drain(..) {
+                    if let YangStmt::$st(stmt) = en {
+                        w.push(stmt)
+                    } else {
+                        error = true;
+                    }
+                }
+
+                if error {
+                    Err(YangError::PlaceHolder)
+                } else {
+                    Ok(w)
+                }
+            }
+            None => Err(YangError::PlaceHolder),
+        }
+    };
+}
+
+#[macro_export]
 macro_rules! collect_opt_stmt {
     ($stmts:expr, $st:ident) => {
         match $stmts.get_mut(<$st>::keyword()) {
