@@ -34,12 +34,15 @@ fn trim_spaces(l: &str, indent: usize) -> String {
 
     'outer: while let Some(mut c) = chars.next() {
         let mut count = 0;
+
+        // counting whitespaces
         loop {
             if c == ' ' {
                 count += 1;
             } else if c == '\t' {
                 count += 8;
             } else if c == '\n' {
+                // we preserve new lines
                 s.push('\n');
                 continue 'outer;
             } else {
@@ -321,24 +324,24 @@ impl Parser {
             };
             token = Token::Comment(String::from(&input[2..pos]));
         } else if input.starts_with("/*") {
-            let mut l = &input[2..];
-            pos = match l.find("*/") {
+            let end_pos = match input.find("*/") {
                 Some(pos) => pos,
                 None => return Err(YangError::InvalidComment),
             };
 
-            l = &l[..pos];
-
+            pos = end_pos + 2;
+            let l = &input[2..end_pos];
             let line = l.matches("\n").count();
+
             if line > 0 {
                 self.column_set_from(l);
+                self.column_add(2);
                 self.line_add(line);
             } else {
-                self.column_add(pos + 4);
+                self.column_add(pos);
             }
 
             token = Token::Comment(String::from(l));
-            pos += 4;
         } else if input.starts_with('+') {
             pos = 1;
             self.column_add(1);
@@ -558,6 +561,21 @@ mod tests {
 
         let token = parser.get_token().unwrap();
         assert_eq!(token, Token::EndOfInput);
+    }
+
+    #[test]
+    pub fn test_double_quoted_string_after_block_comment() {
+        let s = r#"/* this is a multi
+line comment */ "and this is a quoted multi
+                 line string"
+        "#;
+
+        let mut parser = Parser::new(s.to_string());
+
+        let token = parser.get_token().unwrap();
+        assert_eq!(token,
+                   Token::QuotedString("and this is a quoted multi\nline string".to_string()))
+
     }
 
     #[test]
