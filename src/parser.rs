@@ -356,9 +356,12 @@ impl Parser {
             self.column_add(1);
             token = Token::StatementEnd;
         } else if input.starts_with('"') {
-            let mut l = &input[1..];
+            let mut original = &input[1..];
 
-            let mut chars = l.chars();
+            let mut result = String::new();
+            result.reserve(original.len());
+
+            let mut chars = original.chars();
             loop {
                 let c = match chars.next() {
                     Some(c) => c,
@@ -378,30 +381,36 @@ impl Parser {
                             ))
                         }
                     };
-                    if d != 'n' && d != 't' && d != '"' && d != '\\' {
-                        return Err(YangError::InvalidString(format!(
-                            "backslash followed by invalid char '{}'",
-                            d
-                        )));
-                    }
+                    let c = match d {
+                        'n' => '\n',
+                        't' => '\t',
+                        '"' => '"',
+                        '\\' => '\\',
+                        _ => return Err(YangError::InvalidString(format!(
+                                "backslash followed by invalid char '{}'",
+                                d
+                            )))
+                    };
                     pos += 2;
+                    result.push(c);
                 } else if c == '"' {
-                    l = &l[..pos];
+                    original = &original[..pos];
                     break;
                 } else {
                     pos += c.len_utf8();
+                    result.push(c);
                 }
             }
 
-            let line = l[..pos].matches("\n").count();
+            let line = original[..pos].matches("\n").count();
             if line > 0 {
                 let column = self.column.get() + 1;
-                let s = trim_spaces(l, column);
+                let result = trim_spaces(&result, column);
 
                 self.line_add(line);
-                token = Token::QuotedString(s);
+                token = Token::QuotedString(result);
             } else {
-                token = Token::QuotedString(String::from(&l[..pos]));
+                token = Token::QuotedString(result);
             }
 
             pos += 2;
@@ -660,6 +669,23 @@ mod tests {
             token,
             Token::QuotedString(String::from(
                 "string1\n\n string2\n\nstring3	string4".to_string()
+            ))
+        );
+
+        let token = parser.get_token().unwrap();
+        assert_eq!(token, Token::EndOfInput);
+    }
+
+    #[test]
+    pub fn test_get_token_string_escape() {
+        let s = r#""\n\t\"\\""#;
+        let mut parser = Parser::new(s.to_string());
+
+        let token = parser.get_token().unwrap();
+        assert_eq!(
+            token,
+            Token::QuotedString(String::from(
+                "\n\t\"\\".to_string()
             ))
         );
 
