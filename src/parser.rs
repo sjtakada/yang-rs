@@ -248,7 +248,7 @@ impl Parser {
 
         loop {
             if self.input_len() == 0 {
-                if st.len() > 0 {
+                if string_parsed {
                     return Ok(Token::QuotedString(st));
                 } else if concat_str {
                     return Err(YangError::UnexpectedEof);
@@ -686,5 +686,17 @@ mod tests {
 
         let token = parser.get_token().unwrap();
         assert_eq!(token, Token::QuotedString(String::from("")));
+    }
+
+    #[test]
+    pub fn test_empty_string_end() {
+        let s = r#""""#;
+
+        let mut parser = Parser::new(s.to_string());
+        let token = parser.get_token().unwrap();
+        assert_eq!(token, Token::QuotedString(String::from("")));
+
+        let token = parser.get_token().unwrap();
+        assert_eq!(token, Token::EndOfInput);
     }
 }
