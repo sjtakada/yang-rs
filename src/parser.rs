@@ -357,9 +357,7 @@ impl Parser {
             token = Token::StatementEnd;
         } else if input.starts_with('"') {
             let mut original = &input[1..];
-
             let mut result = String::new();
-            result.reserve(original.len());
 
             let mut chars = original.chars();
             loop {
