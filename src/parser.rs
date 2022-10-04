@@ -89,9 +89,6 @@ pub enum Token {
     /// Single line or multi line comments.
     Comment(String),
 
-    /// "+"
-    PlusSign,
-
     /// "{".
     BlockBegin,
 
@@ -116,7 +113,6 @@ impl ToString for Token {
         match &self {
             Token::Whitespace(_) => String::from("Whitespace"),
             Token::Comment(_) => String::from("Comment"),
-            Token::PlusSign => String::from("PlusSign"),
             Token::BlockBegin => String::from("BlockBegin"),
             Token::BlockEnd => String::from("BlockEnd"),
             Token::QuotedString(s) => format!("QuotedString '{}'", s),
@@ -241,6 +237,7 @@ impl Parser {
         let mut st = String::new();
         let mut concat_str = false;
         let mut string_parsed = false;
+        let mut had_quoted_string = false;
 
         if let Some(token) = self.load_token() {
             return Ok(token);
@@ -265,15 +262,22 @@ impl Parser {
                         st.push_str(&s);
                         concat_str = false;
                         string_parsed = true;
+                        had_quoted_string = true;
                     } else {
                         return Err(YangError::InvalidString(s));
                     }
                 }
-                Token::PlusSign => {
-                    if concat_str {
-                        return Err(YangError::InvalidString(st));
-                    } else {
+                Token::Identifier(ref text) => {
+                    if text == "+" && had_quoted_string {
                         concat_str = true;
+                        had_quoted_string = false;
+                    } else {
+                        if string_parsed {
+                            self.save_token(token);
+                            return Ok(Token::QuotedString(st));
+                        }
+
+                        return Ok(token);
                     }
                 }
                 _ => {
@@ -339,10 +343,6 @@ impl Parser {
 
             token = Token::Comment(String::from(l));
             pos += 4;
-        } else if input.starts_with('+') {
-            pos = 1;
-            self.column_add(1);
-            token = Token::PlusSign;
         } else if input.starts_with('{') {
             pos = 1;
             self.column_add(1);
@@ -686,5 +686,43 @@ mod tests {
 
         let token = parser.get_token().unwrap();
         assert_eq!(token, Token::QuotedString(String::from("")));
+    }
+
+    #[test]
+    pub fn plus_as_string_1() {
+        let s = r#"number +32"#;
+        let mut parser = Parser::new(s.to_string());
+
+        let token = parser.get_token().unwrap();
+        assert_eq!(token, Token::Identifier(String::from("number")));
+
+        let token = parser.get_token().unwrap();
+        assert_eq!(token, Token::Identifier(String::from("+32")));
+
+        let token = parser.get_token().unwrap();
+        assert_eq!(token, Token::EndOfInput);
+    }
+
+    #[test]
+    pub fn plus_as_string_2() {
+        // + is a concatenation only if between quoted strings,
+        //  otherwise it's an identifier.
+        let s = r#""num"  +"ber"+32 +"33""#;
+        let mut parser = Parser::new(s.to_string());
+
+        let token = parser.get_token().unwrap();
+        assert_eq!(token, Token::QuotedString(String::from("number")));
+
+        let token = parser.get_token().unwrap();
+        assert_eq!(token, Token::Identifier(String::from("+32")));
+
+        let token = parser.get_token().unwrap();
+        assert_eq!(token, Token::Identifier(String::from("+")));
+
+        let token = parser.get_token().unwrap();
+        assert_eq!(token, Token::QuotedString(String::from("33")));
+
+        let token = parser.get_token().unwrap();
+        assert_eq!(token, Token::EndOfInput);
     }
 }
