@@ -115,6 +115,7 @@ impl SubStmtUtil {
         }
 
         let mut stmts: StmtCollection = HashMap::new();
+        let mut unknown_stmts: StmtCollection = HashMap::new();
 
         loop {
             let token = parser.get_token()?;
@@ -127,14 +128,10 @@ impl SubStmtUtil {
                     if k2i.contains_key(keyword as &str) {
                         if let Some(rep) = i2rep.get_mut(k2i.get(keyword as &str).unwrap()) {
                             let stmt = Self::call_stmt_parser(parser, &keyword)?;
-                            let v = match stmts.get_mut(keyword as &str) {
-                                Some(v) => v,
-                                None => {
-                                    stmts.insert(keyword.to_string(), Vec::new());
-                                    stmts.get_mut(keyword as &str).unwrap()
-                                }
-                            };
-                            v.push(stmt);
+                            stmts
+                                .entry(keyword.clone())
+                                .or_insert(Vec::new())
+                                .push(stmt);
                             rep.count += 1;
                             // maybe we should validate number.
                         } else {
@@ -142,8 +139,16 @@ impl SubStmtUtil {
                         }
                     } else if !STMT_PARSER.contains_key(keyword as &str) {
                         // This could be "unknown" statement.
-                        let _stmt = UnknownStmt::parse(parser, keyword)?;
-                        // TBD: just parse and ignore it for now.
+                        let stmt = UnknownStmt::parse(parser, keyword)?;
+                        // Because we want to be able to find all unknown statements later,
+                        // save them not with their actual keyword (that is still saved within the UnknownStmt)
+                        // but instead using the special value "!unknown"
+                        // In YANG, identifiers are not allowed to contain exclamation marks,
+                        // so this should be collision free even if some new keywords are introduced
+                        unknown_stmts
+                            .entry(String::from(crate::stmt::UNKNOWN_STMT_KEY))
+                            .or_insert(Vec::new())
+                            .push(stmt);
                     } else {
                         parser.save_token(token);
                         break;
@@ -171,6 +176,9 @@ impl SubStmtUtil {
                 None => return Err(YangError::UnexpectedStatement(k.clone())),
             }
         }
+
+        // Add unknown statements to validated statements
+        stmts.extend(unknown_stmts.drain());
 
         if parser.config().debug() {
             println!("*** [DEBUG] end");
