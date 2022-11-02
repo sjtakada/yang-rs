@@ -18,6 +18,7 @@ use super::substmt::*;
 
 use crate::collect_a_stmt;
 use crate::collect_opt_stmt;
+use crate::collect_unknown_stmt;
 use crate::collect_vec_stmt;
 
 ///
@@ -2671,6 +2672,7 @@ impl Stmt for GroupingStmt {
                 collect_vec_stmt!(stmts, AnydataStmt)?,
                 collect_vec_stmt!(stmts, AnyxmlStmt)?,
                 collect_vec_stmt!(stmts, UsesStmt)?,
+                collect_unknown_stmt!(stmts)?,
             )),
             collect_vec_stmt!(stmts, ActionStmt)?,
             collect_vec_stmt!(stmts, NotificationStmt)?,
@@ -2762,6 +2764,10 @@ impl ContainerStmt {
 
     pub fn uses(&self) -> &Vec<UsesStmt> {
         &self.data_def.uses()
+    }
+
+    pub fn unknown(&self) -> &Vec<UnknownStmt> {
+        &self.data_def.unknown()
     }
 }
 
@@ -2883,6 +2889,7 @@ impl Stmt for ContainerStmt {
                 collect_vec_stmt!(stmts, AnydataStmt)?,
                 collect_vec_stmt!(stmts, AnyxmlStmt)?,
                 collect_vec_stmt!(stmts, UsesStmt)?,
+                collect_unknown_stmt!(stmts)?,
             )),
             collect_vec_stmt!(stmts, ActionStmt)?,
             collect_vec_stmt!(stmts, NotificationStmt)?,
@@ -3259,6 +3266,10 @@ impl ListStmt {
     pub fn uses(&self) -> &Vec<UsesStmt> {
         &self.data_def.uses()
     }
+
+    pub fn unknown(&self) -> &Vec<UnknownStmt> {
+        &self.data_def.unknown()
+    }
 }
 
 impl Stmt for ListStmt {
@@ -3373,6 +3384,7 @@ impl Stmt for ListStmt {
                 collect_vec_stmt!(stmts, AnydataStmt)?,
                 collect_vec_stmt!(stmts, AnyxmlStmt)?,
                 collect_vec_stmt!(stmts, UsesStmt)?,
+                collect_unknown_stmt!(stmts)?,
             )),
             collect_vec_stmt!(stmts, ActionStmt)?,
             collect_vec_stmt!(stmts, NotificationStmt)?,
@@ -3765,6 +3777,7 @@ impl Stmt for CaseStmt {
                 collect_vec_stmt!(stmts, AnydataStmt)?,
                 collect_vec_stmt!(stmts, AnyxmlStmt)?,
                 collect_vec_stmt!(stmts, UsesStmt)?,
+                collect_unknown_stmt!(stmts)?,
             )),
         ))
     }
@@ -4427,6 +4440,7 @@ impl Stmt for AugmentStmt {
                 collect_vec_stmt!(stmts, CaseStmt)?,
                 collect_vec_stmt!(stmts, ActionStmt)?,
                 collect_vec_stmt!(stmts, NotificationStmt)?,
+                collect_unknown_stmt!(stmts)?,
             )),
         ))
     }
@@ -4883,6 +4897,7 @@ impl Stmt for InputStmt {
                 collect_vec_stmt!(stmts, AnydataStmt)?,
                 collect_vec_stmt!(stmts, AnyxmlStmt)?,
                 collect_vec_stmt!(stmts, UsesStmt)?,
+                collect_unknown_stmt!(stmts)?,
             )),
         ))
     }
@@ -5002,6 +5017,7 @@ impl Stmt for OutputStmt {
                 collect_vec_stmt!(stmts, AnydataStmt)?,
                 collect_vec_stmt!(stmts, AnyxmlStmt)?,
                 collect_vec_stmt!(stmts, UsesStmt)?,
+                collect_unknown_stmt!(stmts)?,
             )),
         ))
     }
@@ -5174,6 +5190,7 @@ impl Stmt for NotificationStmt {
                 collect_vec_stmt!(stmts, AnydataStmt)?,
                 collect_vec_stmt!(stmts, AnyxmlStmt)?,
                 collect_vec_stmt!(stmts, UsesStmt)?,
+                collect_unknown_stmt!(stmts)?,
             )),
         ))
     }
@@ -5552,6 +5569,8 @@ pub struct UnknownStmt {
     /// YANG statement.
     yang: Vec<YangStmt>,
 }
+
+pub(crate) static UNKNOWN_STMT_KEY: &'static str = "!unknown";
 
 impl UnknownStmt {
     /// Parse a statement and return the object wrapped in enum.

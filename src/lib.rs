@@ -61,6 +61,32 @@ macro_rules! collect_vec_stmt {
 }
 
 #[macro_export]
+macro_rules! collect_unknown_stmt {
+    ($stmts:expr) => {
+        match $stmts.get_mut(crate::stmt::UNKNOWN_STMT_KEY) {
+            Some(v) => {
+                let mut error = false;
+                let mut w = Vec::new();
+                for en in v.drain(..) {
+                    if let YangStmt::UnknownStmt(stmt) = en {
+                        w.push(stmt)
+                    } else {
+                        error = true;
+                    }
+                }
+
+                if error {
+                    Err(YangError::PlaceHolder)
+                } else {
+                    Ok(w)
+                }
+            }
+            None => Ok(Vec::new()),
+        }
+    };
+}
+
+#[macro_export]
 macro_rules! collect_opt_stmt {
     ($stmts:expr, $st:ident) => {
         match $stmts.get_mut(<$st>::keyword()) {

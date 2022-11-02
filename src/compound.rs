@@ -13,6 +13,7 @@ use super::substmt::*;
 
 use crate::collect_a_stmt;
 use crate::collect_opt_stmt;
+use crate::collect_unknown_stmt;
 use crate::collect_vec_stmt;
 
 ///
@@ -174,6 +175,7 @@ impl BodyStmts {
                 collect_vec_stmt!(stmts, AnydataStmt)?,
                 collect_vec_stmt!(stmts, AnyxmlStmt)?,
                 collect_vec_stmt!(stmts, UsesStmt)?,
+                collect_unknown_stmt!(stmts)?,
             )),
             augment: collect_vec_stmt!(stmts, AugmentStmt)?,
             rpc: collect_vec_stmt!(stmts, RpcStmt)?,
@@ -631,6 +633,9 @@ pub struct DataDefStmt {
 
     /// "uses" statement.
     uses: Vec<UsesStmt>,
+
+    /// unknown statements
+    unknown: Vec<UnknownStmt>,
 }
 
 impl Selection for DataDefStmt {
@@ -644,6 +649,7 @@ impl Selection for DataDefStmt {
         Vec<AnydataStmt>,
         Vec<AnyxmlStmt>,
         Vec<UsesStmt>,
+        Vec<UnknownStmt>,
     );
 
     /// Return list fo statement keyword.
@@ -674,6 +680,7 @@ impl Selection for DataDefStmt {
             anydata: Vec::new(),
             anyxml: Vec::new(),
             uses: Vec::new(),
+            unknown: Vec::with_capacity(0),
         }
     }
 
@@ -691,6 +698,7 @@ impl Selection for DataDefStmt {
             anydata: substmts.5,
             anyxml: substmts.6,
             uses: substmts.7,
+            unknown: substmts.8,
         }
     }
 }
@@ -732,6 +740,9 @@ pub struct DataDefOrElse {
 
     /// "notification" statement.
     notification: Vec<NotificationStmt>,
+
+    /// unknown statements
+    unknown: Vec<UnknownStmt>,
 }
 
 impl Selection for DataDefOrElse {
@@ -748,6 +759,7 @@ impl Selection for DataDefOrElse {
         Vec<CaseStmt>,
         Vec<ActionStmt>,
         Vec<NotificationStmt>,
+        Vec<UnknownStmt>,
     );
 
     /// Return list fo statement keyword.
@@ -784,6 +796,7 @@ impl Selection for DataDefOrElse {
             case: Vec::new(),
             action: Vec::new(),
             notification: Vec::new(),
+            unknown: Vec::new(),
         }
     }
 
@@ -804,6 +817,7 @@ impl Selection for DataDefOrElse {
             case: substmts.8,
             action: substmts.9,
             notification: substmts.10,
+            unknown: substmts.11,
         }
     }
 }
